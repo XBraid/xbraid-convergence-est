@@ -6,10 +6,10 @@ void get_E_F(arma::sp_mat **E_F, arma::Col<double> lambda, arma::Col<int> Nl, ar
     int                 numLevels   = lambda.n_elem;
     // pointers to all operators
     arma::sp_mat *ptrA[numLevels];
-    arma::sp_mat *ptrP[numLevels-1];
     arma::sp_mat *ptrR[numLevels-1];
     arma::sp_mat *ptrRI[numLevels-1];
     arma::sp_mat *ptrS[numLevels-1];
+    arma::sp_mat *ptrP[numLevels-1];
     // compute operators
     get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, lambda, Nl, ml);
     // compute error propagator for F-relaxation, using form: I - term * R0A0P0 - sum * R0A0P0
