@@ -3,7 +3,6 @@
 arma::sp_mat get_E_F(arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml){
     // get number of levels
     int                 numLevels   = lambda.n_elem;
-    std::cout << "Number of levels: " << numLevels << std::endl;
     // pointers to all operators
     arma::sp_mat *ptrA[numLevels];
     arma::sp_mat *ptrP[numLevels-1];
@@ -11,20 +10,7 @@ arma::sp_mat get_E_F(arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int>
     arma::sp_mat *ptrRI[numLevels-1];
     arma::sp_mat *ptrS[numLevels-1];
     // compute operators
-    for(int i = 0; i < numLevels-1; i++){
-        ptrA[i]     = new arma::sp_mat();
-        ptrP[i]     = new arma::sp_mat();
-        ptrR[i]     = new arma::sp_mat();
-        ptrRI[i]    = new arma::sp_mat();
-        ptrS[i]     = new arma::sp_mat();
-        (*ptrA[i])  = get_Al(lambda(i), Nl(i));
-        (*ptrP[i])  = get_Pl(lambda(i), Nl(i), ml(i));
-        (*ptrR[i])  = get_Rl(lambda(i), Nl(i), ml(i));
-        (*ptrRI[i]) = get_RIl(lambda(i), Nl(i), ml(i));
-        (*ptrS[i])  = get_Sl(lambda(i), Nl(i), ml(i));
-    }
-    ptrA[numLevels-1]       = new arma::sp_mat();
-    (*ptrA[numLevels-1])    = get_Al(lambda(numLevels-1), Nl(numLevels-1));
+    get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, lambda, Nl, ml);
     // compute error propagator for F-relaxation, using form: I - term * R0A0P0 - sum * R0A0P0
     // pre-compute R0*A0*P0 = RI0*A0*P0
     arma::sp_mat R0A0P0 = (*ptrRI[0]) * (*ptrA[0]) * (*ptrP[0]);
