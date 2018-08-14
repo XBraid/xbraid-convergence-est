@@ -1,6 +1,7 @@
 #include "propagators.h"
 
-arma::sp_mat get_E_F(arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml){
+void get_E_F(arma::sp_mat **E_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml){
+    E_F[0] = new arma::sp_mat();
     // get number of levels
     int                 numLevels   = lambda.n_elem;
     // pointers to all operators
@@ -30,8 +31,7 @@ arma::sp_mat get_E_F(arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int>
         summ += term2;
     }
     // compute error propagator for F-relaxation
-    arma::sp_mat E_F = arma::speye(Nl(1), Nl(1)) - term * R0A0P0 - summ * R0A0P0;
-//    E_F = (*ptrP[0]) * E_F * (*ptrRI[0]);
-    return E_F;
+    (*E_F[0]) = arma::speye(Nl(1), Nl(1)) - term * R0A0P0 - summ * R0A0P0;
+//    (*E_F) = (*ptrP[0]) * (arma::speye(Nl(1), Nl(1)) - term * R0A0P0 - summ * R0A0P0) * (*ptrRI[0]);
 }
 

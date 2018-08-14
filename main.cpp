@@ -25,26 +25,27 @@ int main(int argc, char** argv){
         Nl(i)     = (Nl(i-1) - 1) / ml(i-1) + 1;
     }
     begin = clock();
-    sp_mat E_F = get_E_F(lambda, Nl, ml);
+    sp_mat *E_F[1];
+    get_E_F(E_F, lambda, Nl, ml);
     end = clock();
     cout << double(end-begin)/CLOCKS_PER_SEC << endl;
     begin = clock();
-    norm2 = norm(E_F, 2);
+    norm2 = norm((*E_F[0]), 2);
     end = clock();
     cout << double(end-begin)/CLOCKS_PER_SEC << " " << norm2 << endl;
-    mat fullE_F = mat(E_F);
+    mat fullE_F = mat((*E_F[0]));
     begin = clock();
     norm2 = norm(fullE_F, 2);
     end = clock();
     cout << double(end-begin)/CLOCKS_PER_SEC << " " << norm2 << endl;
     vec singVals(1);
     begin = clock();
-    svds(singVals, E_F, 1);
+    svds(singVals, (*E_F[0]), 1);
     end = clock();
     cout << double(end-begin)/CLOCKS_PER_SEC << " " << singVals(0) << endl;
 
     // save to disk
-    mat(E_F).save("E_F.txt", raw_ascii);
+    mat((*E_F[0])).save("E_F.txt", raw_ascii);
 
     // load from disk
     mat C;
