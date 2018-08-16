@@ -16,7 +16,9 @@ int main(int argc, char** argv){
     double norm2;
     int nt = 1025;
     sp_mat *E_F = new sp_mat();
+    sp_mat *E_FCF = new sp_mat();
     mat pinvE_F;
+    mat pinvE_FCF;
 
     Col<int> ml(1);
     ml(0)     = 4;
@@ -28,11 +30,13 @@ int main(int argc, char** argv){
         lambda(i) = std::pow(0.9, i+1);
         Nl(i)     = (Nl(i-1) - 1) / ml(i-1) + 1;
     }
+
+    /* F-relaxation */
     begin = clock();
     get_E_F(E_F, lambda, Nl, ml);
     end = clock();
     cout << double(end-begin)/CLOCKS_PER_SEC << endl;
-
+    // compute largest singular value
     begin = clock();
     // note: Armadillo 6.500.5 throws an error for matrices of size 10241^2 if norm() is used for sparse matrices
     // todo: check with later versions, if this is still an issue
@@ -40,7 +44,6 @@ int main(int argc, char** argv){
 //    norm2 = norm(cx_mat(*E_F), 2);
     end = clock();
     cout << double(end-begin)/CLOCKS_PER_SEC << " " << norm2 << endl;
-
     // do the same for the pseudo-inverse
     begin = clock();
     bool pinvSuccess = true;
@@ -53,8 +56,34 @@ int main(int argc, char** argv){
     end = clock();
     cout << double(end-begin)/CLOCKS_PER_SEC << " " << 1.0/norm2 << endl;
 
+    /* FCF-relaxation */
+    begin = clock();
+    get_E_FCF(E_FCF, lambda, Nl, ml);
+    end = clock();
+    cout << double(end-begin)/CLOCKS_PER_SEC << endl;
+    // compute largest singular value
+    begin = clock();
+    // note: Armadillo 6.500.5 throws an error for matrices of size 10241^2 if norm() is used for sparse matrices
+    // todo: check with later versions, if this is still an issue
+    norm2 = norm(mat(*E_FCF), 2);
+//    norm2 = norm(cx_mat(*E_FCF), 2);
+    end = clock();
+    cout << double(end-begin)/CLOCKS_PER_SEC << " " << norm2 << endl;
+    // do the same for the pseudo-inverse
+    begin = clock();
+    bool pinvSuccess2 = true;
+    pinvSuccess2 = pinv(pinvE_FCF, mat(*E_FCF));
+    if(!pinvSuccess2){
+        cout << ">>>ERROR: Computing pseudo-inverse of error propagator failed.";
+        throw;
+    }
+    norm2 = norm(pinvE_FCF, 2);
+    end = clock();
+    cout << double(end-begin)/CLOCKS_PER_SEC << " " << 1.0/norm2 << endl;
+
     // save to disk
     export_matrix(E_F, "E_F", raw_ascii);
+    export_matrix(E_FCF, "E_FCF", raw_ascii);
 
     // load from disk
 //    mat C;
