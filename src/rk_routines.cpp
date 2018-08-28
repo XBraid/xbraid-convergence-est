@@ -81,19 +81,37 @@ void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see con
     switch(method){
         case rkconst::A_stable_SDIRK2:
         {
-            std::cerr << "Runge-Kutta method " << method << " not implemented." << std::endl;
-            throw;
-            break;
+            A.set_size(2,2);
+            b.set_size(2);
+            c.set_size(2);
+            A       = {{0.25,   0.0},
+                       {0.5,    0.25}};
+            b       = {0.5,     0.5};
+            c       = {0.25,    0.75};
         }
         case rkconst::A_stable_SDIRK3:
         {
-            std::cerr << "Runge-Kutta method " << method << " not implemented." << std::endl;
-            throw;
+            A.set_size(2,2);
+            b.set_size(2);
+            c.set_size(2);
+            double gamma = (3.0 + sqrt(3.0)) / 6.0;
+            A       = {{gamma,          0.0},
+                       {1.0-2.0*gamma,  gamma}};
+            b       = {0.5,             0.5};
+            c       = {gamma,           1.0-gamma};
         }
         case rkconst::A_stable_SDIRK4:
         {
-            std::cerr << "Runge-Kutta method " << method << " not implemented." << std::endl;
-            throw;
+            A.set_size(3,3);
+            b.set_size(3);
+            c.set_size(3);
+            double  q = 1.0 / sqrt(3.0) * cos(pi / 18.0) + 0.5;
+            double  r = 1.0 / (6.0 *(2.0 * q - 1.0) * (2.0 * q - 1.0));
+            A       = {{q,      0.0,        0.0},
+                       {0.5-q,  q,          0.0},
+                       {2.0*q,  1.0-4.0*q,  q}};
+            b       = {r,       1.0-2.0*r,  r};
+            c       = {q,       0.5,        1.0-q};
         }
         case rkconst::L_stable_SDIRK1:
         {

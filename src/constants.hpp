@@ -4,9 +4,34 @@
 // constants referring to a specific Runge-Kutta method
 namespace rkconst{
     // A-stable SDIRK methods
-    const int A_stable_SDIRK2 = 102;    ///< 2nd-order A-stable SDIRK method
-    const int A_stable_SDIRK3 = 103;    ///< 3rd-order A-stable SDIRK method
-    const int A_stable_SDIRK4 = 104;    ///< 4th-order A-stable SDIRK method
+    /** 2nd-order A-stable SDIRK method
+        <table>
+            <tr>    <td>    \f$0.25\f$  <td>    \f$0.25\f$  <td>    \f$0\f$
+            <tr>    <td>    \f$0.75\f$  <td>    \f$0.5\f$   <td>    \f$0.25\f$
+            <tr>    <td>                <td>    \f$0.5\f$   <td>    \f$0.5\f$
+        </table>
+        See [Bonaventura, Della Rocca (2015)].
+    */
+    const int A_stable_SDIRK2 = 102;
+    /** 3rd-order A-stable SDIRK method
+        <table>
+            <tr>    <td>    \f$\gamma\f$    <td>    \f$\gamma\f$    <td>    \f$0\f$
+            <tr>    <td>    \f$1-\gamma\f$  <td>    \f$1-2\gamma\f$ <td>    \f$\gamma\f$
+            <tr>    <td>                    <td>    \f$0.5\f$       <td>    \f$0.5\f$
+        </table>
+        See <a href="http://mfem.github.io/doxygen/html/ode_8cpp_source.html" target="_blank">MFEM</a>.
+    */
+    const int A_stable_SDIRK3 = 103;
+    /** 4th-order A-stable SDIRK method
+        <table>
+            <tr>    <td>    \f$q\f$     <td>    \f$q\f$     <td>    \f$0\f$     <td>    \f$0\f$
+            <tr>    <td>    \f$0.5\f$   <td>    \f$0.5-q\f$ <td>    \f$q\f$     <td>    \f$0\f$
+            <tr>    <td>    \f$1-q\f$   <td>    \f$2q\f$    <td>    \f$1-4q\f$  <td>    \f$q\f$
+            <tr>    <td>                <td>    \f$2q\f$    <td>    \f$1-4q\f$  <td>    \f$q\f$
+        </table>
+        See <a href="http://mfem.github.io/doxygen/html/ode_8cpp_source.html" target="_blank">MFEM</a>.
+    */
+    const int A_stable_SDIRK4 = 104;
     // L-stable SDIRK methods
     /** 1st-order L-stable SDIRK method, Butcher tableau:
         <table>
