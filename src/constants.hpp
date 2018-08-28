@@ -3,6 +3,7 @@
 
 // constants referring to a specific Runge-Kutta method
 namespace rkconst{
+    const double pi = 3.141592653589793238462643383279502884197169399375105820974;
     // A-stable SDIRK methods
     /** 2nd-order A-stable SDIRK method
         <table>
@@ -10,7 +11,7 @@ namespace rkconst{
             <tr>    <td>    \f$0.75\f$  <td>    \f$0.5\f$   <td>    \f$0.25\f$
             <tr>    <td>                <td>    \f$0.5\f$   <td>    \f$0.5\f$
         </table>
-        See [Bonaventura, Della Rocca (2015)].
+        See [Bonaventura, Della Rocca (2015)], Section 5.1.
     */
     const int A_stable_SDIRK2 = 102;
     /** 3rd-order A-stable SDIRK method
@@ -38,7 +39,7 @@ namespace rkconst{
             <tr>    <td>    \f$1\f$ <td>    \f$1\f$
             <tr>    <td>            <td>    \f$1\f$
         </table>
-        See [Dobrev et al. (2017)].
+        See [Dobrev et al. (2017)], Table 3.1.
     */
     const int L_stable_SDIRK1 = 201;
     /** 2nd-order L-stable SDIRK method, Butcher tableau:
@@ -48,7 +49,7 @@ namespace rkconst{
             <tr>    <td>                    <td>    \f$1-\gamma\f$ <td>    \f$\gamma\f$
         </table>
         with \f$\gamma = 1.0 - 1.0 / \sqrt{2.0}\f$.
-        See [Dobrev et al. (2017)].
+        See [Dobrev et al. (2017)], Table 3.1.
     */
     const int L_stable_SDIRK2 = 202;
     /** 3rd-order L-stable SDIRK method, Butcher tableau:
@@ -59,7 +60,7 @@ namespace rkconst{
             <tr>    <td>                <td>    \f$r\f$     <td>    \f$1-q-r\f$ <td>    \f$q\f$
         </table>
         with \f$q = 0.435866521508458999416019\f$, \f$r = 1.20849664917601007033648\f$ and \f$s = 0.717933260754229499708010\f$.
-        See [Dobrev et al. (2017)],
+        See [Dobrev et al. (2017)], Table 3.1,
         talk by <a href="https://www.math.auckland.ac.nz/~butcher/CONFERENCES/TRONDHEIM/trondheim.pdf" target="_blank">talk by Butcher</a> 
         and <a href="http://mfem.github.io/doxygen/html/ode_8cpp_source.html" target="_blank">MFEM</a>.
     */

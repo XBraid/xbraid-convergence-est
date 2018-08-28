@@ -1,3 +1,4 @@
+#include <mpi.h>
 #include <iostream>
 #include <ctime>
 #include "armadillo"
@@ -11,7 +12,14 @@ using namespace std;
 
 
 int main(int argc, char** argv){
+    int world_size;
+    int world_rank;
+    MPI_Init(NULL, NULL);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
     cout << "Armadillo version: " << arma_version::as_string() << endl;
+    cout << "MPI rank: " << world_rank << " / " << world_size << endl;
 
     clock_t begin,end;
     double norm2;
@@ -99,5 +107,5 @@ int main(int argc, char** argv){
 //    mat C;
 //    C.load("E_F_real.txt");
 
-    return 0;
+    MPI_Finalize();
 }
