@@ -33,6 +33,9 @@ int main(int argc, char** argv){
     Col<cx_double> *dout = new Col<cx_double>(3);
     (*din).fill({0.6,0.3});
     cout << rkconst::L_stable_SDIRK4 << endl;
+    stability_function(rkconst::A_stable_SDIRK2, din, dout);
+    stability_function(rkconst::A_stable_SDIRK3, din, dout);
+    stability_function(rkconst::A_stable_SDIRK4, din, dout);
     stability_function(rkconst::L_stable_SDIRK1, din, dout);
     stability_function(rkconst::L_stable_SDIRK2, din, dout);
     stability_function(rkconst::L_stable_SDIRK3, din, dout);

@@ -88,6 +88,7 @@ void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see con
                        {0.5,    0.25}};
             b       = {0.5,     0.5};
             c       = {0.25,    0.75};
+            break;
         }
         case rkconst::A_stable_SDIRK3:
         {
@@ -99,6 +100,7 @@ void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see con
                        {1.0-2.0*gamma,  gamma}};
             b       = {0.5,             0.5};
             c       = {gamma,           1.0-gamma};
+            break;
         }
         case rkconst::A_stable_SDIRK4:
         {
@@ -112,6 +114,7 @@ void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see con
                        {2.0*q,  1.0-4.0*q,  q}};
             b       = {r,       1.0-2.0*r,  r};
             c       = {q,       0.5,        1.0-q};
+            break;
         }
         case rkconst::L_stable_SDIRK1:
         {
