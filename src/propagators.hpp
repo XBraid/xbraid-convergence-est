@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "armadillo"
-#include "operators.h"
+#include "operators.hpp"
 
 // note: we provide real and complex valued implementations
 

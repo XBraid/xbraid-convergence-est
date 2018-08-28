@@ -1,4 +1,4 @@
-#include "io_routines.h"
+#include "io_routines.hpp"
 
 void export_matrix(arma::sp_mat *m, const std::string& filename, arma::file_type type){
     arma::mat(*m).save(filename, type);

@@ -1,9 +1,10 @@
 #include <iostream>
 #include <ctime>
 #include "armadillo"
-#include "operators.h"
-#include "propagators.h"
-#include "io_routines.h"
+#include "operators.hpp"
+#include "propagators.hpp"
+#include "io_routines.hpp"
+#include "rk_routines.hpp"
 
 using namespace arma;
 using namespace std;
@@ -19,6 +20,15 @@ int main(int argc, char** argv){
     sp_mat *E_FCF = new sp_mat();
     mat pinvE_F;
     mat pinvE_FCF;
+
+    Col<cx_double>  *din = new Col<cx_double>(3);
+    Col<cx_double> *dout = new Col<cx_double>(3);
+    (*din).fill({0.6,0.3});
+    cout << rkconst::L_stable_SDIRK4 << endl;
+    stability_function(rkconst::L_stable_SDIRK1, din, dout);
+    stability_function(rkconst::L_stable_SDIRK2, din, dout);
+    stability_function(rkconst::L_stable_SDIRK3, din, dout);
+    stability_function(rkconst::L_stable_SDIRK4, din, dout);
 
     Col<int> ml(1);
     ml(0)     = 4;

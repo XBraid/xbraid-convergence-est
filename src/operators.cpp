@@ -1,4 +1,4 @@
-#include "operators.h"
+#include "operators.hpp"
 
 arma::sp_mat get_Al(double lambda, int Nl){
     // set size

@@ -1,4 +1,4 @@
-#include "propagators.h"
+#include "propagators.hpp"
 
 // get error propagator for V-cycle with F-relaxation and >= 2 grid levels (real eigenvalues)
 void get_E_F(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
