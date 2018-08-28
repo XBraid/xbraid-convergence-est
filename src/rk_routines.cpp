@@ -1,7 +1,12 @@
 #include "rk_routines.hpp"
 
-// evaluate stability function
-void stability_function(const int method, arma::Col<double> *z, arma::Col<double> *rz){
+/**
+    evaluate stability function for given Runge-Kutta method
+*/
+void stability_function(const int method,       ///< Runge-Kutta method, see constants.hpp
+                        arma::Col<double> *z,   ///< z = dt*eta, with time step size dt and spatial eigenvalue eta
+                        arma::Col<double> *rz   ///< on return, the value of the stability function
+                        ){
     // get Butcher tableau for requested method
     arma::mat           A;
     arma::Col<double>   b;
@@ -13,8 +18,13 @@ void stability_function(const int method, arma::Col<double> *z, arma::Col<double
     }
 }
 
-// evaluate stability function (complex version)
-void stability_function(const int method, arma::Col<arma::cx_double> *z, arma::Col<arma::cx_double> *rz){
+/**
+    evaluate stability function for given Runge-Kutta method (complex version)
+*/
+void stability_function(const int method,               ///< Runge-Kutta method, see constants.hpp
+                        arma::Col<arma::cx_double> *z,  ///< z = dt*eta, with time step size dt and spatial eigenvalue eta
+                        arma::Col<arma::cx_double> *rz  ///< on return, the value of the stability function
+                        ){
     // get Butcher tableau for requested method
     arma::mat           A;
     arma::Col<double>   b;
@@ -26,10 +36,19 @@ void stability_function(const int method, arma::Col<arma::cx_double> *z, arma::C
     }
 }
 
-void get_butcher_tableau(const int method, arma::mat &A, arma::Col<double> &b, arma::Col<double> &c){
+/** 
+    sets the coefficients of a given Runge-Kutta method corresponding to Butcher tableau of form
+        <table>
+            <tr><td>c<td>A
+            <tr><td> <td>b^T
+        </table>
+*/
+void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see constants.hpp
+                         arma::mat &A,          ///< matrix A of Butcher tableau
+                         arma::Col<double> &b,  ///< vector b of Butcher tableau
+                         arma::Col<double> &c   ///< vector c of Butcher tableau
+                         ){
     switch(method){
-        // implicit 1st-order method, SDIRK1
-        // see [Dobrev et al. (2017)]
         case rkconst::L_stable_SDIRK1:
         {
             A.set_size(1,1);
@@ -40,8 +59,6 @@ void get_butcher_tableau(const int method, arma::mat &A, arma::Col<double> &b, a
             c(0)    = 1.0;
             break;
         }
-        // implicit 2nd-order method, SDIRK2
-        // see [Dobrev et al. (2017)]
         case rkconst::L_stable_SDIRK2:
         {
             A.set_size(2,2);
@@ -54,10 +71,6 @@ void get_butcher_tableau(const int method, arma::mat &A, arma::Col<double> &b, a
             c       = {gamma,       1.0};
             break;
         }
-        // implicit 3rd-order method, SDIRK3
-        // see [Dobrev et al. (2017)]
-        // see talk by Butcher: https://www.math.auckland.ac.nz/~butcher/CONFERENCES/TRONDHEIM/trondheim.pdf
-        // see MFEM, http://mfem.github.io/doxygen/html/ode_8cpp_source.html
         case rkconst::L_stable_SDIRK3:
         {
             A.set_size(3,3);
@@ -73,9 +86,6 @@ void get_butcher_tableau(const int method, arma::mat &A, arma::Col<double> &b, a
             c       = {q,       s,          r};
             break;
         }
-        // implicit 4th-order method, SDIRK4
-        // see HairerWanner1996, Table IV.6.5
-        // see DuarteDobbinsSmooke2016, Appendix C
         case rkconst::L_stable_SDIRK4:
         {
             A.set_size(5,5);
