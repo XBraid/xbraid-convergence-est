@@ -36,6 +36,36 @@ void stability_function(const int method,               ///< Runge-Kutta method,
     }
 }
 
+/**
+    evaluate stability function for Runge-Kutta method with provided Butcher tableau
+*/
+void stability_function(arma::mat A,            ///< Butcher coefficients, matrix A
+                        arma::Col<double> b,    ///< Butcher coefficients, vector b
+                        arma::Col<double> c,    ///< Butcher coefficients, vector c
+                        arma::Col<double> *z,   ///< z = dt*eta, with time step size dt and spatial eigenvalue eta
+                        arma::Col<double> *rz   ///< on return, the value of the stability function
+                        ){
+    for(int evalIdx = 0; evalIdx < (*z).n_elem; evalIdx++){
+        (*rz)(evalIdx) = arma::det(arma::eye(b.n_elem,b.n_elem) - (*z)(evalIdx) * A + (*z)(evalIdx) * arma::ones(b.n_elem, 1) * b.t())
+                            / arma::det(arma::eye(b.n_elem,b.n_elem) - (*z)(evalIdx) * A);
+    }
+}
+
+/**
+    evaluate stability function for Runge-Kutta method with provided Butcher tableau (complex version)
+*/
+void stability_function(arma::mat A,                    ///< Butcher coefficients, matrix A
+                        arma::Col<double> b,            ///< Butcher coefficients, vector b
+                        arma::Col<double> c,            ///< Butcher coefficients, vector c
+                        arma::Col<arma::cx_double> *z,  ///< z = dt*eta, with time step size dt and complex spatial eigenvalue eta
+                        arma::Col<arma::cx_double> *rz  ///< on return, the value of the stability function
+                        ){
+    for(int evalIdx = 0; evalIdx < (*z).n_elem; evalIdx++){
+        (*rz)(evalIdx) = arma::det(arma::eye(b.n_elem,b.n_elem) - (*z)(evalIdx) * A + (*z)(evalIdx) * arma::ones(b.n_elem, 1) * b.t())
+                            / arma::det(arma::eye(b.n_elem,b.n_elem) - (*z)(evalIdx) * A);
+    }
+}
+
 /** 
     sets the coefficients of a given Runge-Kutta method corresponding to Butcher tableau of form
         <table>
@@ -49,6 +79,22 @@ void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see con
                          arma::Col<double> &c   ///< vector c of Butcher tableau
                          ){
     switch(method){
+        case rkconst::A_stable_SDIRK2:
+        {
+            std::cerr << "Runge-Kutta method " << method << " not implemented." << std::endl;
+            throw;
+            break;
+        }
+        case rkconst::A_stable_SDIRK3:
+        {
+            std::cerr << "Runge-Kutta method " << method << " not implemented." << std::endl;
+            throw;
+        }
+        case rkconst::A_stable_SDIRK4:
+        {
+            std::cerr << "Runge-Kutta method " << method << " not implemented." << std::endl;
+            throw;
+        }
         case rkconst::L_stable_SDIRK1:
         {
             A.set_size(1,1);
@@ -99,6 +145,11 @@ void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see con
             b       = {25.0/24.0,       -49.0/48.0,     125.0/16.0, -85.0/12.0, 0.25};
             c       = {0.25,            0.75,           11.0/20.0,  0.5,        1.0};
             break;
+        }
+        default:
+        {
+            std::cerr << "Runge-Kutta method " << method << " not implemented." << std::endl;
+            throw;
         }
     }
 }
