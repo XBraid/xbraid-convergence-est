@@ -107,7 +107,7 @@ void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see con
             A.set_size(3,3);
             b.set_size(3);
             c.set_size(3);
-            double  q = 1.0 / sqrt(3.0) * cos(rkconst::pi / 18.0) + 0.5;
+            double  q = 1.0 / sqrt(3.0) * cos(constants::pi / 18.0) + 0.5;
             double  r = 1.0 / (6.0 *(2.0 * q - 1.0) * (2.0 * q - 1.0));
             A       = {{q,      0.0,        0.0},
                        {0.5-q,  q,          0.0},

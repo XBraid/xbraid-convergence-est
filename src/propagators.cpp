@@ -1,7 +1,7 @@
 #include "propagators.hpp"
 
 // get error propagator for V-cycle with F-relaxation and >= 2 grid levels (real eigenvalues)
-void get_E_F(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+int get_E_F(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     // check for valid arguments
     if((theoryLevel != 0) && (theoryLevel != 1)){
         std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
@@ -9,6 +9,10 @@ void get_E_F(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arm
     }
     if((lambda.n_elem != Nl.n_elem) || (lambda.n_elem != ml.n_elem+1)){
         std::cout << ">>>ERROR: Error propagator encountered invalid definition of number of levels." << std::endl;
+    }
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1;
     }
     // get number of levels
     int                 numLevels   = lambda.n_elem;
@@ -33,9 +37,9 @@ void get_E_F(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arm
     arma::sp_mat term2 = arma::sp_mat();
     arma::sp_mat identity = arma::speye(Nl(1),Nl(1));
     for(int level = 0; level < numLevels-2; level++){
-        term2 = (*ptrS[level+1]).st() * (*ptrA[level+1]) * (*ptrS[level+1]);
+        term2 = (*ptrS[level+1]) * arma::sp_mat(arma::mat((*ptrS[level+1]).st() * (*ptrA[level+1]) * (*ptrS[level+1])).i()) * (*ptrS[level+1]).st();
         for(int prepostIdx = level; prepostIdx > 1; prepostIdx--){
-            term2 = (*ptrP[prepostIdx]) * arma::sp_mat(arma::mat(term2).i()) * (*ptrR[prepostIdx]);
+            term2 = (*ptrP[prepostIdx]) * term2 * (*ptrR[prepostIdx]);
         }
         summ += term2;
     }
@@ -46,10 +50,11 @@ void get_E_F(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arm
     } else if(theoryLevel == 0){
         (*E_F) = (*ptrP[0]) * (identity - term * R0A0P0 - summ * R0A0P0) * (*ptrRI[0]);
     }
+    return 0;
 }
 
 // get error propagator for V-cycle with F-relaxation and >= 2 grid levels (complex eigenvalues)
-void get_E_F(arma::sp_cx_mat *E_F, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+int get_E_F(arma::sp_cx_mat *E_F, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     // check for valid arguments
     if((theoryLevel != 0) && (theoryLevel != 1)){
         std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
@@ -57,6 +62,10 @@ void get_E_F(arma::sp_cx_mat *E_F, arma::Col<arma::cx_double> lambda, arma::Col<
     }
     if((lambda.n_elem != Nl.n_elem) || (lambda.n_elem != ml.n_elem+1)){
         std::cout << ">>>ERROR: Error propagator encountered invalid definition of number of levels." << std::endl;
+    }
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1;
     }
     // get number of levels
     int                 numLevels   = lambda.n_elem;
@@ -81,9 +90,9 @@ void get_E_F(arma::sp_cx_mat *E_F, arma::Col<arma::cx_double> lambda, arma::Col<
     arma::sp_cx_mat term2 = arma::sp_cx_mat();
     arma::sp_cx_mat identity = arma::sp_cx_mat(arma::speye(Nl(1),Nl(1)),arma::speye(Nl(1),Nl(1)).zeros());
     for(int level = 0; level < numLevels-2; level++){
-        term2 = (*ptrS[level+1]).st() * (*ptrA[level+1]) * (*ptrS[level+1]);
+        term2 = (*ptrS[level+1]) * arma::sp_cx_mat(arma::cx_mat((*ptrS[level+1]).st() * (*ptrA[level+1]) * (*ptrS[level+1])).i()) * (*ptrS[level+1]).st();
         for(int prepostIdx = level; prepostIdx > 1; prepostIdx--){
-            term2 = (*ptrP[prepostIdx]) * arma::sp_cx_mat(arma::cx_mat(term2).i()) * (*ptrR[prepostIdx]);
+            term2 = (*ptrP[prepostIdx]) * term2 * (*ptrR[prepostIdx]);
         }
         summ += term2;
     }
@@ -94,10 +103,11 @@ void get_E_F(arma::sp_cx_mat *E_F, arma::Col<arma::cx_double> lambda, arma::Col<
     } else if(theoryLevel == 0){
         (*E_F) = (*ptrP[0]) * (identity - term * R0A0P0 - summ * R0A0P0) * (*ptrRI[0]);
     }
+    return 0;
 }
 
 // get error propagator for V-cycle with FCF-relaxation and >= 2 grid levels (real eigenvalues)
-void get_E_FCF(arma::sp_mat *E_FCF, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+int get_E_FCF(arma::sp_mat *E_FCF, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     // check for valid arguments
     if((theoryLevel != 0) && (theoryLevel != 1)){
         std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
@@ -105,6 +115,10 @@ void get_E_FCF(arma::sp_mat *E_FCF, arma::Col<double> lambda, arma::Col<int> Nl,
     }
     if((lambda.n_elem != Nl.n_elem) || (lambda.n_elem != ml.n_elem+1)){
         std::cout << ">>>ERROR: Error propagator encountered invalid definition of number of levels." << std::endl;
+    }
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1;
     }
     // get number of levels
     int numLevels = lambda.n_elem;
@@ -172,10 +186,11 @@ void get_E_FCF(arma::sp_mat *E_FCF, arma::Col<double> lambda, arma::Col<int> Nl,
     } else if(theoryLevel == 0){
         (*E_FCF) = (*ptrP[0]) * result * (*ptrRI[0]);
     }
+    return 0;
 }
 
 // get error propagator for V-cycle with FCF-relaxation and >= 2 grid levels (complex eigenvalues)
-void get_E_FCF(arma::sp_cx_mat *E_FCF, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+int get_E_FCF(arma::sp_cx_mat *E_FCF, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     // check for valid arguments
     if((theoryLevel != 0) && (theoryLevel != 1)){
         std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
@@ -183,6 +198,10 @@ void get_E_FCF(arma::sp_cx_mat *E_FCF, arma::Col<arma::cx_double> lambda, arma::
     }
     if((lambda.n_elem != Nl.n_elem) || (lambda.n_elem != ml.n_elem+1)){
         std::cout << ">>>ERROR: Error propagator encountered invalid definition of number of levels." << std::endl;
+    }
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1;
     }
     // get number of levels
     int numLevels = lambda.n_elem;
@@ -250,4 +269,5 @@ void get_E_FCF(arma::sp_cx_mat *E_FCF, arma::Col<arma::cx_double> lambda, arma::
     } else if(theoryLevel == 0){
         (*E_FCF) = (*ptrP[0]) * result * (*ptrRI[0]);
     }
+    return 0;
 }

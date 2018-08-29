@@ -1,9 +1,18 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+// general constants
+namespace constants{
+    /**
+     * multilevel theory assumes stable time steppers, i.e., that \f$eig(\Phi_l) < 1\f$.
+     * note: we allow for some numerical error here.
+     */
+    const double time_stepper_stability_limit = 1.0 + 1.0e-6;
+    const double pi = 3.141592653589793238462643383279502884197169399375105820974;
+}
+
 // constants referring to a specific Runge-Kutta method
 namespace rkconst{
-    const double pi = 3.141592653589793238462643383279502884197169399375105820974;
     // A-stable SDIRK methods
     /** 2nd-order A-stable SDIRK method
         <table>
