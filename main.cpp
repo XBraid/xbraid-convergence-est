@@ -7,6 +7,7 @@
 #include "io_routines.hpp"
 #include "rk_routines.hpp"
 #include "sampling_routines.hpp"
+#include "error_bound_routines.hpp"
 
 using namespace arma;
 using namespace std;
@@ -56,98 +57,25 @@ int main(int argc, char** argv){
                              dteta[level], lambda[level]);
     }
 
-    // get local eigenvalue index range on rank
-    int samplesPerRank      = numberOfSamples / world_size;
-    int leftover            = numberOfSamples - samplesPerRank * world_size;
-    int samplesRankStartIdx = samplesPerRank * world_rank           + leftover * (world_rank > 0);
-    int samplesRankStopIdx  = samplesPerRank * (world_rank + 1) - 1 + leftover;
-    cout << "Rank " << world_rank << " / " << world_size << ": eigenvalue index range is "
-         << samplesRankStartIdx << " - " << samplesRankStopIdx << " (" << numberOfSamples << ")"
-         << endl;
-    int samplesOnRank = samplesPerRank + leftover * (world_rank == 0);
-
     // compute estimate - F-relaxation
-    errCode = 0;
+    Col<double> *estimateF;
     begin = clock();
-    Col<double> estimateF(numberOfSamples);
-    for(int evalIdx = samplesRankStartIdx; evalIdx < samplesRankStopIdx + 1; evalIdx++){
-        // for a given spatial mode, get eigenvalues for all levels
-        Col<cx_double> lambda_k(numberOfLevels);
-        for(int level = 0; level < numberOfLevels; level++){
-            lambda_k(level) = (*lambda[level])(evalIdx);
-        }
-        sp_cx_mat *E_F = new sp_cx_mat();
-        errCode = get_E_F(E_F, lambda_k, numberOfTimeSteps, coarseningFactors);
-        if(errCode == -1){
-            estimateF(evalIdx) = -1;
-        }
-        else{
-            estimateF(evalIdx) = norm(cx_mat(*E_F), 2);
-        }
-    }
+    get_error_propagator_bound(mgritestimate::upper_bound, mgritestimate::F_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateF);
     end = clock();
     cout << "F-relaxation on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
-    // compute estimate - F-relaxation
-    errCode = 0;
-    begin = clock();
-    Col<double> estimateFCF(numberOfSamples);
-    for(int evalIdx = samplesRankStartIdx; evalIdx < samplesRankStopIdx + 1; evalIdx++){
-        // for a given spatial mode, get eigenvalues for all levels
-        Col<cx_double> lambda_k(numberOfLevels);
-        for(int level = 0; level < numberOfLevels; level++){
-            lambda_k(level) = (*lambda[level])(evalIdx);
-        }
-        sp_cx_mat *E_FCF = new sp_cx_mat();
-        errCode = get_E_FCF(E_FCF, lambda_k, numberOfTimeSteps, coarseningFactors);
-        if(errCode == -1){
-            estimateFCF(evalIdx) = -1;
-        }
-        else{
-            estimateFCF(evalIdx) = norm(cx_mat(*E_FCF), 2);
-        }
+    if(world_rank == 0){
+        mat(*estimateF).save("upper_bound_E_F.txt", raw_ascii);
     }
+
+    // compute estimate - FCF-relaxation
+    Col<double> *estimateFCF;
+    begin = clock();
+    get_error_propagator_bound(mgritestimate::upper_bound, mgritestimate::FCF_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateFCF);
     end = clock();
     cout << "FCF-relaxation on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
-
-    // send data to rank 0
-    int idx = 0;
     if(world_rank == 0){
-        int receiveSize     = samplesPerRank;
-        int receiveStartIdx = samplesRankStartIdx;
-        int receiveStopIdx  = samplesRankStopIdx;
-        for(int rank = 1; rank < world_size; rank++){
-            receiveStartIdx = receiveStopIdx + 1;
-            receiveStopIdx  = receiveStopIdx + samplesPerRank;
-            double data[samplesPerRank];
-            MPI_Recv(data, receiveSize, MPI_DOUBLE, rank, 0, MPI_COMM_WORLD,  MPI_STATUS_IGNORE);
-            idx = 0;
-            for(int evalIdx = receiveStartIdx; evalIdx < receiveStopIdx + 1; evalIdx++){
-                estimateF(evalIdx) = data[idx++];
-            }
-            MPI_Recv(data, receiveSize, MPI_DOUBLE, rank, 0, MPI_COMM_WORLD,  MPI_STATUS_IGNORE);
-            idx = 0;
-            for(int evalIdx = receiveStartIdx; evalIdx < receiveStopIdx + 1; evalIdx++){
-                estimateFCF(evalIdx) = data[idx++];
-            }
-        }
-        estimateF.print();
-    }else{
-        double data[samplesOnRank];
-        idx = 0;
-        for(int evalIdx = samplesRankStartIdx; evalIdx < samplesRankStopIdx + 1; evalIdx++){
-            data[idx++] = estimateF(evalIdx);
-        }
-        MPI_Send(data, samplesOnRank, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
-        idx = 0;
-        for(int evalIdx = samplesRankStartIdx; evalIdx < samplesRankStopIdx + 1; evalIdx++){
-            data[idx++] = estimateFCF(evalIdx);
-        }
-        MPI_Send(data, samplesOnRank, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+        mat(*estimateFCF).save("upper_bound_E_FCF.txt", raw_ascii);
     }
-
-//     // save to disk
-//     export_matrix(E_F, "E_F", raw_ascii);
-//     export_matrix(E_FCF, "E_FCF", raw_ascii);
 
     MPI_Finalize();
 }

@@ -11,6 +11,48 @@ namespace constants{
     const double pi = 3.141592653589793238462643383279502884197169399375105820974;
 }
 
+// constants defining type of estimate/bound
+namespace mgritestimate{
+    /**
+     *  F-relaxation on all levels
+     */
+    const int F_relaxation = 0;
+    /**
+     *  FCF-relaxation on all levels
+     */
+    const int FCF_relaxation = 1;
+    /**
+     *  \f$\ell^2\f$-norm of numerically constructed error propagator
+     */
+    const int upper_bound = 1;
+    /**
+     *  \f$\ell^2\f$-norm of numerically constructed error propagator is bounded by \f$\sqrt{ \| E \|_1 \| E \|_\infty }\f$
+     */
+    const int sqrt_upper_bound = 2;
+    /**
+     *  \f$\ell^2\f$-norm of error propagator is bounded by \f$\sqrt{ \| E \|_1 \| E \|_\infty }\f$.
+     *
+     *  Note: Expression-like bound, faster than sqrt_upper_bound.
+     */
+    const int sqrt_expression_upper_bound = 3;
+    /**
+     *  Tight expression-like upper bound for \f$\ell^2\f$-norm of two-grid error propagator (asymptotically exact bound)
+     */
+    const int tight_twogrid_upper_bound = 4;
+    /**
+     *  \f$\ell^2\f$-norm of pseudo-inverse of numerically constructed error propagator
+     */
+    const int lower_bound = -1;
+    /**
+     *  \f$\ell^2\f$-norm of numerically constructed error propagator is bounded using triangle inequality and \f$\sqrt{ \| \cdot \|_1 \| \cdot \|_\infty }\f$
+     */
+    const int sqrt_lower_bound = -2;
+    /**
+     *  Tight expression-like lower bound for \f$\ell^2\f$-norm of two-grid error propagator (asymptotically exact bound)
+     */
+    const int tight_twogrid_lower_bound = -4;
+}
+
 // constants referring to a specific Runge-Kutta method
 namespace rkconst{
     // A-stable SDIRK methods
