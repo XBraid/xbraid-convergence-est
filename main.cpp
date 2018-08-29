@@ -26,15 +26,12 @@ int main(int argc, char** argv){
 
     // MGRIT settings
     int numberOfTimeSteps_l0 = 1025;
-    int numberOfLevels = 2;
+    int numberOfLevels = 3;
     Col<int> coarseningFactors;
-    Col<int> numberOfFCrelax;
     Col<int> numberOfTimeSteps;
     coarseningFactors.set_size(numberOfLevels-1);
-    numberOfFCrelax.set_size(numberOfLevels-1);
     numberOfTimeSteps.set_size(numberOfLevels);
-    coarseningFactors = {2};
-    numberOfFCrelax = {0};
+    coarseningFactors = {2, 4};
     numberOfTimeSteps(0) = numberOfTimeSteps_l0;
     for(int level = 1; level < numberOfLevels; level++){ numberOfTimeSteps(level) = (numberOfTimeSteps(level-1) - 1) / coarseningFactors(level-1) + 1; }
     // sample complex plane for dt*eta
