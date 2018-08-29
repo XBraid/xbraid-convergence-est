@@ -55,12 +55,22 @@ int main(int argc, char** argv){
                              numberOfRealSamples, numberOfImagSamples,
                              dteta[level], lambda[level]);
     }
+
+    // get local eigenvalue index range on rank
+    int samplesPerRank      = numberOfSamples / world_size;
+    int leftover            = numberOfSamples - samplesPerRank * world_size;
+    int samplesRankStartIdx = samplesPerRank * world_rank           + leftover * (world_rank > 0);
+    int samplesRankStopIdx  = samplesPerRank * (world_rank + 1) - 1 + leftover;
+    cout << "Rank " << world_rank << " / " << world_size << ": eigenvalue index range is "
+         << samplesRankStartIdx << " - " << samplesRankStopIdx << " (" << numberOfSamples << ")"
+         << endl;
+    int samplesOnRank = samplesPerRank + leftover * (world_rank == 0);
+
     // compute estimate - F-relaxation
     errCode = 0;
-    cout << "Estimate for F-relaxation" << endl;
     begin = clock();
     Col<double> estimateF(numberOfSamples);
-    for(int evalIdx = 0; evalIdx < numberOfSamples; evalIdx++){
+    for(int evalIdx = samplesRankStartIdx; evalIdx < samplesRankStopIdx + 1; evalIdx++){
         // for a given spatial mode, get eigenvalues for all levels
         Col<cx_double> lambda_k(numberOfLevels);
         for(int level = 0; level < numberOfLevels; level++){
@@ -76,13 +86,12 @@ int main(int argc, char** argv){
         }
     }
     end = clock();
-    cout << "Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
+    cout << "F-relaxation on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
     // compute estimate - F-relaxation
     errCode = 0;
-    cout << "Estimate for FCF-relaxation" << endl;
     begin = clock();
     Col<double> estimateFCF(numberOfSamples);
-    for(int evalIdx = 0; evalIdx < numberOfSamples; evalIdx++){
+    for(int evalIdx = samplesRankStartIdx; evalIdx < samplesRankStopIdx + 1; evalIdx++){
         // for a given spatial mode, get eigenvalues for all levels
         Col<cx_double> lambda_k(numberOfLevels);
         for(int level = 0; level < numberOfLevels; level++){
@@ -98,7 +107,43 @@ int main(int argc, char** argv){
         }
     }
     end = clock();
-    cout << "Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
+    cout << "FCF-relaxation on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
+
+    // send data to rank 0
+    int idx = 0;
+    if(world_rank == 0){
+        int receiveSize     = samplesPerRank;
+        int receiveStartIdx = samplesRankStartIdx;
+        int receiveStopIdx  = samplesRankStopIdx;
+        for(int rank = 1; rank < world_size; rank++){
+            receiveStartIdx = receiveStopIdx + 1;
+            receiveStopIdx  = receiveStopIdx + samplesPerRank;
+            double data[samplesPerRank];
+            MPI_Recv(data, receiveSize, MPI_DOUBLE, rank, 0, MPI_COMM_WORLD,  MPI_STATUS_IGNORE);
+            idx = 0;
+            for(int evalIdx = receiveStartIdx; evalIdx < receiveStopIdx + 1; evalIdx++){
+                estimateF(evalIdx) = data[idx++];
+            }
+            MPI_Recv(data, receiveSize, MPI_DOUBLE, rank, 0, MPI_COMM_WORLD,  MPI_STATUS_IGNORE);
+            idx = 0;
+            for(int evalIdx = receiveStartIdx; evalIdx < receiveStopIdx + 1; evalIdx++){
+                estimateFCF(evalIdx) = data[idx++];
+            }
+        }
+        estimateF.print();
+    }else{
+        double data[samplesOnRank];
+        idx = 0;
+        for(int evalIdx = samplesRankStartIdx; evalIdx < samplesRankStopIdx + 1; evalIdx++){
+            data[idx++] = estimateF(evalIdx);
+        }
+        MPI_Send(data, samplesOnRank, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+        idx = 0;
+        for(int evalIdx = samplesRankStartIdx; evalIdx < samplesRankStopIdx + 1; evalIdx++){
+            data[idx++] = estimateFCF(evalIdx);
+        }
+        MPI_Send(data, samplesOnRank, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+    }
 
 //     // save to disk
 //     export_matrix(E_F, "E_F", raw_ascii);
