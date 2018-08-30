@@ -1,7 +1,7 @@
 #include "error_bound_routines.hpp"
 
 /**
- *  compute bound for error propagator for multilevel MGRIT algorithm
+ *  compute bound for error propagator for multilevel MGRIT algorithm (complex version)
  */
 void get_error_propagator_bound(const int bound,                ///< requested bound, see constants.hpp
                                 int theoryLevel,                ///< time grid level, where bound is computed
@@ -150,6 +150,7 @@ void get_error_propagator_bound(const int bound,                ///< requested b
 /**
  *  compute \f$ \sqrt{\| E \|_1 \| E \|_\infty} \f$ using expression (complex version)
  */
+// note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
 double get_sqrt_expression_upper_bound(int r,                   ///< number of FC relaxation steps
                                        Col<cx_double> lambda,   ///< eigenvalues of \f$\Phi_l\f$
                                        Col<int> N,              ///< number of time steps on each grid level
@@ -225,7 +226,9 @@ double get_sqrt_expression_upper_bound(int r,                   ///< number of F
                     cout << ">>>ERROR: sqrt_expression_upper_bound not implemented for three levels (F-relaxation) on level " << theoryLevel << endl;
                     throw;
                 }
+                // compute 1-norm
                 double norm1    = max(norm11, norm12);
+                // compute inf-norm
                 double normInf  = (1.0 - std::pow(std::abs(lambda(2)), N(2)-1)) / (1.0 - std::abs(lambda(2)))
                                     * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
                                     * std::abs(std::pow(lambda(0), m(0)) - lambda(1))
@@ -324,7 +327,9 @@ double get_sqrt_expression_upper_bound(int r,                   ///< number of F
                     cout << ">>>ERROR: sqrt_expression_upper_bound not implemented for three levels (FCF-relaxation) on level " << theoryLevel << endl;
                     throw;
                 }
+                // compute 1-norm
                 double norm1    = max(max(norm11, norm12), norm13);
+                // compute inf-norm
                 double normInf  = (1.0 - std::pow(std::abs(lambda(2)), N(2)-1)) / (1.0 - std::abs(lambda(2)))
                                     * ((1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1))) - 1.0)
                                     * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
@@ -347,7 +352,6 @@ double get_sqrt_expression_upper_bound(int r,                   ///< number of F
             }
         }
     }else{
-
             cout << ">>>ERROR: sqrt_expression_upper_bound not implemented for " << numberOfLevels << " levels" << endl;
             throw;
     }
