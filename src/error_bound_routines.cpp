@@ -100,6 +100,30 @@ void get_error_propagator_bound(const int bound,                ///< requested b
             }
             break;
         }
+        case mgritestimate::sqrt_upper_bound:{
+            errCode = 0;
+            double norm1 = 0.0;
+            double normInf = 0.0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<cx_double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                sp_cx_mat *E = new sp_cx_mat();
+                // get error propagator
+                errCode = get_E(E, lambda_k, numberOfTimeSteps, coarseningFactors, 1);
+                // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
+                if(errCode == -1){
+                    (*estimate)(evalIdx) = -1;
+                    continue;
+                }
+                norm1   = norm(*E, 1);
+                normInf = norm(*E, "inf");
+                (*estimate)(evalIdx) = sqrt(norm1 * normInf);
+            }
+            break;
+        }
         default:{
             cout << ">>>ERROR: Bound " << bound << " not implemented" << endl;
             throw;

@@ -59,7 +59,7 @@ int main(int argc, char** argv){
     }
 
     // decide which bound to compute
-    const int bound = mgritestimate::lower_bound;
+    const int bound = mgritestimate::sqrt_upper_bound;
 
     // compute estimate - F-relaxation
     Col<double> *estimateF;
@@ -71,6 +71,8 @@ int main(int argc, char** argv){
         mat(join_rows(real(*dteta[0]), imag(*dteta[0]))).save("dteta_l0.txt", raw_ascii);
         if(bound == mgritestimate::upper_bound){
             filename = "upper_bound_E_F.txt";
+        }else if(bound == mgritestimate::sqrt_upper_bound){
+            filename = "sqrt_upper_bound_E_F.txt";
         }else if(bound == mgritestimate::lower_bound){
             filename = "lower_bound_E_F.txt";
         }else{
@@ -90,6 +92,8 @@ int main(int argc, char** argv){
         string filename;
         if(bound == mgritestimate::upper_bound){
             filename = "upper_bound_E_FCF.txt";
+        }else if(bound == mgritestimate::sqrt_upper_bound){
+            filename = "sqrt_upper_bound_E_FCF.txt";
         }else if(bound == mgritestimate::lower_bound){
             filename = "lower_bound_E_FCF.txt";
         }else{
