@@ -28,12 +28,12 @@ int main(int argc, char** argv){
 
     // MGRIT settings
     int numberOfTimeSteps_l0 = 1025;
-    int numberOfLevels = 2;
+    int numberOfLevels = 3;
     Col<int> coarseningFactors;
     Col<int> numberOfTimeSteps;
     coarseningFactors.set_size(numberOfLevels-1);
     numberOfTimeSteps.set_size(numberOfLevels);
-    coarseningFactors = {2};
+    coarseningFactors = {2, 4};
     numberOfTimeSteps(0) = numberOfTimeSteps_l0;
     for(int level = 1; level < numberOfLevels; level++){ numberOfTimeSteps(level) = (numberOfTimeSteps(level-1) - 1) / coarseningFactors(level-1) + 1; }
     // sample complex plane for dt*eta
@@ -59,12 +59,13 @@ int main(int argc, char** argv){
     }
 
     // decide which bound to compute
-    const int bound = mgritestimate::sqrt_upper_bound;
+    const int bound = mgritestimate::sqrt_expression_upper_bound;
+    int theoryLevel = 1;
 
     // compute estimate - F-relaxation
     Col<double> *estimateF;
     begin = clock();
-    get_error_propagator_bound(bound, 1, mgritestimate::F_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateF);
+    get_error_propagator_bound(bound, theoryLevel, mgritestimate::F_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateF);
     end = clock();
     cout << "F-relaxation on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
     if(world_rank == 0){
@@ -73,6 +74,8 @@ int main(int argc, char** argv){
             filename = "upper_bound_E_F.txt";
         }else if(bound == mgritestimate::sqrt_upper_bound){
             filename = "sqrt_upper_bound_E_F.txt";
+        }else if(bound == mgritestimate::sqrt_expression_upper_bound){
+            filename = "sqrt_expression_upper_bound_E_F.txt";
         }else if(bound == mgritestimate::lower_bound){
             filename = "lower_bound_E_F.txt";
         }else{
@@ -84,7 +87,7 @@ int main(int argc, char** argv){
     // compute estimate - FCF-relaxation
     Col<double> *estimateFCF;
     begin = clock();
-    get_error_propagator_bound(bound, 1, mgritestimate::FCF_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateFCF);
+    get_error_propagator_bound(bound, theoryLevel, mgritestimate::FCF_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateFCF);
     end = clock();
     cout << "FCF-relaxation on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
     if(world_rank == 0){
@@ -94,6 +97,8 @@ int main(int argc, char** argv){
             filename = "upper_bound_E_FCF.txt";
         }else if(bound == mgritestimate::sqrt_upper_bound){
             filename = "sqrt_upper_bound_E_FCF.txt";
+        }else if(bound == mgritestimate::sqrt_expression_upper_bound){
+            filename = "sqrt_expression_upper_bound_E_FCF.txt";
         }else if(bound == mgritestimate::lower_bound){
             filename = "lower_bound_E_FCF.txt";
         }else{
