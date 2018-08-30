@@ -21,18 +21,19 @@ int main(int argc, char** argv){
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     clock_t begin,end;
     int errCode = 0;
+    string filename;
 
     cout << "Armadillo version: " << arma_version::as_string() << endl;
     cout << "MPI rank: " << world_rank << " / " << world_size << endl;
 
     // MGRIT settings
     int numberOfTimeSteps_l0 = 1025;
-    int numberOfLevels = 3;
+    int numberOfLevels = 2;
     Col<int> coarseningFactors;
     Col<int> numberOfTimeSteps;
     coarseningFactors.set_size(numberOfLevels-1);
     numberOfTimeSteps.set_size(numberOfLevels);
-    coarseningFactors = {2, 4};
+    coarseningFactors = {2};
     numberOfTimeSteps(0) = numberOfTimeSteps_l0;
     for(int level = 1; level < numberOfLevels; level++){ numberOfTimeSteps(level) = (numberOfTimeSteps(level-1) - 1) / coarseningFactors(level-1) + 1; }
     // sample complex plane for dt*eta
@@ -57,24 +58,44 @@ int main(int argc, char** argv){
                              dteta[level], lambda[level]);
     }
 
+    // decide which bound to compute
+    const int bound = mgritestimate::lower_bound;
+
     // compute estimate - F-relaxation
     Col<double> *estimateF;
     begin = clock();
-    get_error_propagator_bound(mgritestimate::upper_bound, mgritestimate::F_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateF);
+    get_error_propagator_bound(bound, 1, mgritestimate::F_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateF);
     end = clock();
     cout << "F-relaxation on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
     if(world_rank == 0){
-        mat(*estimateF).save("upper_bound_E_F.txt", raw_ascii);
+        mat(join_rows(real(*dteta[0]), imag(*dteta[0]))).save("dteta_l0.txt", raw_ascii);
+        if(bound == mgritestimate::upper_bound){
+            filename = "upper_bound_E_F.txt";
+        }else if(bound == mgritestimate::lower_bound){
+            filename = "lower_bound_E_F.txt";
+        }else{
+            filename = "bound_E_F.txt";
+        }
+        mat(*estimateF).save(filename, raw_ascii);
     }
 
     // compute estimate - FCF-relaxation
     Col<double> *estimateFCF;
     begin = clock();
-    get_error_propagator_bound(mgritestimate::upper_bound, mgritestimate::FCF_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateFCF);
+    get_error_propagator_bound(bound, 1, mgritestimate::FCF_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateFCF);
     end = clock();
     cout << "FCF-relaxation on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
     if(world_rank == 0){
-        mat(*estimateFCF).save("upper_bound_E_FCF.txt", raw_ascii);
+        mat(join_rows(real(*dteta[0]), imag(*dteta[0]))).save("dteta_l0.txt", raw_ascii);
+        string filename;
+        if(bound == mgritestimate::upper_bound){
+            filename = "upper_bound_E_FCF.txt";
+        }else if(bound == mgritestimate::lower_bound){
+            filename = "lower_bound_E_FCF.txt";
+        }else{
+            filename = "bound_E_FCF.txt";
+        }
+        mat(*estimateFCF).save(filename, raw_ascii);
     }
 
     MPI_Finalize();
