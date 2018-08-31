@@ -59,7 +59,7 @@ int main(int argc, char** argv){
     }
 
     // decide which bound to compute
-    const int bound = mgritestimate::sqrt_expression_upper_bound;
+    const int bound = mgritestimate::tight_twogrid_upper_bound;
     int theoryLevel = 1;
 
     // compute estimate - F-relaxation

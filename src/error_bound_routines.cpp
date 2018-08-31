@@ -138,6 +138,32 @@ void get_error_propagator_bound(const int bound,                ///< requested b
             }
             break;
         }
+        case mgritestimate::tight_twogrid_upper_bound:{
+            errCode = 0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<cx_double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression
+                (*estimate)(evalIdx) = get_tight_twogrid_upper_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+            }
+            break;
+        }
+        case mgritestimate::tight_twogrid_lower_bound:{
+            errCode = 0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<cx_double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression
+                (*estimate)(evalIdx) = get_tight_twogrid_lower_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+            }
+            break;
+        }
         default:{
             cout << ">>>ERROR: Bound " << bound << " not implemented" << endl;
             throw;
@@ -148,7 +174,138 @@ void get_error_propagator_bound(const int bound,                ///< requested b
 }
 
 /**
- *  compute \f$ \sqrt{\| E \|_1 \| E \|_\infty} \f$ using expression (complex version)
+ *  Compute tight two-grid upper bound using expression.
+ *
+ *  Note: Evaluation is reasonably cheap, so let's just wrap the complex equivalent.
+ */
+double get_tight_twogrid_upper_bound(int r,                   ///< number of FC relaxation steps
+                                     Col<double> lambda,      ///< eigenvalues of \f$\Phi_l\f$
+                                     Col<int> N,              ///< number of time steps on each grid level
+                                     Col<int> m,              ///< coarsening factors between all grid levels
+                                     int theoryLevel          ///< expression for error propagator on grid level
+                                     ){
+    Col<cx_double> lambdac(lambda, 0.0*lambda);
+    double val = get_tight_twogrid_upper_bound(r, lambdac, N, m, theoryLevel);
+    return val;
+}
+
+/**
+ *  Compute tight two-grid upper bound using expression (complex version)
+ */
+// note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
+double get_tight_twogrid_upper_bound(int r,                   ///< number of FC relaxation steps
+                                     Col<cx_double> lambda,   ///< eigenvalues of \f$\Phi_l\f$
+                                     Col<int> N,              ///< number of time steps on each grid level
+                                     Col<int> m,              ///< coarsening factors between all grid levels
+                                     int theoryLevel          ///< expression for error propagator on grid level
+                                     ){
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1.0;
+    }
+    // sanity check
+    int numberOfLevels  = N.n_elem;
+    if(numberOfLevels != 2){
+        cout << ">>>ERROR: tight_twogrid_upper_bound only works for two time grids" << endl;
+    }
+    // evaluate expression depending on relaxation scheme
+    double val = -2.0;
+    switch(r){
+        case mgritestimate::F_relaxation:{
+            val = std::abs(std::pow(lambda(0), m(0)) - lambda(1))
+                    / std::sqrt(1.0 + std::pow(std::abs(lambda(1)), 2.0) + 2.0 * std::abs(lambda(1)) * std::cos(N(1) * constants::pi / (N(1) + 0.5)));
+            break;
+        }
+        case mgritestimate::FCF_relaxation:{
+            val = std::abs(std::pow(lambda(0), m(0)))
+                    * std::abs(std::pow(lambda(0), m(0)) - lambda(1))
+                    / std::sqrt(1.0 + std::pow(std::abs(lambda(1)), 2.0) + 2.0 * std::abs(lambda(1)) * std::cos(N(1) * constants::pi / (N(1) + 0.5)));
+            break;
+        }
+        default:{
+            cout << ">>>ERROR: tight_twogrid_upper_bound only implemented for F- and FCF-relaxation" << endl;
+            throw;
+        }
+    }
+    return val;
+}
+
+/**
+ *  Compute tight two-grid lower bound using expression.
+ *
+ *  Note: Evaluation is reasonably cheap, so let's just wrap the complex equivalent.
+ */
+double get_tight_twogrid_lower_bound(int r,                   ///< number of FC relaxation steps
+                                     Col<double> lambda,      ///< eigenvalues of \f$\Phi_l\f$
+                                     Col<int> N,              ///< number of time steps on each grid level
+                                     Col<int> m,              ///< coarsening factors between all grid levels
+                                     int theoryLevel          ///< expression for error propagator on grid level
+                                     ){
+    Col<cx_double> lambdac(lambda, 0.0*lambda);
+    double val = get_tight_twogrid_lower_bound(r, lambdac, N, m, theoryLevel);
+    return val;
+}
+
+/**
+ *  Compute tight two-grid lower bound using expression (complex version).
+ */
+// note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
+double get_tight_twogrid_lower_bound(int r,                   ///< number of FC relaxation steps
+                                     Col<cx_double> lambda,   ///< eigenvalues of \f$\Phi_l\f$
+                                     Col<int> N,              ///< number of time steps on each grid level
+                                     Col<int> m,              ///< coarsening factors between all grid levels
+                                     int theoryLevel          ///< expression for error propagator on grid level
+                                     ){
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1.0;
+    }
+    // sanity check
+    int numberOfLevels  = N.n_elem;
+    if(numberOfLevels != 2){
+        cout << ">>>ERROR: get_tight_twogrid_lower_bound only works for two time grids" << endl;
+    }
+    // evaluate expression depending on relaxation scheme
+    double val = -2.0;
+    switch(r){
+        case mgritestimate::F_relaxation:{
+            val = std::abs(std::pow(lambda(0), m(0)) - lambda(1))
+                    / std::sqrt(1.0 + std::pow(std::abs(lambda(1)), 2.0) + 2.0 * std::abs(lambda(1)) * std::cos(N(1) * constants::pi / (N(1) + 1.0)));
+            break;
+        }
+        case mgritestimate::FCF_relaxation:{
+            val = std::abs(std::pow(lambda(0), m(0)))
+                    * std::abs(std::pow(lambda(0), m(0)) - lambda(1))
+                    / std::sqrt(1.0 + std::pow(std::abs(lambda(1)), 2.0) + 2.0 * std::abs(lambda(1)) * std::cos(N(1) * constants::pi / (N(1) + 1.0)));
+            break;
+        }
+        default:{
+            cout << ">>>ERROR: get_tight_twogrid_lower_bound only implemented for F- and FCF-relaxation" << endl;
+            throw;
+        }
+    }
+    return val;
+}
+
+/**
+ *  Compute \f$ \sqrt{\| E \|_1 \| E \|_\infty} \f$ using expression.
+ *
+ *  Note: Evaluation is reasonably cheap, so let's just wrap the complex equivalent.
+ */
+// note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
+double get_sqrt_expression_upper_bound(int r,                   ///< number of FC relaxation steps
+                                     Col<double> lambda,      ///< eigenvalues of \f$\Phi_l\f$
+                                     Col<int> N,              ///< number of time steps on each grid level
+                                     Col<int> m,              ///< coarsening factors between all grid levels
+                                     int theoryLevel          ///< expression for error propagator on grid level
+                                     ){
+    Col<cx_double> lambdac(lambda, 0.0*lambda);
+    double val = get_sqrt_expression_upper_bound(r, lambdac, N, m, theoryLevel);
+    return val;
+}
+
+/**
+ *  Compute \f$ \sqrt{\| E \|_1 \| E \|_\infty} \f$ using expression (complex version).
  */
 // note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
 double get_sqrt_expression_upper_bound(int r,                   ///< number of FC relaxation steps
