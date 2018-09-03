@@ -119,8 +119,9 @@ void get_error_propagator_bound(const int bound,                ///< requested b
                     (*estimate)(evalIdx) = -1.0;
                     continue;
                 }
-                norm1   = norm(*E, 1);
-                normInf = norm(*E, "inf");
+                /// \todo Seems to be required for Armadillo 6.500.5. Can skip cx_mat() conversion for later versions?
+                norm1   = norm(cx_mat(*E), 1);
+                normInf = norm(cx_mat(*E), "inf");
                 (*estimate)(evalIdx) = sqrt(norm1 * normInf);
             }
             break;
