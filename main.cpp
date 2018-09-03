@@ -30,7 +30,7 @@ int main(int argc, char** argv){
     int numberOfTimeSteps_l0 = 1025;
     int numberOfLevels = 2;
     bool numberOfLevelsSet = false;
-    bool sampleComplexPlane = false;
+    bool sampleComplexPlane = true;
     Col<int> coarseningFactors;
     Col<int> numberOfTimeSteps;
     coarseningFactors.set_size(numberOfLevels-1);
@@ -41,11 +41,18 @@ int main(int argc, char** argv){
     double max_dteta_real_l0 =   1.0;
     double min_dteta_imag_l0 =  -4.0;
     double max_dteta_imag_l0 =   4.0;
-    int numberOfRealSamples = 111;
-    int numberOfImagSamples = 91;
+    int numberOfRealSamples = 11;
+    int numberOfImagSamples = 9;
     int bound = mgritestimate::sqrt_expression_upper_bound;
     int theoryLevel = 1;
     int relax = mgritestimate::F_relaxation;
+    bool fileSpatialEigenvalues = false;
+    bool filePhiEigenvalues = false;
+    bool fileComplexEigenvalues = false;
+    string fileNameSpatialEigenvaluesReal;
+    string fileNameSpatialEigenvaluesImag;
+    string fileNamePhiEigenvaluesReal;
+    string fileNamePhiEigenvaluesImag;
     for(int argIdx = 1; argIdx < argc; argIdx++){
         cout << argv[argIdx] << endl;
         if(string(argv[argIdx]) == "--number-of-timesteps"){
@@ -94,6 +101,22 @@ int main(int argc, char** argv){
             sampleComplexPlane = true;
             numberOfRealSamples = stoi(argv[++argIdx]);
             numberOfImagSamples = stoi(argv[++argIdx]);
+        }else if(string(argv[argIdx]) == "--file-spatial-real-eigenvalues"){
+            fileSpatialEigenvalues = true;
+            fileNameSpatialEigenvaluesReal = string(argv[++argIdx]);
+        }else if(string(argv[argIdx]) == "--file-spatial-complex-eigenvalues"){
+            fileSpatialEigenvalues = true;
+            fileComplexEigenvalues = true;
+            fileNameSpatialEigenvaluesReal = string(argv[++argIdx]);
+            fileNameSpatialEigenvaluesImag = string(argv[++argIdx]);
+        }else if(string(argv[argIdx]) == "--file-phi-real-eigenvalues"){
+            filePhiEigenvalues = true;
+            fileNamePhiEigenvaluesReal = string(argv[++argIdx]);
+        }else if(string(argv[argIdx]) == "--file-phi-complex-eigenvalues"){
+            filePhiEigenvalues = true;
+            fileComplexEigenvalues = true;
+            fileNamePhiEigenvaluesReal = string(argv[++argIdx]);
+            fileNamePhiEigenvaluesImag = string(argv[++argIdx]);
         }else if(string(argv[argIdx]) == "--bound"){
             argIdx++;
             if(string(argv[argIdx]) == "upper_bound"){
@@ -127,10 +150,18 @@ int main(int argc, char** argv){
             throw;
         }
     }
+    // sanity checks for user-defined parameters
+    if((sampleComplexPlane && fileSpatialEigenvalues)
+        || (sampleComplexPlane && filePhiEigenvalues)
+        || (fileSpatialEigenvalues && filePhiEigenvalues)){
+        cout << ">>>ERROR: Defined multiple input sources." << endl;
+        throw;
+    }
+    // set number of time steps based on fine grid and coarsening factors
     numberOfTimeSteps(0) = numberOfTimeSteps_l0;
     for(int level = 1; level < numberOfLevels; level++){ numberOfTimeSteps(level) = (numberOfTimeSteps(level-1) - 1) / coarseningFactors(level-1) + 1; }
     // sample complex plane for dt*eta
-    int numberOfSamples = numberOfRealSamples * numberOfImagSamples;
+    /// \todo conditional typedef for efficiency
     Col<cx_double> *dteta[numberOfLevels];
     Col<cx_double> *lambda[numberOfLevels];
     if(sampleComplexPlane){
@@ -144,33 +175,87 @@ int main(int argc, char** argv){
                                 numberOfRealSamples, numberOfImagSamples,
                                 dteta[level], lambda[level]);
         }
+        mat(join_rows(real(*dteta[0]), imag(*dteta[0]))).save("dteta_l0.txt", raw_ascii);
+    }else if(fileSpatialEigenvalues){
+        if(fileComplexEigenvalues){
+            // read real and complex part of spatial eigenvalues
+            mat realEigs;
+            mat imagEigs;
+            realEigs.load(fileNameSpatialEigenvaluesReal);
+            imagEigs.load(fileNameSpatialEigenvaluesImag);
+            // check whether we have at least as many columns as number of levels
+            if(realEigs.num_cols() < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+                throw;
+            }
+            if(imagEigs.num_cols() < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+                throw;
+            }
+            // store spatial eigenvalues and compute eigenvalues of Phi for given method
+            for(int level = 0; level < numberOfLevels; level++){
+                (*dteta)[level] = Col<cx_double>(realEigs[:, level], imagEigs[:, level]);
+                stability_function(method, dteta[level], lambda[level]);
+            }
+        }else{
+            // read real part of spatial eigenvalues
+            mat realEigs;
+            realEigs.load(fileNameSpatialEigenvaluesReal);
+            // check whether we have at least as many columns as number of levels
+            if(realEigs.num_cols() < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+                throw;
+            }
+            // read/store spatial eigenvalues and compute eigenvalues of Phi for given method
+            for(int level = 0; level < numberOfLevels; level++){
+                (*dteta)[level] = Col<double>(realEigs[:, level]);
+                stability_function(method, dteta[level], lambda[level]);
+            }
+        }
+    }else if(filePhiEigenvalues){
+        if(fileComplexEigenvalues){
+            // read real and complex part of spatial eigenvalues
+            mat realEigs;
+            mat imagEigs;
+            realEigs.load(fileNamePhiEigenvaluesReal);
+            imagEigs.load(fileNamePhiEigenvaluesImag);
+            // check whether we have at least as many columns as number of levels
+            if(realEigs.num_cols() < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+                throw;
+            }
+            if(imagEigs.num_cols() < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+                throw;
+            }
+            // store spatial eigenvalues and compute eigenvalues of Phi for given method
+            for(int level = 0; level < numberOfLevels; level++){
+                (*lambda)[level] = Col<cx_double>(realEigs[:, level], imagEigs[:, level]);
+            }
+        }else{
+            // read real part of spatial eigenvalues
+            mat realEigs;
+            realEigs.load(fileNamePhiEigenvaluesReal);
+            // check whether we have at least as many columns as number of levels
+            if(realEigs.num_cols() < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+                throw;
+            }
+            // store spatial eigenvalues and compute eigenvalues of Phi for given method
+            for(int level = 0; level < numberOfLevels; level++){
+                (*lambda)[level] = Col<double>(realEigs[:, level]);
+            }
+        }
     }
 
-    Col<double> *estimateF;
-    Col<double> *estimateFCF;
-    // compute estimate - F-relaxation
-    if(relax == mgritestimate::F_relaxation){
-        begin = clock();
-        get_error_propagator_bound(bound, theoryLevel, mgritestimate::F_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateF);
-        end = clock();
-        cout << "F-relaxation on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
-        if(world_rank == 0){
-            mat(join_rows(real(*dteta[0]), imag(*dteta[0]))).save("dteta_l0.txt", raw_ascii);
-            get_default_filename(bound, mgritestimate::F_relaxation, &filename);
-            mat(*estimateF).save(filename, raw_ascii);
-        }
-    // compute estimate - FCF-relaxation
-    }else if(relax == mgritestimate::FCF_relaxation){
-        begin = clock();
-        get_error_propagator_bound(bound, theoryLevel, mgritestimate::FCF_relaxation, numberOfTimeSteps, coarseningFactors, lambda, estimateFCF);
-        end = clock();
-        cout << "FCF-relaxation on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
-        if(world_rank == 0){
-            mat(join_rows(real(*dteta[0]), imag(*dteta[0]))).save("dteta_l0.txt", raw_ascii);
-            string filename;
-            get_default_filename(bound, mgritestimate::FCF_relaxation, &filename);
-            mat(*estimateFCF).save(filename, raw_ascii);
-        }
+    Col<double> *estimate;
+    begin = clock();
+    get_error_propagator_bound(bound, theoryLevel, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+    end = clock();
+    cout << "Bound on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
+    if(world_rank == 0){
+        get_default_filename(bound, relax, &filename);
+        mat(*estimate).save(filename, raw_ascii);
     }
 
     MPI_Finalize();
