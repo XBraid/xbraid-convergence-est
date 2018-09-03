@@ -12,7 +12,21 @@ doxygen:
 	doxygen doc/doxygen/Doxyfile
 
 load-packages:
-	spack load armadillo
+	make load-armadillo
+	make load-matplotlib
 
 unload-packages:
+	make unload-armadillo
+	make unload-matplotlib
+
+load-armadillo:
+	spack load armadillo
+
+unload-armadillo:
 	spack unload armadillo
+
+load-matplotlib:
+	spack load py-matplotlib
+
+unload-matplotlib:
+	spack unload py-matplotlib

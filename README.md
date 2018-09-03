@@ -13,6 +13,7 @@ The code depends on a number of third-party libraries:
 * bootstrap
 * armadillo
 * optional: Doxygen
+* optional: matplotlib (recommended: version >= 1.5.2)
 
 To install bootstrap and armadillo, we recommend using SPACK, since SPACK will install all dependencies (blas, lapack, etc.).
 
@@ -20,8 +21,8 @@ To install bootstrap and armadillo, we recommend using SPACK, since SPACK will i
 
     default : builds the default binary
     doxygen : generates the Doxygen source code documentation
-    load-packages : loads the armadillo library using SPACK
-    unload-packages : unloads the armadillo library using SPACK
+    load-packages : loads the recommended libraries using SPACK
+    unload-packages : unloads the recommended libraries using SPACK
 
 ## Source code documentation
 

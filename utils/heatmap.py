@@ -10,16 +10,17 @@ from scipy.spatial import Delaunay
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import sys
+import os
 import code
 
 def main():
     interactiveMode = False
-    # check Matplotlib version for compatibility
+    exportFigure    = True
+    exportFormat    = "png" # png, svg
+    exportDPI       = 300
+    # get Matplotlib version
     mplVersion          = mpl.__version__
     mplVersionMajor, mplVersionMinor, mplVersionPatch = [int(x, 10) for x in mplVersion.split(".")]
-    if ((mplVersionMajor < 2) and (mplVersionMinor < 6) and (mplVersionPatch < 2)):
-        print(">>>ERROR: Requires Matplotlib version >= 1.5.2. You have "+mplVersion+"!")
-        sys.exit()
     # check SciPy version for compatibility
     scipyVersion        = sp.version.version
     scipyVersionMajor, scipyVersionMinor, scipyVersionPatch = [int(x, 10) for x in scipyVersion.split(".")]
@@ -55,6 +56,8 @@ def main():
     xy      = np.loadtxt(axisfile)
     d       = np.loadtxt(datafile)
     x, y    = xy.T
+    nanMask = np.isnan(d)
+
     tri     = Delaunay(xy, incremental=False)
     # get data range
     if (np.isnan(xmin) or np.isnan(xmax)):
@@ -67,18 +70,37 @@ def main():
         dmin    = np.nanmin(d)
         dmax    = np.nanmax(d)
     # plot data
-    plt.figure()
+    fig = plt.figure()
     plt.rc("text", usetex=True)
     plt.rc("font", size=24)
     # plt.rc("ps", usedistiller=xpdf)
-    colormap    = plt.get_cmap("coolwarm")
+    mng = plt.get_current_fig_manager()
+    # colormap    = plt.get_cmap("coolwarm")
+    colormap    = plt.get_cmap("viridis")
     heatmap     = mpl.pyplot.tripcolor(mpl.tri.Triangulation(x, y), d, vmin=dmin, vmax=dmax, shading="gouraud", cmap=colormap)
-    heatmap.cmap.set_under("white")
+    heatmap.cmap.set_under(color="white")
     plt.gca().set_aspect("equal")
     plt.xlim([xmin, xmax])
     plt.ylim([ymin, ymax])
-    plt.colorbar()
-    plt.savefig("tst.svg", format="svg", dpi=1200)
+    plt.colorbar(heatmap, fraction=0.046, pad=0.04)
+    fig.canvas.set_window_title(os.path.abspath(datafile))
+    try:
+        # tkAgg
+        mng.frame.Maximize(True)
+    except AttributeError:
+        # Qt
+        try:
+            mng.window.showMaximized()
+        except AttributeError:
+            try:
+                mng.resize(*mng.window.maxsize())
+            except AttributeError:
+                print("Encountered unknown backend "+mpl.get_backend()+". Please check with developer.")
+    if exportFigure:
+        if ((mplVersionMajor < 2) and (mplVersionMinor < 6) and (mplVersionPatch < 2) and (exportFormat == "svg")):
+            print(">>>ERROR: EPS/SVG export requires Matplotlib version >= 1.5.2. You have "+mplVersion+"!")
+            sys.exit()
+        plt.savefig("tst."+exportFormat, format=exportFormat, dpi=exportDPI)
     plt.show()
     # allow user to interact with data in workspace
     if interactiveMode:
