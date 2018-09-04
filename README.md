@@ -28,3 +28,9 @@ To install bootstrap and armadillo, we recommend using SPACK, since SPACK will i
 
 Doxygen is used to automatically generate source code documentation.
 See doc/doxygen/html/index.html
+
+## Commandline options
+
+A list of commandline options is displayed, when running:
+
+    ./main --help

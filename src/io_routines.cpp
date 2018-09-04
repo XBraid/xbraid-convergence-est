@@ -62,7 +62,7 @@ void get_default_filename(const int bound, const int relax, string *filename){
  *      --number-of-time-grids 2                                number of levels in time grid hierarchy
  *      --coarsening-factors 2                                  temporal coarsening factors for level 0-->1, 1-->2, ...
  *                                                              note: must not be used before option --number-of-time-grids
- *      --runge-kutta-method L_stable_SDIRK1                    Runge-Kutta method, if spatial eigenvalues are supplied
+ *      --runge-kutta-method L_stable_SDIRK1                    Runge-Kutta method, if spatial eigenvalues are supplied, see constants.hpp
  *      --sample-complex-plane -10.0 1.0 -4.0 4.0               sampling of complex plane with ranges [-10.0, 1.0] x [-4.0, 4.0]
  *      --complex-plane-sample-size 12 9                        sampling of real and complex axis using 12 and 9 points
  *      --file-spatial-real-eigenvalues dteta_real.txt          name of file that contains real part of spatial eigenvalues
@@ -86,7 +86,7 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
                 cout << "    --number-of-time-grids 2                                number of levels in time grid hierarchy" << endl;
                 cout << "    --coarsening-factors 2                                  temporal coarsening factors for level 0-->1, 1-->2, ..." << endl;
                 cout << "                                                            note: must not be used before option --number-of-time-grids" << endl;
-                cout << "    --runge-kutta-method L_stable_SDIRK1                    Runge-Kutta method, if spatial eigenvalues are supplied" << endl;
+                cout << "    --runge-kutta-method L_stable_SDIRK1                    Runge-Kutta method, if spatial eigenvalues are supplied, see constants.hpp" << endl;
                 cout << "    --sample-complex-plane -10.0 1.0 -4.0 4.0               sampling of complex plane with ranges [-10.0, 1.0] x [-4.0, 4.0]" << endl;
                 cout << "    --complex-plane-sample-size 12 9                        sampling of real and complex axis using 12 and 9 points" << endl;
                 cout << "    --file-spatial-real-eigenvalues dteta_real.txt          name of file that contains real part of spatial eigenvalues" << endl;
