@@ -160,10 +160,9 @@ int main(int argc, char** argv){
     // set number of time steps based on fine grid and coarsening factors
     numberOfTimeSteps(0) = numberOfTimeSteps_l0;
     for(int level = 1; level < numberOfLevels; level++){ numberOfTimeSteps(level) = (numberOfTimeSteps(level-1) - 1) / coarseningFactors(level-1) + 1; }
-    // sample complex plane for dt*eta
-    /// \todo conditional typedef for efficiency
     Col<cx_double> *dteta[numberOfLevels];
     Col<cx_double> *lambda[numberOfLevels];
+    // sample complex plane for dt*eta
     if(sampleComplexPlane){
         int multiplyBy = 1;
         for(int level = 0; level < numberOfLevels; level++){
@@ -184,17 +183,18 @@ int main(int argc, char** argv){
             realEigs.load(fileNameSpatialEigenvaluesReal);
             imagEigs.load(fileNameSpatialEigenvaluesImag);
             // check whether we have at least as many columns as number of levels
-            if(realEigs.num_cols() < numberOfLevels){
-                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+            if(realEigs.n_cols < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << numberOfLevels << " levels." << endl;
                 throw;
             }
-            if(imagEigs.num_cols() < numberOfLevels){
-                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+            if(imagEigs.n_cols < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << numberOfLevels << " levels." << endl;
                 throw;
             }
             // store spatial eigenvalues and compute eigenvalues of Phi for given method
             for(int level = 0; level < numberOfLevels; level++){
-                (*dteta)[level] = Col<cx_double>(realEigs[:, level], imagEigs[:, level]);
+                Col<cx_double> dtetac(realEigs.col(level), imagEigs.col(level));
+                (*dteta)[level] = dtetac;
                 stability_function(method, dteta[level], lambda[level]);
             }
         }else{
@@ -202,13 +202,14 @@ int main(int argc, char** argv){
             mat realEigs;
             realEigs.load(fileNameSpatialEigenvaluesReal);
             // check whether we have at least as many columns as number of levels
-            if(realEigs.num_cols() < numberOfLevels){
-                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+            if(realEigs.n_cols < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << numberOfLevels << " levels." << endl;
                 throw;
             }
             // read/store spatial eigenvalues and compute eigenvalues of Phi for given method
             for(int level = 0; level < numberOfLevels; level++){
-                (*dteta)[level] = Col<double>(realEigs[:, level]);
+                Col<cx_double> dtetac(realEigs.col(level), realEigs.col(level)*0.0);
+                (*dteta)[level] = dtetac;
                 stability_function(method, dteta[level], lambda[level]);
             }
         }
@@ -220,37 +221,50 @@ int main(int argc, char** argv){
             realEigs.load(fileNamePhiEigenvaluesReal);
             imagEigs.load(fileNamePhiEigenvaluesImag);
             // check whether we have at least as many columns as number of levels
-            if(realEigs.num_cols() < numberOfLevels){
-                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+            if(realEigs.n_cols < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << numberOfLevels << " levels." << endl;
                 throw;
             }
-            if(imagEigs.num_cols() < numberOfLevels){
-                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+            if(imagEigs.n_cols < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << numberOfLevels << " levels." << endl;
                 throw;
             }
             // store spatial eigenvalues and compute eigenvalues of Phi for given method
             for(int level = 0; level < numberOfLevels; level++){
-                (*lambda)[level] = Col<cx_double>(realEigs[:, level], imagEigs[:, level]);
+                Col<cx_double> lambdac(realEigs.col(level), imagEigs.col(level));
+                (*lambda)[level] = lambdac;
             }
         }else{
             // read real part of spatial eigenvalues
             mat realEigs;
             realEigs.load(fileNamePhiEigenvaluesReal);
             // check whether we have at least as many columns as number of levels
-            if(realEigs.num_cols() < numberOfLevels){
-                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << string(numberOfLevels) << " levels." << endl;
+            if(realEigs.n_cols < numberOfLevels){
+                cout << ">>>ERROR: Supplied eigenvalues are invalid for " << numberOfLevels << " levels." << endl;
                 throw;
             }
             // store spatial eigenvalues and compute eigenvalues of Phi for given method
             for(int level = 0; level < numberOfLevels; level++){
-                (*lambda)[level] = Col<double>(realEigs[:, level]);
+                Col<cx_double> lambdac(realEigs.col(level), realEigs.col(level)*0.0);
+                (*lambda)[level] = lambdac;
             }
         }
     }
 
     Col<double> *estimate;
     begin = clock();
-    get_error_propagator_bound(bound, theoryLevel, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+    // evaluate error propagator for complex eigenvalue case
+    if(sampleComplexPlane || fileComplexEigenvalues){
+        get_error_propagator_bound(bound, theoryLevel, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+    // evaluate error propagator for real eigenvalue case
+    }else{
+        Col<double> *lambdar[numberOfLevels];
+        for(int level = 0; level < numberOfLevels; level++){
+            Col<double> tmp(arma::real((*lambda)[level]));
+            (*lambdar)[level] = tmp;
+        }
+        get_error_propagator_bound(bound, theoryLevel, relax, numberOfTimeSteps, coarseningFactors, lambdar, estimate);
+    }
     end = clock();
     cout << "Bound on rank " << world_rank << " / " << world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl;
     if(world_rank == 0){

@@ -1,6 +1,180 @@
 #include "error_bound_routines.hpp"
 
 /**
+ *  compute bound for error propagator for multilevel MGRIT algorithm (real version)
+ */
+void get_error_propagator_bound(const int bound,                ///< requested bound, see constants.hpp
+                                int theoryLevel,                ///< time grid level, where bound is computed
+                                const int relax,                ///< relaxation scheme, see constants.hpp
+                                Col<int> numberOfTimeSteps,     ///< number of time steps on all time grids
+                                Col<int> coarseningFactors,     ///< temporal coarsening factors for levels 0-->1, 1-->2, etc.
+                                Col<double> **lambda,           ///< eigenvalues on each time grid
+                                Col<double> *&estimate          ///< on return, the estimate for all eigenvalues
+                                ){
+    int errCode = 0;
+    bool pinvSuccess = true;
+    // check MPI environment
+    int world_rank;
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    // get number of eigenvalues and levels
+    int numberOfSamples = (*lambda[0]).n_elem;
+    int numberOfLevels  = numberOfTimeSteps.n_elem;
+    estimate = new Col<double>;
+    (*estimate).set_size(numberOfSamples);
+    (*estimate).fill(-2.0);
+    // setup function pointer for error propagator
+    int (*get_E)(arma::sp_mat *, arma::Col<double>, arma::Col<int>, arma::Col<int>, int);
+    switch(relax){
+        case mgritestimate::F_relaxation:{
+            get_E = get_E_F;
+            break;
+        }
+        case mgritestimate::FCF_relaxation:{
+            get_E = get_E_FCF;
+            break;
+        }
+        default:{
+            cout << ">>>ERROR: Only F- and FCF-relaxation are implemented" << endl;
+            throw;
+        }
+    }
+    // get local eigenvalue index range on rank
+    if(numberOfSamples < world_size){
+        cout << ">>>ERROR: Sample size is too small for number of MPI processes" << endl;
+        throw;
+    }
+    // get index range for local MPI process
+    int samplesRankStartIdx;
+    int samplesRankStopIdx;
+    get_samples_index_range(numberOfSamples, samplesRankStartIdx, samplesRankStopIdx);
+    // get estimate
+    switch(bound){
+        case mgritestimate::upper_bound:{
+            errCode = 0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                sp_mat *E = new sp_mat();
+                // get error propagator
+                errCode = get_E(E, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
+                if(errCode == -1){
+                    (*estimate)(evalIdx) = -1.0;
+                    continue;
+                }
+                (*estimate)(evalIdx) = norm(mat(*E), 2);
+            }
+            break;
+        }
+        case mgritestimate::lower_bound:{
+            errCode = 0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                sp_mat *E = new sp_mat();
+                mat pinvE;
+                pinvSuccess = true;
+                // get error propagator
+                errCode = get_E(E, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
+                if(errCode == -1){
+                    (*estimate)(evalIdx) = -1.0;
+                    continue;
+                }
+                // compute pseudo-inverse of error propagator
+                pinvSuccess = pinv(pinvE, mat(*E));
+                if(!pinvSuccess){
+                    cout << ">>>ERROR: Computing pseudo-inverse of error propagator failed." << endl;
+                    throw;
+                }
+                // l2-norm of pseudo-inverse bounds error propagator from below
+                /// \todo should we check for division by zero?
+                (*estimate)(evalIdx) = 1.0 / norm(pinvE, 2);
+            }
+            break;
+        }
+        case mgritestimate::sqrt_upper_bound:{
+            errCode = 0;
+            double norm1 = 0.0;
+            double normInf = 0.0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                sp_mat *E = new sp_mat();
+                // get error propagator
+                errCode = get_E(E, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
+                if(errCode == -1){
+                    (*estimate)(evalIdx) = -1.0;
+                    continue;
+                }
+                /// \todo Seems to be required for Armadillo 6.500.5. Can skip mat() conversion for later versions?
+                norm1   = norm(mat(*E), 1);
+                normInf = norm(mat(*E), "inf");
+                (*estimate)(evalIdx) = sqrt(norm1 * normInf);
+            }
+            break;
+        }
+        case mgritestimate::sqrt_expression_upper_bound:{
+            errCode = 0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression
+                (*estimate)(evalIdx) = get_sqrt_expression_upper_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+            }
+            break;
+        }
+        case mgritestimate::tight_twogrid_upper_bound:{
+            errCode = 0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression
+                (*estimate)(evalIdx) = get_tight_twogrid_upper_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+            }
+            break;
+        }
+        case mgritestimate::tight_twogrid_lower_bound:{
+            errCode = 0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression
+                (*estimate)(evalIdx) = get_tight_twogrid_lower_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+            }
+            break;
+        }
+        default:{
+            cout << ">>>ERROR: Bound " << bound << " not implemented" << endl;
+            throw;
+        }
+    }
+    // communicate data
+    communicateBounds(estimate, numberOfSamples, samplesRankStartIdx, samplesRankStopIdx);
+}
+
+/**
  *  compute bound for error propagator for multilevel MGRIT algorithm (complex version)
  */
 void get_error_propagator_bound(const int bound,                ///< requested bound, see constants.hpp
