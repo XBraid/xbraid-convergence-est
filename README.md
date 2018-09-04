@@ -24,13 +24,13 @@ To install bootstrap and armadillo, we recommend using SPACK, since SPACK will i
     load-packages : loads the recommended libraries using SPACK
     unload-packages : unloads the recommended libraries using SPACK
 
+## Commandline options
+
+A list of commandline options is displayed when running:
+
+    ./main --help
+
 ## Source code documentation
 
 Doxygen is used to automatically generate source code documentation.
 See doc/doxygen/html/index.html
-
-## Commandline options
-
-A list of commandline options is displayed, when running:
-
-    ./main --help

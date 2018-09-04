@@ -35,6 +35,8 @@ struct appStruct{
     arma::Col<arma::cx_double> **dtetac;                                    ///< pointer to spatial eigenvalues at different grid levels (real case)
     arma::Col<arma::cx_double> **lambdac;                                   ///< pointer to eigenvalues of \f$\Phi_l\f$ at different grid levels (complex case)
     arma::Col<double> *estimate;                                            ///< computed estimates
+    bool userOutputFile;                                                    ///< indicates whether user has defined output file name
+    std::string userOutputFileName;                                         ///< user-defined output file name
 };
 
 void initalize_app_struct(appStruct &app);

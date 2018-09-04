@@ -17,7 +17,6 @@ int main(int argc, char** argv){
     MPI_Comm_rank(MPI_COMM_WORLD, &app.world_rank);
     clock_t begin,end;
     int errCode = 0;
-    string filename;
     if(app.world_rank == 0){
         cout << endl << "Armadillo version: " << arma_version::as_string() << endl << endl;
     }
@@ -39,10 +38,9 @@ int main(int argc, char** argv){
     }
     end = clock();
     cout << "Rank " << app.world_rank << " / " << app.world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl << endl;
-    if(app.world_rank == 0){
-        get_default_filename(app.bound, app.relax, &filename);
-        mat(*app.estimate).save(filename, raw_ascii);
-    }
+    
+    // export results
+    export_estimates(app);
 
     MPI_Finalize();
     return 0;

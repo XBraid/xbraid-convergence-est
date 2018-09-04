@@ -1,13 +1,82 @@
 #include "io_routines.hpp"
 
-void export_matrix(arma::sp_mat *m, const string& filename, arma::file_type type){
-    arma::mat(*m).save(filename, type);
+void export_estimates(appStruct &app, arma::file_type type){
+    if(app.world_rank == 0){
+        if(!app.userOutputFile){
+            get_default_filename(app.bound, app.relax, &app.userOutputFileName);
+        }
+        export_vector(app.estimate, app.userOutputFileName, type);
+        export_vector_minmax(app.bound, app.estimate, app.userOutputFileName, type);
+    }
 }
 
-// check newer Armadillo versions and arma::arma_ascii format
-void export_matrix(arma::sp_cx_mat *m, const string& filename, arma::file_type type){
-    arma::mat(arma::real(*m)).save(filename+"_real", type);
-    arma::mat(arma::imag(*m)).save(filename+"_imag", type);
+void export_matrix(arma::sp_mat *m, const string filename, arma::file_type type){
+    string suffix;
+    get_filename_suffix(type, suffix);
+    arma::mat(*m).save(filename+suffix, type);
+}
+
+/// \todo check newer Armadillo versions and arma::arma_ascii format
+void export_matrix(arma::sp_cx_mat *m, const string filename, arma::file_type type){
+    string suffix;
+    get_filename_suffix(type, suffix);
+    arma::mat(arma::real(*m)).save(filename+"_real"+suffix, type);
+    arma::mat(arma::imag(*m)).save(filename+"_imag"+suffix, type);
+}
+
+void export_vector(arma::Col<double> *v, const string filename, arma::file_type type){
+    string suffix;
+    get_filename_suffix(type, suffix);
+    arma::mat(*v).save(filename+suffix, type);
+}
+
+void export_vector(arma::Col<arma::cx_double> *v, const string filename, arma::file_type type){
+    string suffix;
+    get_filename_suffix(type, suffix);
+    arma::mat(arma::real(*v)).save(filename+"_real"+suffix, type);
+    arma::mat(arma::imag(*v)).save(filename+"_imag"+suffix, type);
+}
+
+void export_vector_minmax(int bound, arma::Col<double> *v, const string filename, arma::file_type type){
+    string prefix;
+    string suffix;
+    arma::mat tmp(1, 1);
+    get_filename_suffix(type, suffix);
+    if((bound == mgritestimate::upper_bound)
+        || (bound == mgritestimate::sqrt_upper_bound)
+        || (bound == mgritestimate::sqrt_expression_upper_bound)
+        || (bound == mgritestimate::tight_twogrid_upper_bound)){
+        prefix = "max_";
+        tmp.fill(arma::max(*v));
+        tmp.save(prefix+filename+suffix, type);
+        cout << "Convergence <= " << std::setprecision(17) << tmp[0, 0] << endl << endl;
+    }else if((bound == mgritestimate::lower_bound)
+        || (bound == mgritestimate::sqrt_lower_bound)
+        || (bound == mgritestimate::tight_twogrid_lower_bound)){
+        arma::uvec tmpIdx = find((*v) > 0.0);
+        tmp.fill(arma::min((*v).elem(tmpIdx)));
+        prefix = "min_";
+        tmp.save(prefix+filename+suffix, type);
+        cout << "Convergence >= " << std::setprecision(17) << tmp[0, 0] << endl << endl;
+    }else{
+        cout << ">>>WARNING: Unknown bound type " << bound << " in export routine. Exporting min and max." << endl << endl;
+        tmp.fill(arma::max(*v));
+        tmp.save("max_"+filename+suffix, type);
+        cout << "Convergence <= " << std::setprecision(17) << tmp[0, 0] << endl << endl;
+        arma::uvec tmpIdx = find((*v) > 0.0);
+        tmp.fill(arma::min((*v).elem(tmpIdx)));
+        tmp.save("min_"+filename+suffix, type);
+        cout << "Convergence >= " << std::setprecision(17) << tmp[0, 0] << endl << endl;
+    }
+}
+
+void get_filename_suffix(arma::file_type type, string &suffix){
+    if(type == arma::raw_ascii){
+        suffix = ".txt";
+    }else{
+        cout << ">>>WARNING: Defaulting to raw_ascii format." << endl << endl;
+        suffix = ".txt";
+    }
 }
 
 /**
@@ -17,33 +86,33 @@ void get_default_filename(const int bound, const int relax, string *filename){
     switch(relax){
         case mgritestimate::F_relaxation:{
             if(bound == mgritestimate::upper_bound){
-                *filename = "upper_bound_E_F.txt";
+                *filename = "upper_bound_E_F";
             }else if(bound == mgritestimate::sqrt_upper_bound){
-                *filename = "sqrt_upper_bound_E_F.txt";
+                *filename = "sqrt_upper_bound_E_F";
             }else if(bound == mgritestimate::sqrt_expression_upper_bound){
-                *filename = "sqrt_expression_upper_bound_E_F.txt";
+                *filename = "sqrt_expression_upper_bound_E_F";
             }else if(bound == mgritestimate::tight_twogrid_upper_bound){
-                *filename = "tight_twogrid_upper_bound_E_F.txt";
+                *filename = "tight_twogrid_upper_bound_E_F";
             }else if(bound == mgritestimate::lower_bound){
-                *filename = "lower_bound_E_F.txt";
+                *filename = "lower_bound_E_F";
             }else{
-                *filename = "bound_E_F.txt";
+                *filename = "bound_E_F";
             }
             break;
         }
         case mgritestimate::FCF_relaxation:{
             if(bound == mgritestimate::upper_bound){
-                *filename = "upper_bound_E_FCF.txt";
+                *filename = "upper_bound_E_FCF";
             }else if(bound == mgritestimate::sqrt_upper_bound){
-                *filename = "sqrt_upper_bound_E_FCF.txt";
+                *filename = "sqrt_upper_bound_E_FCF";
             }else if(bound == mgritestimate::sqrt_expression_upper_bound){
-                *filename = "sqrt_expression_upper_bound_E_FCF.txt";
+                *filename = "sqrt_expression_upper_bound_E_FCF";
             }else if(bound == mgritestimate::tight_twogrid_upper_bound){
-                *filename = "tight_twogrid_upper_bound_E_FCF.txt";
+                *filename = "tight_twogrid_upper_bound_E_FCF";
             }else if(bound == mgritestimate::lower_bound){
-                *filename = "lower_bound_E_FCF.txt";
+                *filename = "lower_bound_E_FCF";
             }else{
-                *filename = "bound_E_FCF.txt";
+                *filename = "bound_E_FCF";
             }
             break;
         }
@@ -72,6 +141,7 @@ void get_default_filename(const int bound, const int relax, string *filename){
  *      --bound tight_twogrid_upper_bound                       bound to evaluate, see constants.hpp
  *      --bound-on-level 1                                      bound is evaluated on this level (options: 0, 1)
  *      --relaxation-scheme F_relaxation                        relaxation scheme, see constants.hpp
+ *      --output-file                                           user-defined output file name (without suffix)
  */
 int parse_commandline_options(appStruct &app, int argc, char** argv){
     // need to set number of levels before reading temporal coarsening factors
@@ -96,6 +166,7 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
                 cout << "    --bound tight_twogrid_upper_bound                       bound to evaluate, see constants.hpp" << endl;
                 cout << "    --bound-on-level 1                                      bound is evaluated on this level (options: 0, 1)" << endl;
                 cout << "    --relaxation-scheme F_relaxation                        relaxation scheme, see constants.hpp" << endl;
+                cout << "    --output-file                                           user-defined output file name (without suffix)" << endl;
                 cout << endl;
             }
             return 1;
@@ -179,6 +250,7 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
                 app.bound = mgritestimate::tight_twogrid_lower_bound;
             }else{
                 cout << "ERROR: Unknown bound " << string(argv[argIdx]) << "." << endl;
+                throw;
             }
         }else if(string(argv[argIdx]) == "--bound-on-level"){
             app.theoryLevel = stoi(argv[++argIdx]);
@@ -189,6 +261,9 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
             }else if(string(argv[argIdx]) == "FCF_relaxation"){
                 app.relax = mgritestimate::FCF_relaxation;
             }
+        }else if(string(argv[argIdx]) == "--output-file"){
+            app.userOutputFile      = true;
+            app.userOutputFileName  = string(argv[++argIdx]);
         }else{
             cout << ">>>ERROR: Unknown argument " << string(argv[argIdx]) << endl;
             throw;

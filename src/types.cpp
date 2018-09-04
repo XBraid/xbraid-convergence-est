@@ -25,4 +25,5 @@ void initalize_app_struct(appStruct &app){
     app.fileSpatialEigenvalues = false;
     app.filePhiEigenvalues = false;
     app.fileComplexEigenvalues = false;
+    app.userOutputFile = false;
 }
