@@ -30,6 +30,13 @@ A list of commandline options is displayed when running:
 
     ./main --help
 
+## Visualization
+
+A Python3 script for visualization of estimated bounds for spatial eigenvalues in the complex plane can be found in the utils/ folder.
+For required commandline arguments, run:
+
+    python3 heatmap.py
+
 ## Source code documentation
 
 Doxygen is used to automatically generate source code documentation.
