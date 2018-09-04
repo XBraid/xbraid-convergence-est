@@ -16,7 +16,7 @@ void export_matrix(arma::sp_cx_mat *m, const string& filename, arma::file_type t
 
 void get_default_filename(const int bound, const int relax, string *filename);
 
-void parse_commandline_options(appStruct &app, int argc, char** argv);
+int parse_commandline_options(appStruct &app, int argc, char** argv);
 
 void setget_eigenvalues(appStruct &app);
 

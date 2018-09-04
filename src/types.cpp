@@ -12,14 +12,14 @@ void initalize_app_struct(appStruct &app){
     app.coarseningFactors.set_size(app.numberOfLevels-1);
     app.coarseningFactors.fill(2);
     app.numberOfTimeSteps.set_size(app.numberOfLevels);
-    app.method = rkconst::A_stable_SDIRK2;
+    app.method = rkconst::L_stable_SDIRK1;
     app.min_dteta_real_l0 = -10.0;
     app.max_dteta_real_l0 =   1.0;
     app.min_dteta_imag_l0 =  -4.0;
     app.max_dteta_imag_l0 =   4.0;
-    app.numberOfRealSamples = 11;
+    app.numberOfRealSamples = 12;
     app.numberOfImagSamples = 9;
-    app.bound = mgritestimate::sqrt_expression_upper_bound;
+    app.bound = mgritestimate::tight_twogrid_upper_bound;
     app.theoryLevel = 1;
     app.relax = mgritestimate::F_relaxation;
     app.fileSpatialEigenvalues = false;

@@ -55,15 +55,51 @@ void get_default_filename(const int bound, const int relax, string *filename){
 }
 
 /**
- *  read commandline options
+ *  Read commandline options (default arguments):
+ *
+ *      --help                                                  prints all commandline options
+ *      --number-of-timesteps 1025                              number of timesteps on fine grid (must contain time point corresponding to initial condition)
+ *      --number-of-time-grids 2                                number of levels in time grid hierarchy
+ *      --coarsening-factors 2                                  temporal coarsening factors for level 0-->1, 1-->2, ...
+ *                                                              note: must not be used before option --number-of-time-grids
+ *      --runge-kutta-method L_stable_SDIRK1                    Runge-Kutta method, if spatial eigenvalues are supplied
+ *      --sample-complex-plane -10.0 1.0 -4.0 4.0               sampling of complex plane with ranges [-10.0, 1.0] x [-4.0, 4.0]
+ *      --complex-plane-sample-size 12 9                        sampling of real and complex axis using 12 and 9 points
+ *      --file-spatial-real-eigenvalues dteta_real.txt          name of file that contains real part of spatial eigenvalues
+ *      --file-spatial-complex-eigenvalues dteta_imag.txt       name of file that contains complex part of spatial eigenvalues
+ *      --file-phi-real-eigenvalues lambda_real.txt             name of file that contains real part of eigenvalues of Phi
+ *      --file-phi-complex-eigenvalues lambda_imag.txt          name of file that contains complex part of eigenvalues of Phi
+ *      --bound tight_twogrid_upper_bound                       bound to evaluate, see constants.hpp
+ *      --bound-on-level 1                                      bound is evaluated on this level (options: 0, 1)
+ *      --relaxation-scheme F_relaxation                        relaxation scheme, see constants.hpp
  */
-void parse_commandline_options(appStruct &app, int argc, char** argv){
+int parse_commandline_options(appStruct &app, int argc, char** argv){
     // need to set number of levels before reading temporal coarsening factors
     bool numberOfLevelsSet = false;
     // parse commandline arguments
     for(int argIdx = 1; argIdx < argc; argIdx++){
-        cout << argv[argIdx] << endl;
-        if(string(argv[argIdx]) == "--number-of-timesteps"){
+        if(string(argv[argIdx]) == "--help"){
+            if(app.world_rank == 0){
+                cout << "Commandline options:" << endl << endl;
+                cout << "    --help                                                  prints all commandline options" << endl;
+                cout << "    --number-of-timesteps 1025                              number of timesteps on fine grid (must contain time point corresponding to initial condition)" << endl;
+                cout << "    --number-of-time-grids 2                                number of levels in time grid hierarchy" << endl;
+                cout << "    --coarsening-factors 2                                  temporal coarsening factors for level 0-->1, 1-->2, ..." << endl;
+                cout << "                                                            note: must not be used before option --number-of-time-grids" << endl;
+                cout << "    --runge-kutta-method L_stable_SDIRK1                    Runge-Kutta method, if spatial eigenvalues are supplied" << endl;
+                cout << "    --sample-complex-plane -10.0 1.0 -4.0 4.0               sampling of complex plane with ranges [-10.0, 1.0] x [-4.0, 4.0]" << endl;
+                cout << "    --complex-plane-sample-size 12 9                        sampling of real and complex axis using 12 and 9 points" << endl;
+                cout << "    --file-spatial-real-eigenvalues dteta_real.txt          name of file that contains real part of spatial eigenvalues" << endl;
+                cout << "    --file-spatial-complex-eigenvalues dteta_imag.txt       name of file that contains complex part of spatial eigenvalues" << endl;
+                cout << "    --file-phi-real-eigenvalues lambda_real.txt             name of file that contains real part of eigenvalues of Phi" << endl;
+                cout << "    --file-phi-complex-eigenvalues lambda_imag.txt          name of file that contains complex part of eigenvalues of Phi" << endl;
+                cout << "    --bound tight_twogrid_upper_bound                       bound to evaluate, see constants.hpp" << endl;
+                cout << "    --bound-on-level 1                                      bound is evaluated on this level (options: 0, 1)" << endl;
+                cout << "    --relaxation-scheme F_relaxation                        relaxation scheme, see constants.hpp" << endl;
+                cout << endl;
+            }
+            return 1;
+        }else if(string(argv[argIdx]) == "--number-of-timesteps"){
             app.numberOfTimeSteps_l0 = stoi(argv[++argIdx]);
         }else if(string(argv[argIdx]) == "--number-of-time-grids"){
             app.numberOfLevels = stoi(argv[++argIdx]);
@@ -105,7 +141,7 @@ void parse_commandline_options(appStruct &app, int argc, char** argv){
             app.max_dteta_real_l0 = stod(argv[++argIdx]);
             app.min_dteta_imag_l0 = stod(argv[++argIdx]);
             app.max_dteta_imag_l0 = stod(argv[++argIdx]);
-        }else if(string(argv[argIdx]) == "--complex-plane-sample-number"){
+        }else if(string(argv[argIdx]) == "--complex-plane-sample-size"){
             app.sampleComplexPlane = true;
             app.numberOfRealSamples = stoi(argv[++argIdx]);
             app.numberOfImagSamples = stoi(argv[++argIdx]);
@@ -168,6 +204,7 @@ void parse_commandline_options(appStruct &app, int argc, char** argv){
     // set number of time steps based on fine grid and coarsening factors
     app.numberOfTimeSteps(0) = app.numberOfTimeSteps_l0;
     for(int level = 1; level < app.numberOfLevels; level++){ app.numberOfTimeSteps(level) = (app.numberOfTimeSteps(level-1) - 1) / app.coarseningFactors(level-1) + 1; }
+    return 0;
 }
 
 /**
@@ -272,4 +309,9 @@ void setget_eigenvalues(appStruct &app){
             }
         }
     }
+    // if(app.sampleComplexPlane || app.fileComplexEigenvalues){
+    //     (*app.estimate).set_size((*app.lambdac[0]).n_cols);
+    // }else{
+    //     (*app.estimate).set_size((*app.lambdar[0]).n_cols);
+    // }
 }
