@@ -4,11 +4,20 @@
 #include <iostream>
 #include "armadillo"
 #include "constants.hpp"
+#include "types.hpp"
+#include "sampling_routines.hpp"
+#include "rk_routines.hpp"
 
-void export_matrix(arma::sp_mat *m, const std::string& filename, arma::file_type type = arma::raw_ascii);
+using namespace std;
 
-void export_matrix(arma::sp_cx_mat *m, const std::string& filename, arma::file_type type = arma::raw_ascii);
+void export_matrix(arma::sp_mat *m, const string& filename, arma::file_type type = arma::raw_ascii);
 
-void get_default_filename(const int bound, const int relax, std::string *filename);
+void export_matrix(arma::sp_cx_mat *m, const string& filename, arma::file_type type = arma::raw_ascii);
+
+void get_default_filename(const int bound, const int relax, string *filename);
+
+void parse_commandline_options(appStruct &app, int argc, char** argv);
+
+void setget_eigenvalues(appStruct &app);
 
 #endif
