@@ -126,22 +126,22 @@ void get_default_filename(const int bound, const int relax, string *filename){
 /**
  *  Read commandline options (default arguments):
  *
- *      --help                                                  prints all commandline options
- *      --number-of-timesteps 1025                              number of timesteps on fine grid (must contain time point corresponding to initial condition)
- *      --number-of-time-grids 2                                number of levels in time grid hierarchy
- *      --coarsening-factors 2                                  temporal coarsening factors for level 0-->1, 1-->2, ...
- *                                                              note: must not be used before option --number-of-time-grids
- *      --runge-kutta-method L_stable_SDIRK1                    Runge-Kutta method, if spatial eigenvalues are supplied, see constants.hpp
- *      --sample-complex-plane -10.0 1.0 -4.0 4.0               sampling of complex plane with ranges [-10.0, 1.0] x [-4.0, 4.0]
- *      --complex-plane-sample-size 12 9                        sampling of real and complex axis using 12 and 9 points
- *      --file-spatial-real-eigenvalues dteta_real.txt          name of file that contains real part of spatial eigenvalues
- *      --file-spatial-complex-eigenvalues dteta_imag.txt       name of file that contains complex part of spatial eigenvalues
- *      --file-phi-real-eigenvalues lambda_real.txt             name of file that contains real part of eigenvalues of Phi
- *      --file-phi-complex-eigenvalues lambda_imag.txt          name of file that contains complex part of eigenvalues of Phi
- *      --bound tight_twogrid_upper_bound                       bound to evaluate, see constants.hpp
- *      --bound-on-level 1                                      bound is evaluated on this level (options: 0, 1)
- *      --relaxation-scheme F_relaxation                        relaxation scheme, see constants.hpp
- *      --output-file                                           user-defined output file name (without suffix)
+ *      --help                                                               prints all commandline options
+ *      --number-of-timesteps 1025                                           number of timesteps on fine grid (must contain time point corresponding to initial condition)
+ *      --number-of-time-grids 2                                             number of levels in time grid hierarchy
+ *      --coarsening-factors 2                                               temporal coarsening factors for level 0-->1, 1-->2, ...
+ *                                                                           note: must not be used before option --number-of-time-grids
+ *      --runge-kutta-method L_stable_SDIRK1                                 Runge-Kutta method, if spatial eigenvalues are supplied, see constants.hpp
+ *      --sample-complex-plane -10.0 1.0 -4.0 4.0                            sampling of complex plane with ranges [-10.0, 1.0] x [-4.0, 4.0]
+ *      --complex-plane-sample-size 12 9                                     sampling of real and complex axis using 12 and 9 points
+ *      --file-spatial-real-eigenvalues dteta_real.txt                       name of file that contains real part of spatial eigenvalues
+ *      --file-spatial-complex-eigenvalues dteta_real.txt dteta_imag.txt     name of files that contain real and complex part of spatial eigenvalues, respectively
+ *      --file-phi-real-eigenvalues lambda_real.txt                          name of file that contains real part of eigenvalues of Phi
+ *      --file-phi-complex-eigenvalues lambda_real.txt lambda_imag.txt       name of file that contains complex part of eigenvalues of Phi
+ *      --bound tight_twogrid_upper_bound                                    bound to evaluate, see constants.hpp
+ *      --bound-on-level 1                                                   bound is evaluated on this level (options: 0, 1)
+ *      --relaxation-scheme F_relaxation                                     relaxation scheme, see constants.hpp
+ *      --output-file                                                        user-defined output file name (without suffix)
  */
 int parse_commandline_options(appStruct &app, int argc, char** argv){
     // need to set number of levels before reading temporal coarsening factors
@@ -151,22 +151,22 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
         if(string(argv[argIdx]) == "--help"){
             if(app.world_rank == 0){
                 cout << "Commandline options:" << endl << endl;
-                cout << "    --help                                                  prints all commandline options" << endl;
-                cout << "    --number-of-timesteps 1025                              number of timesteps on fine grid (must contain time point corresponding to initial condition)" << endl;
-                cout << "    --number-of-time-grids 2                                number of levels in time grid hierarchy" << endl;
-                cout << "    --coarsening-factors 2                                  temporal coarsening factors for level 0-->1, 1-->2, ..." << endl;
-                cout << "                                                            note: must not be used before option --number-of-time-grids" << endl;
-                cout << "    --runge-kutta-method L_stable_SDIRK1                    Runge-Kutta method, if spatial eigenvalues are supplied, see constants.hpp" << endl;
-                cout << "    --sample-complex-plane -10.0 1.0 -4.0 4.0               sampling of complex plane with ranges [-10.0, 1.0] x [-4.0, 4.0]" << endl;
-                cout << "    --complex-plane-sample-size 12 9                        sampling of real and complex axis using 12 and 9 points" << endl;
-                cout << "    --file-spatial-real-eigenvalues dteta_real.txt          name of file that contains real part of spatial eigenvalues" << endl;
-                cout << "    --file-spatial-complex-eigenvalues dteta_imag.txt       name of file that contains complex part of spatial eigenvalues" << endl;
-                cout << "    --file-phi-real-eigenvalues lambda_real.txt             name of file that contains real part of eigenvalues of Phi" << endl;
-                cout << "    --file-phi-complex-eigenvalues lambda_imag.txt          name of file that contains complex part of eigenvalues of Phi" << endl;
-                cout << "    --bound tight_twogrid_upper_bound                       bound to evaluate, see constants.hpp" << endl;
-                cout << "    --bound-on-level 1                                      bound is evaluated on this level (options: 0, 1)" << endl;
-                cout << "    --relaxation-scheme F_relaxation                        relaxation scheme, see constants.hpp" << endl;
-                cout << "    --output-file                                           user-defined output file name (without suffix)" << endl;
+                cout << "    --help                                                              prints all commandline options" << endl;
+                cout << "    --number-of-timesteps 1025                                          number of timesteps on fine grid (must contain time point corresponding to initial condition)" << endl;
+                cout << "    --number-of-time-grids 2                                            number of levels in time grid hierarchy" << endl;
+                cout << "    --coarsening-factors 2                                              temporal coarsening factors for level 0-->1, 1-->2, ..." << endl;
+                cout << "                                                                        note: must not be used before option --number-of-time-grids" << endl;
+                cout << "    --runge-kutta-method L_stable_SDIRK1                                Runge-Kutta method, if spatial eigenvalues are supplied, see constants.hpp" << endl;
+                cout << "    --sample-complex-plane -10.0 1.0 -4.0 4.0                           sampling of complex plane with ranges [-10.0, 1.0] x [-4.0, 4.0]" << endl;
+                cout << "    --complex-plane-sample-size 12 9                                    sampling of real and complex axis using 12 and 9 points" << endl;
+                cout << "    --file-spatial-real-eigenvalues dteta_real.txt                      name of file that contains real part of spatial eigenvalues" << endl;
+                cout << "    --file-spatial-complex-eigenvalues dteta_real.txt dteta_imag.txt    name of files that contain real and complex part of spatial eigenvalues" << endl;
+                cout << "    --file-phi-real-eigenvalues lambda_real.txt                         name of file that contains real part of eigenvalues of Phi" << endl;
+                cout << "    --file-phi-complex-eigenvalues lambda_real.txt lambda_imag.txt      name of file that contains complex part of eigenvalues of Phi" << endl;
+                cout << "    --bound tight_twogrid_upper_bound                                   bound to evaluate, see constants.hpp" << endl;
+                cout << "    --bound-on-level 1                                                  bound is evaluated on this level (options: 0, 1)" << endl;
+                cout << "    --relaxation-scheme F_relaxation                                    relaxation scheme, see constants.hpp" << endl;
+                cout << "    --output-file                                                       user-defined output file name (without suffix)" << endl;
                 cout << endl;
             }
             return 1;
@@ -207,31 +207,35 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
                 throw;
             }
         }else if(string(argv[argIdx]) == "--sample-complex-plane"){
-            app.sampleComplexPlane = true;
-            app.min_dteta_real_l0 = stod(argv[++argIdx]);
-            app.max_dteta_real_l0 = stod(argv[++argIdx]);
-            app.min_dteta_imag_l0 = stod(argv[++argIdx]);
-            app.max_dteta_imag_l0 = stod(argv[++argIdx]);
+            app.sampleComplexPlane  = true;
+            app.min_dteta_real_l0   = stod(argv[++argIdx]);
+            app.max_dteta_real_l0   = stod(argv[++argIdx]);
+            app.min_dteta_imag_l0   = stod(argv[++argIdx]);
+            app.max_dteta_imag_l0   = stod(argv[++argIdx]);
         }else if(string(argv[argIdx]) == "--complex-plane-sample-size"){
-            app.sampleComplexPlane = true;
+            app.sampleComplexPlane  = true;
             app.numberOfRealSamples = stoi(argv[++argIdx]);
             app.numberOfImagSamples = stoi(argv[++argIdx]);
         }else if(string(argv[argIdx]) == "--file-spatial-real-eigenvalues"){
-            app.fileSpatialEigenvalues = true;
-            app.fileNameSpatialEigenvaluesReal = string(argv[++argIdx]);
+            app.sampleComplexPlane              = false;
+            app.fileSpatialEigenvalues          = true;
+            app.fileNameSpatialEigenvaluesReal  = string(argv[++argIdx]);
         }else if(string(argv[argIdx]) == "--file-spatial-complex-eigenvalues"){
-            app.fileSpatialEigenvalues = true;
-            app.fileComplexEigenvalues = true;
-            app.fileNameSpatialEigenvaluesReal = string(argv[++argIdx]);
-            app.fileNameSpatialEigenvaluesImag = string(argv[++argIdx]);
+            app.sampleComplexPlane              = false;
+            app.fileSpatialEigenvalues          = true;
+            app.fileComplexEigenvalues          = true;
+            app.fileNameSpatialEigenvaluesReal  = string(argv[++argIdx]);
+            app.fileNameSpatialEigenvaluesImag  = string(argv[++argIdx]);
         }else if(string(argv[argIdx]) == "--file-phi-real-eigenvalues"){
-            app.filePhiEigenvalues = true;
-            app.fileNamePhiEigenvaluesReal = string(argv[++argIdx]);
+            app.sampleComplexPlane          = false;
+            app.filePhiEigenvalues          = true;
+            app.fileNamePhiEigenvaluesReal  = string(argv[++argIdx]);
         }else if(string(argv[argIdx]) == "--file-phi-complex-eigenvalues"){
-            app.filePhiEigenvalues = true;
-            app.fileComplexEigenvalues = true;
-            app.fileNamePhiEigenvaluesReal = string(argv[++argIdx]);
-            app.fileNamePhiEigenvaluesImag = string(argv[++argIdx]);
+            app.sampleComplexPlane          = false;
+            app.filePhiEigenvalues          = true;
+            app.fileComplexEigenvalues      = true;
+            app.fileNamePhiEigenvaluesReal  = string(argv[++argIdx]);
+            app.fileNamePhiEigenvaluesImag  = string(argv[++argIdx]);
         }else if(string(argv[argIdx]) == "--bound"){
             argIdx++;
             if(string(argv[argIdx]) == "upper_bound"){
@@ -305,6 +309,7 @@ void setget_eigenvalues(appStruct &app){
                                  app.min_dteta_real_l0*multiplyBy, app.max_dteta_real_l0*multiplyBy, app.min_dteta_imag_l0*multiplyBy, app.max_dteta_imag_l0*multiplyBy,
                                  app.numberOfRealSamples, app.numberOfImagSamples,
                                  app.dtetac[level], app.lambdac[level]);
+            // z = new arma::Col<arma::cx_double>(numberOfRealSamples*numberOfImagSamples);
         }
         arma::mat(join_rows(real(*app.dtetac[0]), imag(*app.dtetac[0]))).save("dteta_l0.txt", arma::raw_ascii);
     // import spatial eigenvalues
@@ -313,8 +318,9 @@ void setget_eigenvalues(appStruct &app){
             // read real and complex part of spatial eigenvalues
             arma::mat realEigs;
             arma::mat imagEigs;
-            realEigs.load(app.fileNameSpatialEigenvaluesReal);
-            imagEigs.load(app.fileNameSpatialEigenvaluesImag);
+            realEigs.load(app.fileNameSpatialEigenvaluesReal, arma::raw_ascii);
+            imagEigs.load(app.fileNameSpatialEigenvaluesImag, arma::raw_ascii);
+            int numberOfSamples = realEigs.n_rows;
             // check whether we have at least as many columns as number of levels
             if(realEigs.n_cols < app.numberOfLevels){
                 cout << ">>>ERROR: Supplied eigenvalues are invalid for " << app.numberOfLevels << " levels." << endl;
@@ -326,14 +332,17 @@ void setget_eigenvalues(appStruct &app){
             }
             // store spatial eigenvalues and compute eigenvalues of Phi for given method
             for(int level = 0; level < app.numberOfLevels; level++){
-                arma::Col<arma::cx_double> dtetac(realEigs.col(level), imagEigs.col(level));
-                (*app.dtetac)[level] = dtetac;
+                arma::Col<arma::cx_double> dteta(realEigs.col(level), imagEigs.col(level));
+                app.dtetac[level]       = new arma::Col<arma::cx_double>(numberOfSamples);
+                app.lambdac[level]      = new arma::Col<arma::cx_double>(numberOfSamples);
+                *(app.dtetac[level])    = dteta;
                 stability_function(app.method, app.dtetac[level], app.lambdac[level]);
             }
         }else{
             // read real part of spatial eigenvalues
             arma::mat realEigs;
-            realEigs.load(app.fileNameSpatialEigenvaluesReal);
+            realEigs.load(app.fileNameSpatialEigenvaluesReal, arma::raw_ascii);
+            int numberOfSamples = realEigs.n_rows;
             // check whether we have at least as many columns as number of levels
             if(realEigs.n_cols < app.numberOfLevels){
                 cout << ">>>ERROR: Supplied eigenvalues are invalid for " << app.numberOfLevels << " levels." << endl;
@@ -342,7 +351,9 @@ void setget_eigenvalues(appStruct &app){
             // read/store spatial eigenvalues and compute eigenvalues of Phi for given method
             for(int level = 0; level < app.numberOfLevels; level++){
                 arma::Col<double> dteta(realEigs.col(level));
-                (*app.dtetar)[level] = dteta;
+                app.dtetar[level]       = new arma::Col<double>(numberOfSamples);
+                app.lambdar[level]      = new arma::Col<double>(numberOfSamples);
+                *(app.dtetar[level])    = dteta;
                 stability_function(app.method, app.dtetar[level], app.lambdar[level]);
             }
         }
@@ -352,8 +363,9 @@ void setget_eigenvalues(appStruct &app){
             // read real and complex part of spatial eigenvalues
             arma::mat realEigs;
             arma::mat imagEigs;
-            realEigs.load(app.fileNamePhiEigenvaluesReal);
-            imagEigs.load(app.fileNamePhiEigenvaluesImag);
+            realEigs.load(app.fileNamePhiEigenvaluesReal, arma::raw_ascii);
+            imagEigs.load(app.fileNamePhiEigenvaluesImag, arma::raw_ascii);
+            int numberOfSamples = realEigs.n_rows;
             // check whether we have at least as many columns as number of levels
             if(realEigs.n_cols < app.numberOfLevels){
                 cout << ">>>ERROR: Supplied eigenvalues are invalid for " << app.numberOfLevels << " levels." << endl;
@@ -366,12 +378,14 @@ void setget_eigenvalues(appStruct &app){
             // store spatial eigenvalues and compute eigenvalues of Phi for given method
             for(int level = 0; level < app.numberOfLevels; level++){
                 arma::Col<arma::cx_double> lambda(realEigs.col(level), imagEigs.col(level));
-                (*app.lambdac)[level] = lambda;
+                app.lambdac[level]      = new arma::Col<arma::cx_double>(numberOfSamples);
+                *(app.lambdac[level])   = lambda;
             }
         }else{
             // read real part of spatial eigenvalues
             arma::mat realEigs;
-            realEigs.load(app.fileNamePhiEigenvaluesReal);
+            realEigs.load(app.fileNamePhiEigenvaluesReal, arma::raw_ascii);
+            int numberOfSamples = realEigs.n_rows;
             // check whether we have at least as many columns as number of levels
             if(realEigs.n_cols < app.numberOfLevels){
                 cout << ">>>ERROR: Supplied eigenvalues are invalid for " << app.numberOfLevels << " levels." << endl;
@@ -380,13 +394,9 @@ void setget_eigenvalues(appStruct &app){
             // store spatial eigenvalues and compute eigenvalues of Phi for given method
             for(int level = 0; level < app.numberOfLevels; level++){
                 arma::Col<double> lambda(realEigs.col(level));
-                (*app.lambdar)[level] = lambda;
+                app.lambdar[level]      = new arma::Col<double>(numberOfSamples);
+                *(app.lambdar[level])   = lambda;
             }
         }
     }
-    // if(app.sampleComplexPlane || app.fileComplexEigenvalues){
-    //     (*app.estimate).set_size((*app.lambdac[0]).n_cols);
-    // }else{
-    //     (*app.estimate).set_size((*app.lambdar[0]).n_cols);
-    // }
 }
