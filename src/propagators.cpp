@@ -349,7 +349,7 @@ int get_R_FCF(arma::sp_mat *R_FCF, arma::Col<double> lambda, arma::Col<int> Nl, 
     }
     // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
     if(theoryLevel == 0){
-        (*R_FCF) = A0 * (*E_FCF0) * arma::sp_mat(arma::cx_mat(A0).i());
+        (*R_FCF) = A0 * (*E_FCF0) * arma::sp_mat(arma::mat(A0).i());
     }else{
         arma::sp_mat RI0 = get_RIl(lambda(0), Nl(0), ml(0));
         arma::sp_mat P0 = get_Pl(lambda(0), Nl(0), ml(0));
