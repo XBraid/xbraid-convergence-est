@@ -284,19 +284,25 @@ int get_E_FCF(arma::sp_cx_mat *E_FCF, arma::Col<arma::cx_double> lambda, arma::C
  *  get residual propagator for V-cycle with F-relaxation and >= 2 grid levels (real eigenvalues)
  */
 int get_R_F(arma::sp_mat *R_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
-    if(theoryLevel != 0){
-        std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
+    if((theoryLevel != 0) && (theoryLevel != 1)){
+        std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
         throw;
     }
     arma::sp_mat A0 = get_Al(lambda(0), Nl(0));
     int errCode = 0;
-    arma::sp_mat *E_F = new arma::sp_mat();
-    errCode = get_E_F(E_F, lambda, Nl, ml, theoryLevel);
+    arma::sp_mat *E_F0 = new arma::sp_mat();
+    errCode = get_E_F(E_F0, lambda, Nl, ml, 0);
     if(errCode == -1){
         return errCode;
     }
     // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
-    (*R_F) = A0 * (*E_F) * arma::sp_mat(arma::mat(A0).i());
+    if(theoryLevel == 0){
+        (*R_F) = A0 * (*E_F0) * arma::sp_mat(arma::mat(A0).i());
+    }else{
+        arma::sp_mat RI0 = get_RIl(lambda(0), Nl(0), ml(0));
+        arma::sp_mat P0 = get_Pl(lambda(0), Nl(0), ml(0));
+        (*R_F) = RI0 * A0 * (*E_F0) * arma::sp_mat(arma::mat(A0).i()) * RI0.st();
+    }
     return errCode;
 }
 
@@ -304,19 +310,25 @@ int get_R_F(arma::sp_mat *R_F, arma::Col<double> lambda, arma::Col<int> Nl, arma
  *  get residual propagator for V-cycle with F-relaxation and >= 2 grid levels (complex eigenvalues)
  */
 int get_R_F(arma::sp_cx_mat *R_F, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
-    if(theoryLevel != 0){
-        std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
+    if((theoryLevel != 0) && (theoryLevel != 1)){
+        std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
         throw;
     }
     arma::sp_cx_mat A0 = get_Al(lambda(0), Nl(0));
     int errCode = 0;
-    arma::sp_cx_mat *E_F = new arma::sp_cx_mat();
-    errCode = get_E_F(E_F, lambda, Nl, ml, theoryLevel);
+    arma::sp_cx_mat *E_F0 = new arma::sp_cx_mat();
+    errCode = get_E_F(E_F0, lambda, Nl, ml, 0);
     if(errCode == -1){
         return errCode;
     }
     // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
-    (*R_F) = A0 * (*E_F) * arma::sp_cx_mat(arma::cx_mat(A0).i());
+    if(theoryLevel == 0){
+        (*R_F) = A0 * (*E_F0) * arma::sp_cx_mat(arma::cx_mat(A0).i());
+    }else{
+        arma::sp_cx_mat RI0 = get_RIl(lambda(0), Nl(0), ml(0));
+        arma::sp_cx_mat P0 = get_Pl(lambda(0), Nl(0), ml(0));
+        (*R_F) = RI0 * A0 * (*E_F0) * arma::sp_cx_mat(arma::cx_mat(A0).i()) * RI0.st();
+    }
     return errCode;
 }
 
@@ -324,19 +336,25 @@ int get_R_F(arma::sp_cx_mat *R_F, arma::Col<arma::cx_double> lambda, arma::Col<i
  *  get residual propagator for V-cycle with FCF-relaxation and >= 2 grid levels (real eigenvalues)
  */
 int get_R_FCF(arma::sp_mat *R_FCF, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
-    if(theoryLevel != 0){
-        std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
+    if((theoryLevel != 0) && (theoryLevel != 1)){
+        std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
         throw;
     }
     arma::sp_mat A0 = get_Al(lambda(0), Nl(0));
     int errCode = 0;
-    arma::sp_mat *E_FCF = new arma::sp_mat();
-    errCode = get_E_FCF(E_FCF, lambda, Nl, ml, theoryLevel);
+    arma::sp_mat *E_FCF0 = new arma::sp_mat();
+    errCode = get_E_FCF(E_FCF0, lambda, Nl, ml, 0);
     if(errCode == -1){
         return errCode;
     }
     // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
-    (*R_FCF) = A0 * (*E_FCF) * arma::sp_mat(arma::mat(A0).i());
+    if(theoryLevel == 0){
+        (*R_FCF) = A0 * (*E_FCF0) * arma::sp_mat(arma::cx_mat(A0).i());
+    }else{
+        arma::sp_mat RI0 = get_RIl(lambda(0), Nl(0), ml(0));
+        arma::sp_mat P0 = get_Pl(lambda(0), Nl(0), ml(0));
+        (*R_FCF) = RI0 * A0 * (*E_FCF0) * arma::sp_mat(arma::mat(A0).i()) * RI0.st();
+    }
     return errCode;
 }
 
@@ -344,18 +362,24 @@ int get_R_FCF(arma::sp_mat *R_FCF, arma::Col<double> lambda, arma::Col<int> Nl, 
  *  get residual propagator for V-cycle with FCF-relaxation and >= 2 grid levels (complex eigenvalues)
  */
 int get_R_FCF(arma::sp_cx_mat *R_FCF, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
-    if(theoryLevel != 0){
-        std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
+    if((theoryLevel != 0) && (theoryLevel != 1)){
+        std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
         throw;
     }
     arma::sp_cx_mat A0 = get_Al(lambda(0), Nl(0));
     int errCode = 0;
-    arma::sp_cx_mat *E_FCF = new arma::sp_cx_mat();
-    errCode = get_E_FCF(E_FCF, lambda, Nl, ml, theoryLevel);
+    arma::sp_cx_mat *E_FCF0 = new arma::sp_cx_mat();
+    errCode = get_E_FCF(E_FCF0, lambda, Nl, ml, 0);
     if(errCode == -1){
         return errCode;
     }
     // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
-    (*R_FCF) = A0 * (*E_FCF) * arma::sp_cx_mat(arma::cx_mat(A0).i());
+    if(theoryLevel == 0){
+        (*R_FCF) = A0 * (*E_FCF0) * arma::sp_cx_mat(arma::cx_mat(A0).i());
+    }else{
+        arma::sp_cx_mat RI0 = get_RIl(lambda(0), Nl(0), ml(0));
+        arma::sp_cx_mat P0 = get_Pl(lambda(0), Nl(0), ml(0));
+        (*R_FCF) = RI0 * A0 * (*E_FCF0) * arma::sp_cx_mat(arma::cx_mat(A0).i()) * RI0.st();
+    }
     return errCode;
 }
