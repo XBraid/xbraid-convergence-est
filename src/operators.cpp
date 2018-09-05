@@ -1,5 +1,8 @@
 #include "operators.hpp"
 
+/**
+ *  get time stepping operator (real version)
+ */
 arma::sp_mat get_Al(double lambda, int Nl){
     // set size
     arma::sp_mat Al(Nl, Nl);
@@ -14,6 +17,9 @@ arma::sp_mat get_Al(double lambda, int Nl){
     return Al;
 }
 
+/**
+ *  get time stepping operator (complex version)
+ */
 arma::sp_cx_mat get_Al(arma::cx_double lambda, int Nl){
     // set size
     arma::sp_cx_mat Al(Nl, Nl);
@@ -28,6 +34,9 @@ arma::sp_cx_mat get_Al(arma::cx_double lambda, int Nl){
     return Al;
 }
 
+/**
+ *  get restriction operator (real version)
+ */
 arma::sp_mat get_Rl(double lambda, int Nl, int ml){
     // compute coarse-grid size
     int Nl1 = (Nl - 1) / ml + 1;
@@ -48,6 +57,9 @@ arma::sp_mat get_Rl(double lambda, int Nl, int ml){
     return Rl;
 }
 
+/**
+ *  get restriction operator (complex version)
+ */
 arma::sp_cx_mat get_Rl(arma::cx_double lambda, int Nl, int ml){
     // compute coarse-grid size
     int Nl1 = (Nl - 1) / ml + 1;
@@ -68,6 +80,9 @@ arma::sp_cx_mat get_Rl(arma::cx_double lambda, int Nl, int ml){
     return Rl;
 }
 
+/**
+ *  get injection operator (real version)
+ */
 arma::sp_mat get_RIl(double lambda, int Nl, int ml){
     // compute coarse-grid size
     int Nl1 = (Nl - 1) / ml + 1;
@@ -82,6 +97,9 @@ arma::sp_mat get_RIl(double lambda, int Nl, int ml){
     return RIl;
 }
 
+/**
+ *  get injection operator (complex version)
+ */
 arma::sp_cx_mat get_RIl(arma::cx_double lambda, int Nl, int ml){
     // compute coarse-grid size
     int Nl1 = (Nl - 1) / ml + 1;
@@ -128,6 +146,9 @@ arma::sp_cx_mat get_Sl(arma::cx_double lambda, int Nl, int ml){
     return Sl;
 }
 
+/**
+ *  get interpolation operator (real version)
+ */
 arma::sp_mat get_Pl(double lambda, int Nl, int ml){
     // compute coarse-grid size
     int Nl1 = (Nl - 1) / ml + 1;
@@ -148,6 +169,9 @@ arma::sp_mat get_Pl(double lambda, int Nl, int ml){
     return Pl;
 }
 
+/**
+ *  get interpolation operator (complex version)
+ */
 arma::sp_cx_mat get_Pl(arma::cx_double lambda, int Nl, int ml){
     // compute coarse-grid size
     int Nl1 = (Nl - 1) / ml + 1;
@@ -168,6 +192,9 @@ arma::sp_cx_mat get_Pl(arma::cx_double lambda, int Nl, int ml){
     return Pl;
 }
 
+/**
+ *  get all operators needed for constructing error and residual propagator (real version)
+ */
 void get_operators(arma::sp_mat **ptrA, arma::sp_mat **ptrR, arma::sp_mat **ptrRI, arma::sp_mat **ptrS, arma::sp_mat **ptrP,
                            arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml){
     int numLevels   = lambda.n_elem;
@@ -187,6 +214,9 @@ void get_operators(arma::sp_mat **ptrA, arma::sp_mat **ptrR, arma::sp_mat **ptrR
     (*ptrA[numLevels-1])    = get_Al(lambda(numLevels-1), Nl(numLevels-1));
 }
 
+/**
+ *  get all operators needed for constructing error and residual propagator (complex version)
+ */
 void get_operators(arma::sp_cx_mat **ptrA, arma::sp_cx_mat **ptrR, arma::sp_cx_mat **ptrRI, arma::sp_cx_mat **ptrS, arma::sp_cx_mat **ptrP,
                    arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml){
     int numLevels   = lambda.n_elem;

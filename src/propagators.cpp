@@ -1,6 +1,8 @@
 #include "propagators.hpp"
 
-// get error propagator for V-cycle with F-relaxation and >= 2 grid levels (real eigenvalues)
+/**
+ *  get error propagator for V-cycle with FCF-F and >= 2 grid levels (real eigenvalues)
+ */
 int get_E_F(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     // check for valid arguments
     if((theoryLevel != 0) && (theoryLevel != 1)){
@@ -53,7 +55,9 @@ int get_E_F(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arma
     return 0;
 }
 
-// get error propagator for V-cycle with F-relaxation and >= 2 grid levels (complex eigenvalues)
+/**
+ *  get error propagator for V-cycle with F-relaxation and >= 2 grid levels (complex eigenvalues)
+ */
 int get_E_F(arma::sp_cx_mat *E_F, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     // check for valid arguments
     if((theoryLevel != 0) && (theoryLevel != 1)){
@@ -106,7 +110,9 @@ int get_E_F(arma::sp_cx_mat *E_F, arma::Col<arma::cx_double> lambda, arma::Col<i
     return 0;
 }
 
-// get error propagator for V-cycle with FCF-relaxation and >= 2 grid levels (real eigenvalues)
+/**
+ *  get error propagator for V-cycle with FCF-relaxation and >= 2 grid levels (real eigenvalues)
+ */
 int get_E_FCF(arma::sp_mat *E_FCF, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     // check for valid arguments
     if((theoryLevel != 0) && (theoryLevel != 1)){
@@ -189,7 +195,9 @@ int get_E_FCF(arma::sp_mat *E_FCF, arma::Col<double> lambda, arma::Col<int> Nl, 
     return 0;
 }
 
-// get error propagator for V-cycle with FCF-relaxation and >= 2 grid levels (complex eigenvalues)
+/**
+ *  get error propagator for V-cycle with FCF-relaxation and >= 2 grid levels (complex eigenvalues)
+ */
 int get_E_FCF(arma::sp_cx_mat *E_FCF, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     // check for valid arguments
     if((theoryLevel != 0) && (theoryLevel != 1)){
@@ -272,7 +280,9 @@ int get_E_FCF(arma::sp_cx_mat *E_FCF, arma::Col<arma::cx_double> lambda, arma::C
     return 0;
 }
 
-// get residual propagator for V-cycle with F-relaxation and >= 2 grid levels (real eigenvalues)
+/**
+ *  get residual propagator for V-cycle with F-relaxation and >= 2 grid levels (real eigenvalues)
+ */
 int get_R_F(arma::sp_mat *R_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     if(theoryLevel != 0){
         std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
@@ -290,7 +300,9 @@ int get_R_F(arma::sp_mat *R_F, arma::Col<double> lambda, arma::Col<int> Nl, arma
     return errCode;
 }
 
-// get residual propagator for V-cycle with F-relaxation and >= 2 grid levels (complex eigenvalues)
+/**
+ *  get residual propagator for V-cycle with F-relaxation and >= 2 grid levels (complex eigenvalues)
+ */
 int get_R_F(arma::sp_cx_mat *R_F, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     if(theoryLevel != 0){
         std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
@@ -308,7 +320,9 @@ int get_R_F(arma::sp_cx_mat *R_F, arma::Col<arma::cx_double> lambda, arma::Col<i
     return errCode;
 }
 
-// get residual propagator for V-cycle with FCF-relaxation and >= 2 grid levels (real eigenvalues)
+/**
+ *  get residual propagator for V-cycle with FCF-relaxation and >= 2 grid levels (real eigenvalues)
+ */
 int get_R_FCF(arma::sp_mat *R_FCF, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     if(theoryLevel != 0){
         std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
@@ -326,7 +340,9 @@ int get_R_FCF(arma::sp_mat *R_FCF, arma::Col<double> lambda, arma::Col<int> Nl, 
     return errCode;
 }
 
-// get residual propagator for V-cycle with FCF-relaxation and >= 2 grid levels (complex eigenvalues)
+/**
+ *  get residual propagator for V-cycle with FCF-relaxation and >= 2 grid levels (complex eigenvalues)
+ */
 int get_R_FCF(arma::sp_cx_mat *R_FCF, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     if(theoryLevel != 0){
         std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
