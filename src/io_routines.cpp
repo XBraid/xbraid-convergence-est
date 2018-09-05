@@ -42,17 +42,20 @@ void export_vector_minmax(int bound, arma::Col<double> *v, const string filename
     string suffix;
     arma::mat tmp(1, 1);
     get_filename_suffix(type, suffix);
-    if((bound == mgritestimate::upper_bound)
-        || (bound == mgritestimate::sqrt_upper_bound)
-        || (bound == mgritestimate::sqrt_expression_upper_bound)
-        || (bound == mgritestimate::tight_twogrid_upper_bound)){
+    if((bound == mgritestimate::error_l2_upper_bound)
+        || (bound == mgritestimate::error_l2_sqrt_upper_bound)
+        || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
+        || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
+        || (bound == mgritestimate::residual_l2_upper_bound)
+        || (bound == mgritestimate::residual_l2_sqrt_upper_bound)){
         prefix = "max_";
         tmp.fill(arma::max(*v));
         tmp.save(prefix+filename+suffix, type);
         cout << "Convergence <= " << std::setprecision(17) << tmp[0, 0] << endl << endl;
-    }else if((bound == mgritestimate::lower_bound)
-        || (bound == mgritestimate::sqrt_lower_bound)
-        || (bound == mgritestimate::tight_twogrid_lower_bound)){
+    }else if((bound == mgritestimate::error_l2_lower_bound)
+        || (bound == mgritestimate::error_l2_sqrt_lower_bound)
+        || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
+        || (bound == mgritestimate::residual_l2_lower_bound)){
         arma::uvec tmpIdx = find((*v) > 0.0);
         tmp.fill(arma::min((*v).elem(tmpIdx)));
         prefix = "min_";
@@ -85,32 +88,44 @@ void get_filename_suffix(arma::file_type type, string &suffix){
 void get_default_filename(const int bound, const int relax, string *filename){
     switch(relax){
         case mgritestimate::F_relaxation:{
-            if(bound == mgritestimate::upper_bound){
-                *filename = "upper_bound_E_F";
-            }else if(bound == mgritestimate::sqrt_upper_bound){
-                *filename = "sqrt_upper_bound_E_F";
-            }else if(bound == mgritestimate::sqrt_expression_upper_bound){
-                *filename = "sqrt_expression_upper_bound_E_F";
-            }else if(bound == mgritestimate::tight_twogrid_upper_bound){
-                *filename = "tight_twogrid_upper_bound_E_F";
-            }else if(bound == mgritestimate::lower_bound){
-                *filename = "lower_bound_E_F";
+            if(bound == mgritestimate::error_l2_upper_bound){
+                *filename = "error_l2_upper_bound_E_F";
+            }else if(bound == mgritestimate::error_l2_sqrt_upper_bound){
+                *filename = "error_l2_sqrt_upper_bound_E_F";
+            }else if(bound == mgritestimate::error_l2_sqrt_expression_upper_bound){
+                *filename = "error_l2_sqrt_expression_upper_bound_E_F";
+            }else if(bound == mgritestimate::error_l2_tight_twogrid_upper_bound){
+                *filename = "error_l2_tight_twogrid_upper_bound_E_F";
+            }else if(bound == mgritestimate::error_l2_lower_bound){
+                *filename = "error_l2_lower_bound_E_F";
+            }else if(bound == mgritestimate::residual_l2_upper_bound){
+                *filename = "residual_l2_upper_bound_E_F";
+            }else if(bound == mgritestimate::residual_l2_sqrt_upper_bound){
+                *filename = "residual_l2_sqrt_upper_bound_E_F";
+            }else if(bound == mgritestimate::residual_l2_lower_bound){
+                *filename = "residual_l2_lower_bound_E_F";
             }else{
                 *filename = "bound_E_F";
             }
             break;
         }
         case mgritestimate::FCF_relaxation:{
-            if(bound == mgritestimate::upper_bound){
-                *filename = "upper_bound_E_FCF";
-            }else if(bound == mgritestimate::sqrt_upper_bound){
-                *filename = "sqrt_upper_bound_E_FCF";
-            }else if(bound == mgritestimate::sqrt_expression_upper_bound){
-                *filename = "sqrt_expression_upper_bound_E_FCF";
-            }else if(bound == mgritestimate::tight_twogrid_upper_bound){
-                *filename = "tight_twogrid_upper_bound_E_FCF";
-            }else if(bound == mgritestimate::lower_bound){
-                *filename = "lower_bound_E_FCF";
+            if(bound == mgritestimate::error_l2_upper_bound){
+                *filename = "error_l2_upper_bound_E_FCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_upper_bound){
+                *filename = "error_l2_sqrt_upper_bound_E_FCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_expression_upper_bound){
+                *filename = "error_l2_sqrt_expression_upper_bound_E_FCF";
+            }else if(bound == mgritestimate::error_l2_tight_twogrid_upper_bound){
+                *filename = "error_l2_tight_twogrid_upper_bound_E_FCF";
+            }else if(bound == mgritestimate::error_l2_lower_bound){
+                *filename = "error_l2_lower_bound_E_FCF";
+            }else if(bound == mgritestimate::residual_l2_upper_bound){
+                *filename = "residual_l2_upper_bound_E_FCF";
+            }else if(bound == mgritestimate::residual_l2_sqrt_upper_bound){
+                *filename = "residual_l2_sqrt_upper_bound_E_FCF";
+            }else if(bound == mgritestimate::residual_l2_lower_bound){
+                *filename = "residual_l2_lower_bound_E_FCF";
             }else{
                 *filename = "bound_E_FCF";
             }
@@ -238,20 +253,26 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
             app.fileNamePhiEigenvaluesImag  = string(argv[++argIdx]);
         }else if(string(argv[argIdx]) == "--bound"){
             argIdx++;
-            if(string(argv[argIdx]) == "upper_bound"){
-                app.bound = mgritestimate::upper_bound;
-            }else if(string(argv[argIdx]) == "sqrt_upper_bound"){
-                app.bound = mgritestimate::sqrt_upper_bound;
-            }else if(string(argv[argIdx]) == "sqrt_expression_upper_bound"){
-                app.bound = mgritestimate::sqrt_expression_upper_bound;
-            }else if(string(argv[argIdx]) == "tight_twogrid_upper_bound"){
-                app.bound = mgritestimate::tight_twogrid_upper_bound;
-            }else if(string(argv[argIdx]) == "lower_bound"){
-                app.bound = mgritestimate::lower_bound;
-            }else if(string(argv[argIdx]) == "sqrt_lower_bound"){
-                app.bound = mgritestimate::sqrt_lower_bound;
-            }else if(string(argv[argIdx]) == "tight_twogrid_lower_bound"){
-                app.bound = mgritestimate::tight_twogrid_lower_bound;
+            if(string(argv[argIdx]) == "error_l2_upper_bound"){
+                app.bound = mgritestimate::error_l2_upper_bound;
+            }else if(string(argv[argIdx]) == "error_l2_sqrt_upper_bound"){
+                app.bound = mgritestimate::error_l2_sqrt_upper_bound;
+            }else if(string(argv[argIdx]) == "error_l2_sqrt_expression_upper_bound"){
+                app.bound = mgritestimate::error_l2_sqrt_expression_upper_bound;
+            }else if(string(argv[argIdx]) == "error_l2_tight_twogrid_upper_bound"){
+                app.bound = mgritestimate::error_l2_tight_twogrid_upper_bound;
+            }else if(string(argv[argIdx]) == "error_l2_lower_bound"){
+                app.bound = mgritestimate::error_l2_lower_bound;
+            }else if(string(argv[argIdx]) == "error_l2_sqrt_lower_bound"){
+                app.bound = mgritestimate::error_l2_sqrt_lower_bound;
+            }else if(string(argv[argIdx]) == "error_l2_tight_twogrid_lower_bound"){
+                app.bound = mgritestimate::error_l2_tight_twogrid_lower_bound;
+            }else if(string(argv[argIdx]) == "residual_l2_upper_bound"){
+                app.bound = mgritestimate::residual_l2_upper_bound;
+            }else if(string(argv[argIdx]) == "residual_l2_sqrt_upper_bound"){
+                app.bound = mgritestimate::residual_l2_sqrt_upper_bound;
+            }else if(string(argv[argIdx]) == "residual_l2_lower_bound"){
+                app.bound = mgritestimate::residual_l2_lower_bound;
             }else{
                 cout << "ERROR: Unknown bound " << string(argv[argIdx]) << "." << endl;
                 throw;

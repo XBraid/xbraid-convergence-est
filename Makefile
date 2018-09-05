@@ -6,7 +6,7 @@ else
 endif 
 
 default:
-	mpic++ src/types.cpp src/error_bound_routines.cpp src/sampling_routines.cpp src/rk_routines.cpp src/io_routines.cpp src/propagators.cpp src/operators.cpp main.cpp -o main $(CXXFLAGS) -std=c++11 -Isrc/ -larmadillo
+	mpic++ src/types.cpp src/bound_routines.cpp src/sampling_routines.cpp src/rk_routines.cpp src/io_routines.cpp src/propagators.cpp src/operators.cpp main.cpp -o main $(CXXFLAGS) -std=c++11 -Isrc/ -larmadillo
 
 doxygen:
 	doxygen doc/doxygen/Doxyfile

@@ -3,7 +3,7 @@
 #include <ctime>
 #include "armadillo"
 #include "io_routines.hpp"
-#include "error_bound_routines.hpp"
+#include "bound_routines.hpp"
 #include "types.hpp"
 
 using namespace arma;
@@ -29,12 +29,12 @@ int main(int argc, char** argv){
     setget_eigenvalues(app);
 
     begin = clock();
-    // evaluate error propagator for complex eigenvalue case
+    // evaluate bound for residual or error propagator for complex eigenvalue case
     if(app.sampleComplexPlane || app.fileComplexEigenvalues){
-        get_error_propagator_bound(app.bound, app.theoryLevel, app.relax, app.numberOfTimeSteps, app.coarseningFactors, app.lambdac, app.estimate);
-    // evaluate error propagator for real eigenvalue case
+        get_propagator_bound(app.bound, app.theoryLevel, app.relax, app.numberOfTimeSteps, app.coarseningFactors, app.lambdac, app.estimate);
+    // evaluate bound for residual or error propagator for real eigenvalue case
     }else{
-        get_error_propagator_bound(app.bound, app.theoryLevel, app.relax, app.numberOfTimeSteps, app.coarseningFactors, app.lambdar, app.estimate);
+        get_propagator_bound(app.bound, app.theoryLevel, app.relax, app.numberOfTimeSteps, app.coarseningFactors, app.lambdar, app.estimate);
     }
     end = clock();
     cout << "Rank " << app.world_rank << " / " << app.world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl << endl;

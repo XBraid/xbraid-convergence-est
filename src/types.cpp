@@ -19,7 +19,7 @@ void initalize_app_struct(appStruct &app){
     app.max_dteta_imag_l0 =   4.0;
     app.numberOfRealSamples = 12;
     app.numberOfImagSamples = 9;
-    app.bound = mgritestimate::tight_twogrid_upper_bound;
+    app.bound = mgritestimate::residual_l2_upper_bound;
     app.theoryLevel = 1;
     app.relax = mgritestimate::F_relaxation;
     app.fileSpatialEigenvalues = false;

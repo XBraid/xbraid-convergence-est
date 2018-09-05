@@ -271,3 +271,63 @@ int get_E_FCF(arma::sp_cx_mat *E_FCF, arma::Col<arma::cx_double> lambda, arma::C
     }
     return 0;
 }
+
+// get residual propagator for V-cycle with F-relaxation and >= 2 grid levels (real eigenvalues)
+int get_R_F(arma::sp_mat *R_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+    if(theoryLevel != 0){
+        std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
+        throw;
+    }
+    arma::sp_mat A0 = get_Al(lambda(0), Nl(0));
+    int errCode = 0;
+    arma::sp_mat *E_F = new arma::sp_mat();
+    errCode = get_E_F(E_F, lambda, Nl, ml, theoryLevel);
+    // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
+    (*R_F) = A0 * (*E_F) * arma::sp_mat(arma::mat(A0).i());
+    return errCode;
+}
+
+// get residual propagator for V-cycle with F-relaxation and >= 2 grid levels (complex eigenvalues)
+int get_R_F(arma::sp_cx_mat *R_F, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+    if(theoryLevel != 0){
+        std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
+        throw;
+    }
+    arma::sp_cx_mat A0 = get_Al(lambda(0), Nl(0));
+    int errCode = 0;
+    arma::sp_cx_mat *E_F = new arma::sp_cx_mat();
+    errCode = get_E_F(E_F, lambda, Nl, ml, theoryLevel);
+    // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
+    (*R_F) = A0 * (*E_F) * arma::sp_cx_mat(arma::cx_mat(A0).i());
+    return errCode;
+}
+
+// get residual propagator for V-cycle with FCF-relaxation and >= 2 grid levels (real eigenvalues)
+int get_R_FCF(arma::sp_mat *R_FCF, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+    if(theoryLevel != 0){
+        std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
+        throw;
+    }
+    arma::sp_mat A0 = get_Al(lambda(0), Nl(0));
+    int errCode = 0;
+    arma::sp_mat *E_FCF = new arma::sp_mat();
+    errCode = get_E_FCF(E_FCF, lambda, Nl, ml, theoryLevel);
+    // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
+    (*R_FCF) = A0 * (*E_FCF) * arma::sp_mat(arma::mat(A0).i());
+    return errCode;
+}
+
+// get residual propagator for V-cycle with FCF-relaxation and >= 2 grid levels (complex eigenvalues)
+int get_R_FCF(arma::sp_cx_mat *R_FCF, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+    if(theoryLevel != 0){
+        std::cout << ">>>ERROR: Residual propagation only implemented for level 0." << std::endl << std::endl;
+        throw;
+    }
+    arma::sp_cx_mat A0 = get_Al(lambda(0), Nl(0));
+    int errCode = 0;
+    arma::sp_cx_mat *E_FCF = new arma::sp_cx_mat();
+    errCode = get_E_FCF(E_FCF, lambda, Nl, ml, theoryLevel);
+    // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
+    (*R_FCF) = A0 * (*E_FCF) * arma::sp_cx_mat(arma::cx_mat(A0).i());
+    return errCode;
+}

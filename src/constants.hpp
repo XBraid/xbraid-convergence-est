@@ -13,6 +13,7 @@ namespace constants{
 
 // constants defining type of estimate/bound
 namespace mgritestimate{
+    //----------------------------------------------------------------------------------------------------------------//
     /**
      *  F-relaxation on all levels
      */
@@ -21,36 +22,51 @@ namespace mgritestimate{
      *  FCF-relaxation on all levels
      */
     const int FCF_relaxation = 1;
+    //----------------------------------------------------------------------------------------------------------------//
     /**
      *  \f$\ell^2\f$-norm of numerically constructed error propagator
      */
-    const int upper_bound = 1;
+    const int error_l2_upper_bound = 1;
     /**
      *  \f$\ell^2\f$-norm of numerically constructed error propagator is bounded by \f$\sqrt{ \| E \|_1 \| E \|_\infty }\f$
      */
-    const int sqrt_upper_bound = 2;
+    const int error_l2_sqrt_upper_bound = 2;
     /**
      *  \f$\ell^2\f$-norm of error propagator is bounded by \f$\sqrt{ \| E \|_1 \| E \|_\infty }\f$.
      *
      *  Note: Expression-like bound, faster than sqrt_upper_bound.
      */
-    const int sqrt_expression_upper_bound = 3;
+    const int error_l2_sqrt_expression_upper_bound = 3;
     /**
      *  Tight expression-like upper bound for \f$\ell^2\f$-norm of two-grid error propagator (asymptotically exact bound)
      */
-    const int tight_twogrid_upper_bound = 4;
+    const int error_l2_tight_twogrid_upper_bound = 4;
     /**
      *  \f$\ell^2\f$-norm of pseudo-inverse of numerically constructed error propagator
      */
-    const int lower_bound = -1;
+    const int error_l2_lower_bound = -1;
     /**
      *  \f$\ell^2\f$-norm of numerically constructed error propagator is bounded using triangle inequality and \f$\sqrt{ \| \cdot \|_1 \| \cdot \|_\infty }\f$
      */
-    const int sqrt_lower_bound = -2;
+    const int error_l2_sqrt_lower_bound = -2;
     /**
      *  Tight expression-like lower bound for \f$\ell^2\f$-norm of two-grid error propagator (asymptotically exact bound)
      */
-    const int tight_twogrid_lower_bound = -4;
+    const int error_l2_tight_twogrid_lower_bound = -4;
+    //----------------------------------------------------------------------------------------------------------------//
+    /**
+     *  \f$\ell^2\f$-norm of numerically constructed residual propagator
+     */
+    const int residual_l2_upper_bound = 101;
+    /**
+     *  \f$\ell^2\f$-norm of numerically constructed residual propagator is bounded by \f$\sqrt{ \| R \|_1 \| R \|_\infty }\f$
+     */
+    const int residual_l2_sqrt_upper_bound = 102;
+    /**
+     *  \f$\ell^2\f$-norm of pseudo-inverse of numerically constructed error propagator
+     */
+    const int residual_l2_lower_bound = -101;
+    //----------------------------------------------------------------------------------------------------------------//
 }
 
 // constants referring to a specific Runge-Kutta method
