@@ -282,6 +282,9 @@ int get_R_F(arma::sp_mat *R_F, arma::Col<double> lambda, arma::Col<int> Nl, arma
     int errCode = 0;
     arma::sp_mat *E_F = new arma::sp_mat();
     errCode = get_E_F(E_F, lambda, Nl, ml, theoryLevel);
+    if(errCode == -1){
+        return errCode;
+    }
     // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
     (*R_F) = A0 * (*E_F) * arma::sp_mat(arma::mat(A0).i());
     return errCode;
@@ -297,6 +300,9 @@ int get_R_F(arma::sp_cx_mat *R_F, arma::Col<arma::cx_double> lambda, arma::Col<i
     int errCode = 0;
     arma::sp_cx_mat *E_F = new arma::sp_cx_mat();
     errCode = get_E_F(E_F, lambda, Nl, ml, theoryLevel);
+    if(errCode == -1){
+        return errCode;
+    }
     // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
     (*R_F) = A0 * (*E_F) * arma::sp_cx_mat(arma::cx_mat(A0).i());
     return errCode;
@@ -312,6 +318,9 @@ int get_R_FCF(arma::sp_mat *R_FCF, arma::Col<double> lambda, arma::Col<int> Nl, 
     int errCode = 0;
     arma::sp_mat *E_FCF = new arma::sp_mat();
     errCode = get_E_FCF(E_FCF, lambda, Nl, ml, theoryLevel);
+    if(errCode == -1){
+        return errCode;
+    }
     // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
     (*R_FCF) = A0 * (*E_FCF) * arma::sp_mat(arma::mat(A0).i());
     return errCode;
@@ -327,6 +336,9 @@ int get_R_FCF(arma::sp_cx_mat *R_FCF, arma::Col<arma::cx_double> lambda, arma::C
     int errCode = 0;
     arma::sp_cx_mat *E_FCF = new arma::sp_cx_mat();
     errCode = get_E_FCF(E_FCF, lambda, Nl, ml, theoryLevel);
+    if(errCode == -1){
+        return errCode;
+    }
     // residual propagation on level 0 is computed using A*E*inv(A) because error and residual propagation are formally similar
     (*R_FCF) = A0 * (*E_FCF) * arma::sp_cx_mat(arma::cx_mat(A0).i());
     return errCode;
