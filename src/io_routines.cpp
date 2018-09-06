@@ -217,6 +217,42 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
                 app.method = rkconst::L_stable_SDIRK3;
             }else if(string(argv[argIdx]) == "L_stable_SDIRK4"){
                 app.method = rkconst::L_stable_SDIRK4;
+            }else if(string(argv[argIdx]) == "A_stable_LobattoIIIA_order2"){
+                app.method = rkconst::A_stable_LobattoIIIA_order2;
+            }else if(string(argv[argIdx]) == "A_stable_LobattoIIIA_order4"){
+                app.method = rkconst::A_stable_LobattoIIIA_order4;
+            }else if(string(argv[argIdx]) == "A_stable_LobattoIIIA_order6"){
+                app.method = rkconst::A_stable_LobattoIIIA_order6;
+            }else if(string(argv[argIdx]) == "A_stable_LobattoIIIB_order2"){
+                app.method = rkconst::A_stable_LobattoIIIB_order2;
+            }else if(string(argv[argIdx]) == "A_stable_LobattoIIIB_order4"){
+                app.method = rkconst::A_stable_LobattoIIIB_order4;
+            }else if(string(argv[argIdx]) == "A_stable_LobattoIIIB_order6"){
+                app.method = rkconst::A_stable_LobattoIIIB_order6;
+            }else if(string(argv[argIdx]) == "A_stable_LobattoIIIB_order8"){
+                app.method = rkconst::A_stable_LobattoIIIB_order8;
+            }else if(string(argv[argIdx]) == "L_stable_RadauIIA_order1"){
+                app.method = rkconst::L_stable_RadauIIA_order1;
+            }else if(string(argv[argIdx]) == "L_stable_RadauIIA_order3"){
+                app.method = rkconst::L_stable_RadauIIA_order3;
+            }else if(string(argv[argIdx]) == "L_stable_RadauIIA_order5"){
+                app.method = rkconst::L_stable_RadauIIA_order5;
+            }else if(string(argv[argIdx]) == "L_stable_LobattoIIIC_order2"){
+                app.method = rkconst::L_stable_LobattoIIIC_order2;
+            }else if(string(argv[argIdx]) == "L_stable_LobattoIIIC_order4"){
+                app.method = rkconst::L_stable_LobattoIIIC_order4;
+            }else if(string(argv[argIdx]) == "L_stable_LobattoIIIC_order6"){
+                app.method = rkconst::L_stable_LobattoIIIC_order6;
+            }else if(string(argv[argIdx]) == "L_stable_LobattoIIIC_order8"){
+                app.method = rkconst::L_stable_LobattoIIIC_order8;
+            }else if(string(argv[argIdx]) == "LobattoIIICast_order2"){
+                app.method = rkconst::LobattoIIICast_order2;
+            }else if(string(argv[argIdx]) == "LobattoIIICast_order4"){
+                app.method = rkconst::LobattoIIICast_order4;
+            }else if(string(argv[argIdx]) == "LobattoIIICast_order6"){
+                app.method = rkconst::LobattoIIICast_order6;
+            }else if(string(argv[argIdx]) == "LobattoIIICast_order8"){
+                app.method = rkconst::LobattoIIICast_order8;
             }else{
                 cout << ">>>ERROR: Unknown Runge-Kutta method " << string(argv[argIdx]) << "." << endl;
                 throw;
@@ -332,7 +368,9 @@ void setget_eigenvalues(appStruct &app){
                                  app.dtetac[level], app.lambdac[level]);
             // z = new arma::Col<arma::cx_double>(numberOfRealSamples*numberOfImagSamples);
         }
-        arma::mat(join_rows(real(*app.dtetac[0]), imag(*app.dtetac[0]))).save("dteta_l0.txt", arma::raw_ascii);
+        if(app.world_rank == 0){
+            arma::mat(join_rows(real(*app.dtetac[0]), imag(*app.dtetac[0]))).save("dteta_l0.txt", arma::raw_ascii);
+        }
     // import spatial eigenvalues
     }else if(app.fileSpatialEigenvalues){
         if(app.fileComplexEigenvalues){
