@@ -237,6 +237,8 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
                 app.method = rkconst::L_stable_SDIRK3;
             }else if(string(argv[argIdx]) == "L_stable_SDIRK4"){
                 app.method = rkconst::L_stable_SDIRK4;
+            }else if(string(argv[argIdx]) == "L_stable_SDIRK5"){
+                app.method = rkconst::L_stable_SDIRK5;
             }else if(string(argv[argIdx]) == "L_stable_RadauIIA_order1"){
                 app.method = rkconst::L_stable_RadauIIA_order1;
             }else if(string(argv[argIdx]) == "L_stable_RadauIIA_order3"){

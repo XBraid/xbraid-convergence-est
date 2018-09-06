@@ -406,9 +406,9 @@ void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see con
             A.set_size(1,1);
             b.set_size(1);
             c.set_size(1);
-            A       = {{0.5}};
-            b       = {1.0};
-            c       = {0.5};
+            A(0,0)  = 0.5;
+            b(0)    = 1.0;
+            c(0)    = 0.5;
             break;
         }
         case rkconst::A_stable_Gauss_order4:

@@ -16,6 +16,7 @@ import code
 def main():
     interactiveMode = False
     exportFigure    = True
+    silentMode      = True
     exportFormat    = "png" # png, svg
     exportDPI       = 300
     # get Matplotlib version
@@ -101,7 +102,8 @@ def main():
             print(">>>ERROR: EPS/SVG export requires Matplotlib version >= 1.5.2. You have "+mplVersion+"!")
             sys.exit()
         plt.savefig("tst."+exportFormat, format=exportFormat, dpi=exportDPI)
-    plt.show()
+    if not(silentMode):
+        plt.show()
     # allow user to interact with data in workspace
     if interactiveMode:
         code.interact(local=locals())
