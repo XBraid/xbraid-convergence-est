@@ -82,7 +82,9 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$ <td>    \f$\frac{1}{2}\f$   <td>    \f$\frac{1}{2}\f$
      *      <tr>    <td>            <td>    \f$\frac{1}{2}\f$   <td>    \f$\frac{1}{2}\f$
      *  </table>
-     *  See [Hairer, Wanner (1996)], Table 5.7 and [Jay (2015), pp. 817-826], Table 1
+     *  See [Hairer, Wanner (1996)], Table 5.7 and [Jay (2015), pp. 817-826], Table 1.
+     * 
+     *  Note: Also known as trapezoidal or Crank-Nicolson method.
      */
     const int A_stable_LobattoIIIA_order2 = 402;
     /** 4th-order A-stable Lobatto IIIA method, Butcher tableau:
@@ -92,7 +94,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$             <td>    \f$\frac{1}{6}\f$   <td>    \f$\frac{2}{3}\f$   <td>    \f$\frac{1}{6}\f$
      *      <tr>    <td>                        <td>    \f$\frac{1}{6}\f$   <td>    \f$\frac{2}{3}\f$   <td>    \f$\frac{1}{6}\f$
      *  </table>
-     *  See [Hairer, Wanner (1996)], Table 5.7 and [Jay (2015), pp. 817-826], Table 1
+     *  See [Hairer, Wanner (1996)], Table 5.7 and [Jay (2015), pp. 817-826], Table 1.
      */
     const int A_stable_LobattoIIIA_order4 = 404;
     /** 6th-order A-stable Lobatto IIIA method, Butcher tableau:
@@ -103,7 +105,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$                     <td>    \f$\frac{1}{12}\f$              <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{1}{12}\f$
      *      <tr>    <td>                                <td>    \f$\frac{1}{12}\f$              <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{1}{12}\f$
      *  </table>
-     *  See [Hairer, Wanner (1996)], Table 5.8 and [Jay (2015), pp. 817-826], Table 1
+     *  See [Hairer, Wanner (1996)], Table 5.8 and [Jay (2015), pp. 817-826], Table 1.
      */
     const int A_stable_LobattoIIIA_order6 = 406;
     /** 2nd-order A-stable Lobatto IIIB method, Butcher tableau:
@@ -112,7 +114,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$ <td>    \f$\frac{1}{2}\f$   <td>    \f$0\f$
      *      <tr>    <td>            <td>    \f$\frac{1}{2}\f$   <td>    \f$\frac{1}{2}\f$
      *  </table>
-     *  See [Jay (2015), pp. 817-826], Table 2
+     *  See [Jay (2015), pp. 817-826], Table 2.
      */
     const int A_stable_LobattoIIIB_order2 = 502;
     /** 4th-order A-stable Lobatto IIIB method, Butcher tableau:
@@ -122,7 +124,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$             <td>    \f$\frac{1}{6}\f$  <td>    \f$\frac{5}{6}\f$  <td>    \f$0\f$
      *      <tr>    <td>                        <td>    \f$\frac{1}{6}\f$  <td>    \f$\frac{2}{3}\f$  <td>    \f$\frac{1}{6}\f$
      *  </table>
-     *  See [Jay (2015), pp. 817-826], Table 2
+     *  See [Jay (2015), pp. 817-826], Table 2.
      */
     const int A_stable_LobattoIIIB_order4 = 504;
     /** 6th-order A-stable Lobatto IIIB method, Butcher tableau:
@@ -133,7 +135,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$                     <td>    \f$\frac{1}{12}\f$  <td>    \f$\frac{11-\sqrt{5}}{24}\f$    <td>    \f$\frac{11+\sqrt{5}}{24}\f$    <td>    \f$0\f$
      *      <tr>    <td>                                <td>    \f$\frac{1}{12}\f$  <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{1}{12}\f$
      *  </table>
-     *  See [Jay (2015), pp. 817-826], Table 2
+     *  See [Jay (2015), pp. 817-826], Table 2.
      */
     const int A_stable_LobattoIIIB_order6 = 506;
     /** 8th-order A-stable Lobatto IIIB method, Butcher tableau:
@@ -145,9 +147,40 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$                         <td>    \f$\frac{1}{20}\f$  <td>    \f$\frac{119-3\sqrt{21}}{360}\f$    <td>    \f$\frac{13}{45}\f$                 <td>    \f$\frac{119+3\sqrt{21}}{360}\f$    <td>    \f$0\f$
      *      <tr>    <td>                                    <td>    \f$\frac{1}{20}\f$  <td>    \f$\frac{49}{180}\f$                <td>    \f$\frac{16}{45}\f$                 <td>    \f$\frac{49}{180}\f$                <td>    \f$\frac{1}{20}\f$
      * </table>
-     *  See [Jay (2015), pp. 817-826], Table 2
+     *  See [Jay (2015), pp. 817-826], Table 2.
      */
     const int A_stable_LobattoIIIB_order8 = 508;
+    /** 2nd-order A-stable Gauss method, Butcher tableau:
+     *  <table>
+     *      <tr>    <td>    \f$\frac{1}{2}\f$   <td>    \f$\frac{1}{2}\f$
+     *      <tr>    <td>                        <td>    \f$1\f$
+     *  </table>
+     *  See [Hairer, Wanner (1996)], Table 5.1.
+     *
+     *  Note: Also known as implicit midpoint rule.
+     */
+    const int A_stable_Gauss_order2 = 802;
+    /** 4th-order A-stable Gauss method, Butcher tableau:
+     *  <table>
+     *      <tr>    <td>    \f$\frac{3-\sqrt{3}}{6}\f$  <td>    \f$\frac{1}{4}\f$               <td>    \f$\frac{6-4\sqrt{3}}{24}\f$
+     *      <tr>    <td>    \f$\frac{3+\sqrt{3}}{6}\f$  <td>    \f$\frac{6+4\sqrt{3}}{24}\f$    <td>    \f$\frac{1}{4}\f$
+     *      <tr>    <td>                                <td>    \f$\frac{1}{2}\f$               <td>    \f$\frac{1}{2}\f$
+     *  </table>
+     *  See [Hairer, Wanner (1996)], Table 5.1.
+     *
+     *  Note: Also known as method by Hammer \& Hollingsworth.
+     */
+    const int A_stable_Gauss_order4 = 804;
+    /** 6th-order A-stable Gauss method, Butcher tableau:
+     *  <table>
+     *      <tr>    <td>    \f$\frac{5-\sqrt{15}}{10}\f$    <td>    \f$\frac{5}{36}\f$                      <td>    \f$\frac{2}{9}-\frac{\sqrt{15}}{15}\f$  <td>    \f$\frac{5}{36}-\frac{\sqrt{15}}{30}\f$
+     *      <tr>    <td>    \f$\frac{1}{2}\f$               <td>    \f$\frac{5}{36}+\frac{\sqrt{15}}{24}\f$ <td>    \f$\frac{2}{9}\f$                       <td>    \f$\frac{5}{36}-\frac{\sqrt{15}}{24}\f$
+     *      <tr>    <td>    \f$\frac{5+\sqrt{15}}{10}\f$    <td>    \f$\frac{5}{36}+\frac{\sqrt{15}}{30}\f$ <td>    \f$\frac{2}{9}+\frac{\sqrt{15}}{15}\f$  <td>    \f$\frac{5}{36}\f$
+     *      <tr>    <td>                                    <td>    \f$\frac{5}{18}\f$                      <td>    \f$\frac{4}{9}\f$                       <td>    \f$\frac{5}{18}\f$
+     *  </table>
+     *  See [Hairer, Wanner (1996)], Table 5.2.
+     */
+    const int A_stable_Gauss_order6 = 806;
     /** 2nd-order A-stable SDIRK method, Butcher tableau:
      *  <table>
      *      <tr>    <td>    \f$\frac{1}{4}\f$   <td>    \f$\frac{1}{4}\f$   <td>    \f$0\f$
@@ -183,6 +216,8 @@ namespace rkconst{
      *      <tr>    <td>            <td>    \f$1\f$
      *  </table>
      *  See [Dobrev et al. (2017)], Table 3.1.
+     * 
+     *  Note: Also known as backward Euler method.
      */
     const int L_stable_SDIRK1 = 201;
     /** 2nd-order L-stable SDIRK method, Butcher tableau:
@@ -232,12 +267,14 @@ namespace rkconst{
      *  See [Kennedy, Carpenter (2016)], NASA/TM-2016-219173, Table 24.
      */
     const int L_stable_SDIRK5 = 205;
-    /** 1st-order L-stable Radau IIA method (same as rkconst::L_stable_SDIRK1), Butcher tableau:
+    /** 1st-order L-stable Radau IIA method, Butcher tableau:
      *  <table>
      *      <tr>    <td>    \f$1\f$ <td>    \f$1\f$
      *      <tr>    <td>            <td>    \f$1\f$
      *  </table>
-     *  See [Hairer, Wanner (1996)], Table 5.5
+     *  See [Hairer, Wanner (1996)], Table 5.5.
+     * 
+     *  Note: Same as rkconst::L_stable_SDIRK1.
      */
     const int L_stable_RadauIIA_order1 = 301;
     /** 3rd-order L-stable Radau IIA method, Butcher tableau:
@@ -246,7 +283,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$             <td>    \f$\frac{3}{4}\f$   <td>    \f$\frac{1}{4}\f$
      *      <tr>    <td>                        <td>    \f$\frac{3}{4}\f$   <td>    \f$\frac{1}{4}\f$
      *  </table>
-     *  See [Hairer, Wanner (1996)], Table 5.5
+     *  See [Hairer, Wanner (1996)], Table 5.5.
     */
     const int L_stable_RadauIIA_order3 = 303;
     /** 5th-order L-stable Radau IIA method, Butcher tableau:
@@ -256,7 +293,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$                     <td>    \f$\frac{16-\sqrt{6}}{36}\f$        <td>    \f$\frac{16+\sqrt{6}}{36}\f$        <td>    \f$\frac{1}{9}\f$
      *      <tr>    <td>                                <td>    \f$\frac{16-\sqrt{6}}{36}\f$        <td>    \f$\frac{16+\sqrt{6}}{36}\f$        <td>    \f$\frac{1}{9}\f$
      *  </table>
-     *  See [Hairer, Norsett, Wanner (1987)], Table 7.7 and [Hairer, Wanner (1996)], Table 5.6
+     *  See [Hairer, Norsett, Wanner (1987)], Table 7.7 and [Hairer, Wanner (1996)], Table 5.6.
     */
     const int L_stable_RadauIIA_order5 = 305;
     /** 2nd-order L- and B-stable Lobatto IIIC method, Butcher tableau:
@@ -265,7 +302,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$   <td>    \f$\frac{1}{2}\f$    <td>    \f$\frac{1}{2}\f$
      *      <tr>    <td>              <td>    \f$\frac{1}{2}\f$    <td>    \f$\frac{1}{2}\f$
      *  </table>
-     *  See [Jay (2015), pp. 817-826], Table 3
+     *  See [Jay (2015), pp. 817-826], Table 3.
      */
     const int L_stable_LobattoIIIC_order2 = 602;
     /** 4th-order L- and B-stable Lobatto IIIC method, Butcher tableau:
@@ -275,7 +312,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$             <td>    \f$\frac{1}{6}\f$   <td>    \f$\frac{2}{3}\f$   <td>    \f$\frac{1}{6}\f$
      *      <tr>    <td>                        <td>    \f$\frac{1}{6}\f$   <td>    \f$\frac{2}{3}\f$   <td>    \f$\frac{1}{6}\f$
      *  </table>
-     *  See [Jay (2015), pp. 817-826], Table 3
+     *  See [Jay (2015), pp. 817-826], Table 3.
      */
     const int L_stable_LobattoIIIC_order4 = 604;
     /** 6th-order L- and B-stable Lobatto IIIC method, Butcher tableau:
@@ -286,7 +323,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$                     <td>    \f$\frac{1}{12}\f$  <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{1}{12}\f$
      *      <tr>    <td>                                <td>    \f$\frac{1}{12}\f$  <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{1}{12}\f$
      *  </table>
-     *  See [Jay (2015), pp. 817-826], Table 3
+     *  See [Jay (2015), pp. 817-826], Table 3.
      */
     const int L_stable_LobattoIIIC_order6 = 606;
     /** 8th-order L- and B-stable Lobatto IIIC method, Butcher tableau:
@@ -298,7 +335,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$                         <td>    \f$\frac{1}{20}\f$    <td>    \f$\frac{49}{180}\f$                  <td>    \f$\frac{16}{45}\f$                 <td>    \f$\frac{49}{180}\f$                <td>    \f$\frac{1}{20}\f$
      *      <tr>    <td>                                    <td>    \f$\frac{1}{20}\f$    <td>    \f$\frac{49}{180}\f$                  <td>    \f$\frac{16}{45}\f$                 <td>    \f$\frac{49}{180}\f$                <td>    \f$\frac{1}{20}\f$
      *  </table>
-     *  See [Jay (2015), pp. 817-826], Table 3
+     *  See [Jay (2015), pp. 817-826], Table 3.
      */
     const int L_stable_LobattoIIIC_order8 = 608;
     //-------------------------------------- not A-stable methods ----------------------------------------------------//
@@ -308,7 +345,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$ <td>    \f$1\f$             <td>    \f$0\f$
      *      <tr>    <td>            <td>    \f$\frac{1}{2}\f$   <td>    \f$\frac{1}{2}\f$
      *  </table>
-     *  See [Jay (2015), pp. 817-826], Table 4
+     *  See [Jay (2015), pp. 817-826], Table 4.
      */
     const int LobattoIIICast_order2 = 702;
     /** 4th-order Lobatto IIIC\* method (not A-stable, not B-stable), Butcher tableau:
@@ -318,7 +355,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$             <td>    \f$0\f$             <td>    \f$1\f$             <td>    \f$0\f$
      *      <tr>    <td>                        <td>    \f$\frac{1}{6}\f$   <td>    \f$\frac{2}{3}\f$   <td>    \f$\frac{1}{6}\f$
      *  </table>
-     *  See [Jay (2015), pp. 817-826], Table 4
+     *  See [Jay (2015), pp. 817-826], Table 4.
      */
     const int LobattoIIICast_order4 = 704;
     /** 6th-order Lobatto IIIC\* method (not A-stable, not B-stable), Butcher tableau:
@@ -329,7 +366,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$                     <td>    \f$\frac{1}{6}\f$           <td>    \f$\frac{5-\sqrt{5}}{12}\f$     <td>    \f$\frac{5+\sqrt{5}}{12}\f$     <td>    \f$0\f$
      *      <tr>    <td>                                <td>    \f$\frac{1}{12}\f$          <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{5}{12}\f$              <td>    \f$\frac{1}{12}\f$
      *  </table>
-     *  See [Jay (2015), pp. 817-826], Table 4
+     *  See [Jay (2015), pp. 817-826], Table 4.
      */
     const int LobattoIIICast_order6 = 706;
     /** 8th-order Lobatto IIIC\* method (not A-stable, not B-stable), Butcher tableau:
@@ -341,7 +378,7 @@ namespace rkconst{
      *      <tr>    <td>    \f$1\f$                         <td>    \f$0\f$             <td>    \f$\frac{7}{18}\f$                  <td>    \f$\frac{2}{9}\f$               <td>    \f$\frac{7}{18}\f$                  <td>    \f$0\f$
      *      <tr>    <td>                                    <td>    \f$\frac{1}{20}\f$  <td>    \f$\frac{49}{180}\f$                <td>    \f$\frac{16}{45}\f$             <td>    \f$\frac{49}{180}\f$                <td>    \f$\frac{1}{20}\f$
      *  </table>
-     *  See [Jay (2015), pp. 817-826], Table 4
+     *  See [Jay (2015), pp. 817-826], Table 4.
      */
     const int LobattoIIICast_order8 = 708;
 }

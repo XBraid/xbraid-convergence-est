@@ -401,6 +401,39 @@ void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see con
             c       = {0.0,             (7.0-sqrt(21.0))/14.0,          0.5,                        (7.0+sqrt(21.0))/14.0,          1.0};
             break;
         }
+        case rkconst::A_stable_Gauss_order2:
+        {
+            A.set_size(1,1);
+            b.set_size(1);
+            c.set_size(1);
+            A       = {{0.5}};
+            b       = {1.0};
+            c       = {0.5};
+            break;
+        }
+        case rkconst::A_stable_Gauss_order4:
+        {
+            A.set_size(2,2);
+            b.set_size(2);
+            c.set_size(2);
+            A       = {{0.25,                       (6.0-4.0*sqrt(3.0))/24.0},
+                       {(6.0+4.0*sqrt(3.0))/24.0,   0.25}};
+            b       = {0.5,                         0.5};
+            c       = {(3.0-sqrt(3.0))/6.0,         (3.0+sqrt(3.0))/6.0};
+            break;
+        }
+        case rkconst::A_stable_Gauss_order6:
+        {
+            A.set_size(3,3);
+            b.set_size(3);
+            c.set_size(3);
+            A       = {{5.0/36.0,                   2.0/9.0-1.0/sqrt(15.0),     5.0/36.0-sqrt(15.0)/30.0},
+                       {5.0/36.0+sqrt(15.0)/24.0,   2.0/9.0,                    5.0/36.0-sqrt(15.0)/24.0},
+                       {5.0/36.0+sqrt(15.0)/30.0,   2.0/9.0+1.0/sqrt(15.0),     5.0/36.0}};
+            b       = {5.0/18.0,                    4.0/9.0,                    5.0/18.0};
+            c       = {(5.0-sqrt(15.0))/10.0,       0.5,                        (5.0+sqrt(15.0))/10.0};
+            break;
+        }
         default:
         {
             std::cerr << "Runge-Kutta method " << method << " not implemented." << std::endl;

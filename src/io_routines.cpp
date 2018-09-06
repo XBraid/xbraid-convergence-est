@@ -203,21 +203,7 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
             }
         }else if(string(argv[argIdx]) == "--runge-kutta-method"){
             argIdx++;
-            if(string(argv[argIdx]) == "A_stable_SDIRK2"){
-                app.method = rkconst::A_stable_SDIRK2;
-            }else if(string(argv[argIdx]) == "A_stable_SDIRK3"){
-                app.method = rkconst::A_stable_SDIRK4;
-            }else if(string(argv[argIdx]) == "A_stable_SDIRK4"){
-                app.method = rkconst::A_stable_SDIRK3;
-            }else if(string(argv[argIdx]) == "L_stable_SDIRK1"){
-                app.method = rkconst::L_stable_SDIRK1;
-            }else if(string(argv[argIdx]) == "L_stable_SDIRK2"){
-                app.method = rkconst::L_stable_SDIRK2;
-            }else if(string(argv[argIdx]) == "L_stable_SDIRK3"){
-                app.method = rkconst::L_stable_SDIRK3;
-            }else if(string(argv[argIdx]) == "L_stable_SDIRK4"){
-                app.method = rkconst::L_stable_SDIRK4;
-            }else if(string(argv[argIdx]) == "A_stable_LobattoIIIA_order2"){
+            if(string(argv[argIdx]) == "A_stable_LobattoIIIA_order2"){
                 app.method = rkconst::A_stable_LobattoIIIA_order2;
             }else if(string(argv[argIdx]) == "A_stable_LobattoIIIA_order4"){
                 app.method = rkconst::A_stable_LobattoIIIA_order4;
@@ -231,6 +217,26 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
                 app.method = rkconst::A_stable_LobattoIIIB_order6;
             }else if(string(argv[argIdx]) == "A_stable_LobattoIIIB_order8"){
                 app.method = rkconst::A_stable_LobattoIIIB_order8;
+            }else if(string(argv[argIdx]) == "A_stable_Gauss_order2"){
+                app.method = rkconst::A_stable_Gauss_order2;
+            }else if(string(argv[argIdx]) == "A_stable_Gauss_order4"){
+                app.method = rkconst::A_stable_Gauss_order4;
+            }else if(string(argv[argIdx]) == "A_stable_Gauss_order6"){
+                app.method = rkconst::A_stable_Gauss_order6;
+            }else if(string(argv[argIdx]) == "A_stable_SDIRK2"){
+                app.method = rkconst::A_stable_SDIRK2;
+            }else if(string(argv[argIdx]) == "A_stable_SDIRK3"){
+                app.method = rkconst::A_stable_SDIRK3;
+            }else if(string(argv[argIdx]) == "A_stable_SDIRK4"){
+                app.method = rkconst::A_stable_SDIRK4;
+            }else if(string(argv[argIdx]) == "L_stable_SDIRK1"){
+                app.method = rkconst::L_stable_SDIRK1;
+            }else if(string(argv[argIdx]) == "L_stable_SDIRK2"){
+                app.method = rkconst::L_stable_SDIRK2;
+            }else if(string(argv[argIdx]) == "L_stable_SDIRK3"){
+                app.method = rkconst::L_stable_SDIRK3;
+            }else if(string(argv[argIdx]) == "L_stable_SDIRK4"){
+                app.method = rkconst::L_stable_SDIRK4;
             }else if(string(argv[argIdx]) == "L_stable_RadauIIA_order1"){
                 app.method = rkconst::L_stable_RadauIIA_order1;
             }else if(string(argv[argIdx]) == "L_stable_RadauIIA_order3"){
