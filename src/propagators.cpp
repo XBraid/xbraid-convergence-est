@@ -40,7 +40,7 @@ int get_E_F(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arma
     arma::sp_mat identity = arma::speye(Nl(1),Nl(1));
     for(int level = 0; level < numLevels-2; level++){
         term2 = (*ptrS[level+1]) * arma::sp_mat(arma::mat((*ptrS[level+1]).st() * (*ptrA[level+1]) * (*ptrS[level+1])).i()) * (*ptrS[level+1]).st();
-        for(int prepostIdx = level; prepostIdx > 1; prepostIdx--){
+        for(int prepostIdx = level; prepostIdx > 0; prepostIdx--){
             term2 = (*ptrP[prepostIdx]) * term2 * (*ptrR[prepostIdx]);
         }
         summ += term2;
@@ -95,7 +95,7 @@ int get_E_F(arma::sp_cx_mat *E_F, arma::Col<arma::cx_double> lambda, arma::Col<i
     arma::sp_cx_mat identity = arma::sp_cx_mat(arma::speye(Nl(1),Nl(1)),arma::speye(Nl(1),Nl(1)).zeros());
     for(int level = 0; level < numLevels-2; level++){
         term2 = (*ptrS[level+1]) * arma::sp_cx_mat(arma::cx_mat((*ptrS[level+1]).st() * (*ptrA[level+1]) * (*ptrS[level+1])).i()) * (*ptrS[level+1]).st();
-        for(int prepostIdx = level; prepostIdx > 1; prepostIdx--){
+        for(int prepostIdx = level; prepostIdx > 0; prepostIdx--){
             term2 = (*ptrP[prepostIdx]) * term2 * (*ptrR[prepostIdx]);
         }
         summ += term2;

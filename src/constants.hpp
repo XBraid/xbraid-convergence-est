@@ -53,6 +53,13 @@ namespace mgritestimate{
      *  Tight expression-like lower bound for \f$\ell^2\f$-norm of two-grid error propagator (asymptotically exact bound)
      */
     const int error_l2_tight_twogrid_lower_bound = -4;
+    /**
+     *  Approximate MGRIT convergence rate by approximating \f$\sqrt{ \| E \|_1 \| E \|_\infty }\f$.
+     * 
+     *  Here, \f$ \| E \|_1 \f$ is approximated by the absolute column sum corresponding to the first C-point
+     *  and \f$ \| E \|_\infty \f$ is approximated by the absolute row sum corresponding to the last C-point.
+     */
+    const int error_l2_sqrt_expression_approximate_rate = 5;
     //----------------------------------------------------------------------------------------------------------------//
     /**
      *  \f$\ell^2\f$-norm of numerically constructed residual propagator

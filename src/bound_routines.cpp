@@ -17,7 +17,8 @@ void get_propagator_bound(const int bound,                  ///< requested bound
         || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
         || (bound == mgritestimate::error_l2_lower_bound)
         || (bound == mgritestimate::error_l2_sqrt_lower_bound)
-        || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)){
+        || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
+        || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
         get_error_l2_propagator_bound(bound, theoryLevel, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
     }else if((bound == mgritestimate::residual_l2_upper_bound)
         || (bound == mgritestimate::residual_l2_sqrt_upper_bound)
@@ -46,7 +47,8 @@ void get_propagator_bound(const int bound,                  ///< requested bound
         || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
         || (bound == mgritestimate::error_l2_lower_bound)
         || (bound == mgritestimate::error_l2_sqrt_lower_bound)
-        || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)){
+        || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
+        || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
         get_error_l2_propagator_bound(bound, theoryLevel, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
     }else if((bound == mgritestimate::residual_l2_upper_bound)
         || (bound == mgritestimate::residual_l2_sqrt_upper_bound)
@@ -223,6 +225,19 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
             }
             break;
         }
+        case mgritestimate::error_l2_sqrt_expression_approximate_rate:{
+            errCode = 0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression
+                (*estimate)(evalIdx) = get_error_l2_sqrt_expression_approximate_rate(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+            }
+            break;
+        }
         default:{
             cout << ">>>ERROR: Bound " << bound << " not implemented" << endl;
             throw;
@@ -394,6 +409,19 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                 }
                 // evaluate expression
                 (*estimate)(evalIdx) = get_error_l2_tight_twogrid_lower_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+            }
+            break;
+        }
+        case mgritestimate::error_l2_sqrt_expression_approximate_rate:{
+            errCode = 0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<cx_double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression
+                (*estimate)(evalIdx) = get_error_l2_sqrt_expression_approximate_rate(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
             }
             break;
         }
@@ -834,6 +862,8 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
             throw;
         }
     }else if(numberOfLevels == 3){
+        cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound for three grids needs some more work." << endl;
+        throw;
         switch(r){
             case mgritestimate::F_relaxation:{
                 double norm11;
@@ -1007,7 +1037,159 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                 break;
             }
             default:{
-                cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound not implemented for three levels on level " << theoryLevel << endl;
+                cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound only implemented for F- and FCF-relaxation" << endl;
+                throw;
+            }
+        }
+    }else if(numberOfLevels == 4){
+        switch(r){
+            case mgritestimate::F_relaxation:{
+                /*  On level 1, we have the following points:
+                 *
+                 *  C0  F1 CF1 F2 CF2  F3 CF3  F4  C1
+                 *  |---|---|---|---|---|---|---|---|
+                 *  |-------|-------|-------|-------|
+                 *  |---------------|---------------|
+                 *
+                 */
+                double colSumC0 = 0.0;  // abs sum of C0-column
+                double colSumCF = 0.0;  // abs sum of CF-columns
+                double colSumF  = 0.0;  // abs sum of F-columns
+                double rowSumCN = 0.0;  // abs sum of CN-rows
+                double rowSumCF = 0.0;  // abs sum of CF-rows
+                double rowSumF  = 0.0;  // abs sum of F-rows
+                double norm1    = 0.0;
+                double normInf  = 0.0;
+                if(theoryLevel == 0){
+                    cout << ">>>ERROR: Implementation of error_l2_sqrt_expression_upper_bound for four grids not finished." << endl;
+                    throw;
+                }else if(theoryLevel == 1){
+                    // abs column sums
+                    colSumC0    = std::pow(std::abs(lambda(3)), N(3)-2) * std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
+                                    + std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
+                                        * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                        * (1.0 - std::pow(std::abs(lambda(2)), m(2))) / (1.0 - std::abs(lambda(2)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                    + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                        * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1)) / (1.0 - std::abs(lambda(2)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                    + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)));
+                    norm1       = std::max(colSumC0, norm1);
+                    for(int j = 1; j < m(2); j++){
+                        double summ = 0.0;
+                        for(int k = 0; k <= j-2; k++){
+                            summ    = summ + std::pow(std::abs(lambda(2)), k);
+                        }
+                        colSumCF    = std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1)) * (
+                                        std::pow(std::abs(lambda(3)), N(3)-2)
+                                            + (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                                * (1.0 - std::pow(std::abs(lambda(2)), m(2))) / (1.0 - std::abs(lambda(2)))
+                                                * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                        ) * std::pow(std::abs(lambda(2)), j-1)
+                                        + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                        + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                            * summ;
+                        norm1       = std::max(colSumCF, norm1);
+                    }
+                    for(int r = 0; r <= m(1)-2; r++){
+                        for(int j = 0; j <= m(2)-1; j++){
+                            double summ1 = 0.0;
+                            double summ2 = 0.0;
+                            for(int k = 0; k <= j-1; k++){
+                                summ1   = summ1 + std::pow(std::abs(lambda(2)), k);
+                            }
+                            for(int k = 0; k <= r-1; k++){
+                                summ2   = summ2 + std::pow(std::abs(lambda(1)), k);
+                            }
+                            colSumF = std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (
+                                        std::pow(std::abs(lambda(3)), N(3)-2)
+                                        + (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                            * (1.0 - std::pow(std::abs(lambda(2)), m(2))) / (1.0 - std::abs(lambda(2)))
+                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                        ) * std::pow(std::abs(lambda(1)), r) * std::pow(std::abs(lambda(2)), j)
+                                        + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                            * summ1;
+                                        + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                            * summ2;
+                            norm1   = std::max(colSumF, norm1);
+                        }
+                    }
+                    // abs row sums
+                    rowSumCN    = std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                    * (1.0 - std::pow(std::abs(lambda(3)), N(3)-1)) / (1.0 - std::abs(lambda(3)))
+                                    * (1.0 - std::pow(std::abs(lambda(2)), m(2)))   / (1.0 - std::abs(lambda(2)))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                    + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                        * (1.0 - std::pow(std::abs(lambda(3)), N(3)-1)) / (1.0 - std::abs(lambda(3)))
+                                        * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2)))
+                                    + std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
+                                        * (1.0 - std::pow(std::abs(lambda(3)), N(3)-1)) / (1.0 - std::abs(lambda(3)));
+                    normInf     = std::max(rowSumCN, normInf);
+                    cout << setprecision(3) << normInf << " ";
+                    for(int j = 1; j <= m(2)-1; j++){
+                        rowSumCF    = std::pow(std::abs(lambda(2)), j) * (
+                                         std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
+                                            * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                         + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                            * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                            * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2)))
+                                         + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                            * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                            * (1.0 - std::pow(std::abs(lambda(2)), m(2)))   / (1.0 - std::abs(lambda(2)))
+                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                        ) + (1.0 - std::pow(std::abs(lambda(2)), j)) / (1.0 - std::abs(lambda(2))) * (
+                                            std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                            + (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2))) * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                        );
+                        normInf     = std::max(rowSumCF, normInf);
+                        cout << setprecision(3) << normInf << " ";
+                    }
+                    for(int j = 0; j <= m(2)-1; j++){
+                        for(int r = 1; r <= m(1)-1; r++){
+                            double summ = 0.0;
+                            for(int k = 0; k <= j-1; k++){
+                                summ    = summ + std::pow(std::abs(lambda(2)), k);
+                            }
+                            rowSumF = std::pow(std::abs(lambda(1)), r) * (
+                                            std::pow(std::abs(lambda(2)), j)
+                                                * std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
+                                                * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                            + std::pow(std::abs(lambda(2)), j)
+                                                * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                                * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                                * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2)))
+                                            + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                                * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                                * (1.0 - std::pow(std::abs(lambda(2)), m(2)))   / (1.0 - std::abs(lambda(2)))
+                                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                            + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                                * summ
+                                            + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                                * summ
+                                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                        ) + std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (1.0 - std::pow(std::abs(lambda(1)), r)) / (1.0 - std::abs(lambda(1)));
+                            normInf = std::max(rowSumF, normInf);
+                            cout << setprecision(3) << normInf << " ";
+                        }
+                    }
+                    cout << endl;
+                    val = sqrt(norm1 * normInf);
+                }else{
+                    cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound not implemented for four levels (FCF-relaxation) on level " << theoryLevel << endl;
+                    throw;
+                }
+                break;
+            }
+            case mgritestimate::FCF_relaxation:{
+                cout << ">>>ERROR: Implementation of error_l2_sqrt_expression_upper_bound with FCF-relaxation for four grids not finished." << endl;
+                break;
+            }
+            default:{
+                cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound only implemented for F- and FCF-relaxation" << endl;
                 throw;
             }
         }
@@ -1015,6 +1197,123 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
             cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound not implemented for " << numberOfLevels << " levels" << endl;
             throw;
     }
+    return val;
+}
+
+/**
+ *  Computes an approximation of \f$ \sqrt{\| E \|_1 \| E \|_\infty} \f$ using expression.
+ *
+ *  Note: Evaluation is reasonably cheap, so let's just wrap the complex equivalent.
+ */
+// note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
+double get_error_l2_sqrt_expression_approximate_rate(int r,                     ///< number of FC relaxation steps
+                                                     Col<double> lambda,        ///< eigenvalues of \f$\Phi_l\f$
+                                                     Col<int> N,                ///< number of time steps on each grid level
+                                                     Col<int> m,                ///< coarsening factors between all grid levels
+                                                     int theoryLevel            ///< expression for error propagator on grid level
+                                                     ){
+    Col<cx_double> lambdac(lambda, 0.0*lambda);
+    double val = get_error_l2_sqrt_expression_approximate_rate(r, lambdac, N, m, theoryLevel);
+    return val;
+}
+
+/**
+ *  Computes an approximation of \f$ \sqrt{\| E \|_1 \| E \|_\infty} \f$ using expression (complex version).
+ */
+// note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
+double get_error_l2_sqrt_expression_approximate_rate(int r,                     ///< number of FC relaxation steps
+                                                     Col<cx_double> lambda,     ///< eigenvalues of \f$\Phi_l\f$
+                                                     Col<int> N,                ///< number of time steps on each grid level
+                                                     Col<int> m,                ///< coarsening factors between all grid levels
+                                                     int theoryLevel            ///< expression for error propagator on grid level
+                                                     ){
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1.0;
+    }
+    // evaluate expression depending on number of time grids and relaxation scheme
+    int numberOfLevels  = N.n_elem;
+    double val      = 0.0;
+    double colSum   = 0.0;
+    double rowSum   = 0.0;
+    // set up \f$ \tilde{m} \f$
+    Col<int> mt;
+    mt.set_size(numberOfLevels);
+    for(int l = 0; l < numberOfLevels-1; l++){
+        mt(l) = m(l);
+    }
+    mt(numberOfLevels-1) = N(numberOfLevels-1);
+    if(theoryLevel == 0){
+        // compute approximation for column sum
+        for(int l = 1; l <= numberOfLevels-1; l++){
+            cx_double prod1 = std::pow(lambda(0), mt(0));
+            double prod2 = 1.0;
+            for(int k = 1; k <= l-1; k++){
+                prod1 *= std::pow(lambda(k), mt(k)-1);
+            }
+            for(int k = 1; k <= l; k++){
+                prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k)-1)) / (1.0 - std::abs(lambda(k)));
+            }
+            colSum += std::abs(lambda(l) - prod1) * prod2;
+        }
+        colSum *= (1.0 - std::pow(std::abs(lambda(0)), mt(0))) / (1.0 - std::abs(lambda(0)));
+        if(numberOfLevels > 2){
+            cx_double prod1 = std::pow(lambda(0), mt(0));
+            for(int k = 1; k <= numberOfLevels-2; k++){
+                prod1 *= std::pow(lambda(k), mt(k)-1);
+            }
+            colSum += std::pow(std::abs(lambda(numberOfLevels-1)), mt(numberOfLevels-1)-1) * std::abs(lambda(numberOfLevels-1) - prod1);
+        }
+        // compute approximation of row sum
+        for(int l = 1; l <= numberOfLevels-1; l++){
+            cx_double prod1 = std::pow(lambda(0), mt(0));
+            double prod2 = 1.0;
+            for(int k = 1; k <= l-1; k++){
+                prod1 *= std::pow(lambda(k), mt(k)-1);
+            }
+            for(int k = l; k <= numberOfLevels-1; k++){
+                prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k))) / (1.0 - std::abs(lambda(k)));
+            }
+            rowSum += std::abs(lambda(l) - prod1) * prod2;
+        }
+    }else if(theoryLevel == 1){
+        // compute approximation for column sum
+        for(int l = 1; l <= numberOfLevels-1; l++){
+            cx_double prod1 = std::pow(lambda(0), mt(0));
+            double prod2 = 1.0;
+            for(int k = 1; k <= l-1; k++){
+                prod1 *= std::pow(lambda(k), mt(k)-1);
+            }
+            for(int k = 1; k <= l; k++){
+                prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k)-1)) / (1.0 - std::abs(lambda(k)));
+            }
+            colSum += std::abs(lambda(l) - prod1) * prod2;
+        }
+        if(numberOfLevels > 2){
+            cx_double prod1 = std::pow(lambda(0), mt(0));
+            for(int k = 1; k <= numberOfLevels-2; k++){
+                prod1 *= std::pow(lambda(k), mt(k)-1);
+            }
+            colSum += std::pow(std::abs(lambda(numberOfLevels-1)), mt(numberOfLevels-1)-1) * std::abs(lambda(numberOfLevels-1) - prod1);
+        }
+        // compute approximation of row sum
+        for(int l = 1; l <= numberOfLevels-1; l++){
+            cx_double prod1 = std::pow(lambda(0), mt(0));
+            double prod2 = 1.0;
+            for(int k = 1; k <= l-1; k++){
+                prod1 *= std::pow(lambda(k), mt(k)-1);
+            }
+            for(int k = l; k <= numberOfLevels-1; k++){
+                prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k))) / (1.0 - std::abs(lambda(k)));
+            }
+            rowSum += std::abs(lambda(l) - prod1) * prod2;
+        }
+    }else{
+        cout << ">>>ERROR:error_l2_sqrt_expression_approximate_rate not implemented on level " << theoryLevel << "." << endl << endl;
+        throw;
+    }
+    // compute approximation of convergence rate
+    val = std::sqrt(colSum * rowSum);
     return val;
 }
 

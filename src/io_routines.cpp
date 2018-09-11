@@ -46,6 +46,7 @@ void export_vector_minmax(int bound, arma::Col<double> *v, const string filename
         || (bound == mgritestimate::error_l2_sqrt_upper_bound)
         || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
         || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
+        || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)
         || (bound == mgritestimate::residual_l2_upper_bound)
         || (bound == mgritestimate::residual_l2_sqrt_upper_bound)){
         prefix = "max_";
@@ -98,12 +99,14 @@ void get_default_filename(const int bound, const int relax, string *filename){
                 *filename = "error_l2_tight_twogrid_upper_bound_E_F";
             }else if(bound == mgritestimate::error_l2_lower_bound){
                 *filename = "error_l2_lower_bound_E_F";
+            }else if(bound == mgritestimate::error_l2_sqrt_expression_approximate_rate){
+                *filename = "error_l2_sqrt_expression_approximate_rate_E_F";
             }else if(bound == mgritestimate::residual_l2_upper_bound){
-                *filename = "residual_l2_upper_bound_E_F";
+                *filename = "residual_l2_upper_bound_R_F";
             }else if(bound == mgritestimate::residual_l2_sqrt_upper_bound){
-                *filename = "residual_l2_sqrt_upper_bound_E_F";
+                *filename = "residual_l2_sqrt_upper_bound_R_F";
             }else if(bound == mgritestimate::residual_l2_lower_bound){
-                *filename = "residual_l2_lower_bound_E_F";
+                *filename = "residual_l2_lower_bound_R_F";
             }else{
                 *filename = "bound_E_F";
             }
@@ -121,11 +124,11 @@ void get_default_filename(const int bound, const int relax, string *filename){
             }else if(bound == mgritestimate::error_l2_lower_bound){
                 *filename = "error_l2_lower_bound_E_FCF";
             }else if(bound == mgritestimate::residual_l2_upper_bound){
-                *filename = "residual_l2_upper_bound_E_FCF";
+                *filename = "residual_l2_upper_bound_R_FCF";
             }else if(bound == mgritestimate::residual_l2_sqrt_upper_bound){
-                *filename = "residual_l2_sqrt_upper_bound_E_FCF";
+                *filename = "residual_l2_sqrt_upper_bound_R_FCF";
             }else if(bound == mgritestimate::residual_l2_lower_bound){
-                *filename = "residual_l2_lower_bound_E_FCF";
+                *filename = "residual_l2_lower_bound_R_FCF";
             }else{
                 *filename = "bound_E_FCF";
             }
@@ -311,6 +314,8 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
                 app.bound = mgritestimate::error_l2_sqrt_lower_bound;
             }else if(string(argv[argIdx]) == "error_l2_tight_twogrid_lower_bound"){
                 app.bound = mgritestimate::error_l2_tight_twogrid_lower_bound;
+            }else if(string(argv[argIdx]) == "error_l2_sqrt_expression_approximate_rate"){
+                app.bound = mgritestimate::error_l2_sqrt_expression_approximate_rate;
             }else if(string(argv[argIdx]) == "residual_l2_upper_bound"){
                 app.bound = mgritestimate::residual_l2_upper_bound;
             }else if(string(argv[argIdx]) == "residual_l2_sqrt_upper_bound"){
