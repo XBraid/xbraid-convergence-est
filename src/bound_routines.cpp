@@ -1309,7 +1309,7 @@ double get_error_l2_sqrt_expression_approximate_rate(int r,                     
             rowSum += std::abs(lambda(l) - prod1) * prod2;
         }
     }else{
-        cout << ">>>ERROR:error_l2_sqrt_expression_approximate_rate not implemented on level " << theoryLevel << "." << endl << endl;
+        cout << ">>>ERROR: error_l2_sqrt_expression_approximate_rate not implemented on level " << theoryLevel << "." << endl << endl;
         throw;
     }
     // compute approximation of convergence rate
