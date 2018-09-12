@@ -983,13 +983,14 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                                 * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1));
                     norm1   = std::max(colSumF, norm1);
                     for(int j = 1; j <= m(1)-2; j++){
-                        colSumF = std::pow(std::abs(lambda(0)), m(0)) * std::pow(std::abs(lambda(1)), j) * (
-                                    (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
+                        colSumF = std::pow(std::abs(lambda(0)), m(0))
+                                    * std::pow(std::abs(lambda(1)), j)
+                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (
+                                    * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
                                     * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
                                     * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
                                     + std::pow(std::abs(lambda(2)), N(2)-2)
-                                    + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                    * (1.0 - std::pow(std::abs(lambda(1)), j))      / (1.0 - std::abs(lambda(1)))
+                                    + (1.0 - std::pow(std::abs(lambda(1)), j))      / (1.0 - std::abs(lambda(1)))
                                     * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
                                     );
                         norm1   = std::max(colSumF, norm1);
@@ -1023,12 +1024,13 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                                 * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1));
                     norm1   = std::max(colSumF, norm1);
                     for(int j = 1; j <= m(1)-2; j++){
-                        colSumF = std::pow(std::abs(lambda(0)), m(0)) * std::pow(std::abs(lambda(1)), j) * (
+                        colSumF = std::pow(std::abs(lambda(0)), m(0))
+                                    * std::pow(std::abs(lambda(1)), j)
+                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (
                                     (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
                                     * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
                                     + std::pow(std::abs(lambda(2)), N(2)-2)
-                                    + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                    * (1.0 - std::pow(std::abs(lambda(1)), j))   / (1.0 - std::abs(lambda(1)))
+                                    + (1.0 - std::pow(std::abs(lambda(1)), j))   / (1.0 - std::abs(lambda(1)))
                                     );
                         norm1   = std::max(colSumF, norm1);
                     }
