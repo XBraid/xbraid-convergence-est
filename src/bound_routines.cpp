@@ -1102,22 +1102,85 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                 double norm1    = 0.0;
                 double normInf  = 0.0;
                 if(theoryLevel == 0){
-                    cout << ">>>ERROR: Implementation of error_l2_sqrt_expression_upper_bound for four grids not finished." << endl;
-                    throw;
-                }else if(theoryLevel == 1){
                     // abs column sums
-                    colSumC0    = std::pow(std::abs(lambda(3)), N(3)-2) * std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
+                    colSumC0    = std::pow(std::abs(lambda(3)), N(3)-2)
+                                    * std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
                                     + std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
                                         * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
-                                        * (1.0 - std::pow(std::abs(lambda(2)), m(2))) / (1.0 - std::abs(lambda(2)))
-                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                        * (1.0 - std::pow(std::abs(lambda(2)), m(2)))   / (1.0 - std::abs(lambda(2)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                        * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
                                     + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
                                         * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1)) / (1.0 - std::abs(lambda(2)))
-                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                        * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
+                                    + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                        * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)));
+                    norm1       = std::max(colSumC0, norm1);
+                    for(int j = 1; j <= m(2)-1; j++){
+                        double summ = 0.0;
+                        for(int k = 0; k <= j-2; k++){
+                            summ    = summ + std::pow(std::abs(lambda(2)), k);
+                        }
+                        colSumCF    = std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1)) * (
+                                        std::pow(std::abs(lambda(3)), N(3)-2)
+                                            + (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                                * (1.0 - std::pow(std::abs(lambda(2)), m(2))) / (1.0 - std::abs(lambda(2)))
+                                                * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                                * (1.0 - std::pow(std::abs(lambda(0)), m(0))) / (1.0 - std::abs(lambda(0)))
+                                        ) * std::pow(std::abs(lambda(2)), j-1)
+                                        + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                            * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
+                                        + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                            * (1.0 - std::pow(std::abs(lambda(0)), m(0))) / (1.0 - std::abs(lambda(0)))
+                                            * summ;
+                        norm1       = std::max(colSumCF, norm1);
+                    }
+                    for(int r = 0; r <= m(1)-2; r++){
+                        for(int j = 0; j <= m(2)-1; j++){
+                            double summ1 = 0.0;
+                            double summ2 = 0.0;
+                            for(int k = 0; k <= j-1; k++){
+                                summ1   = summ1 + std::pow(std::abs(lambda(2)), k);
+                            }
+                            for(int k = 0; k <= r-1; k++){
+                                summ2   = summ2 + std::pow(std::abs(lambda(1)), k);
+                            }
+                            colSumF = std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (
+                                        std::pow(std::abs(lambda(3)), N(3)-2)
+                                        + (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                            * (1.0 - std::pow(std::abs(lambda(2)), m(2))) / (1.0 - std::abs(lambda(2)))
+                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                            * (1.0 - std::pow(std::abs(lambda(0)), m(0))) / (1.0 - std::abs(lambda(0)))
+                                        ) * std::pow(std::abs(lambda(1)), r) * std::pow(std::abs(lambda(2)), j)
+                                        + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
+                                            * (1.0 - std::pow(std::abs(lambda(0)), m(0))) / (1.0 - std::abs(lambda(0)))
+                                            * summ1;
+                                        + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                            * (1.0 - std::pow(std::abs(lambda(0)), m(0))) / (1.0 - std::abs(lambda(0)))
+                                            * summ2;
+                            norm1   = std::max(colSumF, norm1);
+                        }
+                    }
+                }else if(theoryLevel == 1){
+                    // abs column sums
+                    colSumC0    = std::pow(std::abs(lambda(3)), N(3)-2)
+                                    * std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
+                                    + std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
+                                        * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                        * (1.0 - std::pow(std::abs(lambda(2)), m(2)))   / (1.0 - std::abs(lambda(2)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                    + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                        * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1)) / (1.0 - std::abs(lambda(2)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
                                     + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                         * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)));
                     norm1       = std::max(colSumC0, norm1);
-                    for(int j = 1; j < m(2); j++){
+                    for(int j = 1; j <= m(2)-1; j++){
                         double summ = 0.0;
                         for(int k = 0; k <= j-2; k++){
                             summ    = summ + std::pow(std::abs(lambda(2)), k);
@@ -1159,70 +1222,66 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                             norm1   = std::max(colSumF, norm1);
                         }
                     }
-                    // abs row sums
-                    rowSumCN    = std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                    * (1.0 - std::pow(std::abs(lambda(3)), N(3)-1)) / (1.0 - std::abs(lambda(3)))
-                                    * (1.0 - std::pow(std::abs(lambda(2)), m(2)))   / (1.0 - std::abs(lambda(2)))
-                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
-                                    + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                        * (1.0 - std::pow(std::abs(lambda(3)), N(3)-1)) / (1.0 - std::abs(lambda(3)))
-                                        * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2)))
-                                    + std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
-                                        * (1.0 - std::pow(std::abs(lambda(3)), N(3)-1)) / (1.0 - std::abs(lambda(3)));
-                    normInf     = std::max(rowSumCN, normInf);
-                    cout << setprecision(3) << normInf << " ";
-                    for(int j = 1; j <= m(2)-1; j++){
-                        rowSumCF    = std::pow(std::abs(lambda(2)), j) * (
-                                         std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
-                                            * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
-                                         + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                            * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
-                                            * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2)))
-                                         + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                            * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
-                                            * (1.0 - std::pow(std::abs(lambda(2)), m(2)))   / (1.0 - std::abs(lambda(2)))
-                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
-                                        ) + (1.0 - std::pow(std::abs(lambda(2)), j)) / (1.0 - std::abs(lambda(2))) * (
-                                            std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                            + (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2))) * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                        );
-                        normInf     = std::max(rowSumCF, normInf);
-                        cout << setprecision(3) << normInf << " ";
-                    }
-                    for(int j = 0; j <= m(2)-1; j++){
-                        for(int r = 1; r <= m(1)-1; r++){
-                            double summ = 0.0;
-                            for(int k = 0; k <= j-1; k++){
-                                summ    = summ + std::pow(std::abs(lambda(2)), k);
-                            }
-                            rowSumF = std::pow(std::abs(lambda(1)), r) * (
-                                            std::pow(std::abs(lambda(2)), j)
-                                                * std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
-                                                * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
-                                            + std::pow(std::abs(lambda(2)), j)
-                                                * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                                * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
-                                                * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2)))
-                                            + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                                * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
-                                                * (1.0 - std::pow(std::abs(lambda(2)), m(2)))   / (1.0 - std::abs(lambda(2)))
-                                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
-                                            + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                                * summ
-                                            + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                                * summ
-                                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
-                                        ) + std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (1.0 - std::pow(std::abs(lambda(1)), r)) / (1.0 - std::abs(lambda(1)));
-                            normInf = std::max(rowSumF, normInf);
-                            cout << setprecision(3) << normInf << " ";
-                        }
-                    }
-                    cout << endl;
-                    val = sqrt(norm1 * normInf);
                 }else{
                     cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound not implemented for four levels (FCF-relaxation) on level " << theoryLevel << endl;
                     throw;
                 }
+                // abs row sums
+                rowSumCN    = std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                * (1.0 - std::pow(std::abs(lambda(3)), N(3)-1)) / (1.0 - std::abs(lambda(3)))
+                                * (1.0 - std::pow(std::abs(lambda(2)), m(2)))   / (1.0 - std::abs(lambda(2)))
+                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                    * (1.0 - std::pow(std::abs(lambda(3)), N(3)-1)) / (1.0 - std::abs(lambda(3)))
+                                    * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2)))
+                                + std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
+                                    * (1.0 - std::pow(std::abs(lambda(3)), N(3)-1)) / (1.0 - std::abs(lambda(3)));
+                normInf     = std::max(rowSumCN, normInf);
+                for(int j = 1; j <= m(2)-1; j++){
+                    rowSumCF    = std::pow(std::abs(lambda(2)), j) * (
+                                        std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
+                                        * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                        + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                        * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                        * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2)))
+                                        + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                        * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                        * (1.0 - std::pow(std::abs(lambda(2)), m(2)))   / (1.0 - std::abs(lambda(2)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                    ) + (1.0 - std::pow(std::abs(lambda(2)), j)) / (1.0 - std::abs(lambda(2))) * (
+                                        std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                        + (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2))) * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                    );
+                    normInf     = std::max(rowSumCF, normInf);
+                }
+                for(int j = 0; j <= m(2)-1; j++){
+                    for(int r = 1; r <= m(1)-1; r++){
+                        double summ = 0.0;
+                        for(int k = 0; k <= j-1; k++){
+                            summ    = summ + std::pow(std::abs(lambda(2)), k);
+                        }
+                        rowSumF = std::pow(std::abs(lambda(1)), r) * (
+                                        std::pow(std::abs(lambda(2)), j)
+                                            * std::abs(lambda(3) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * std::pow(lambda(2), m(2)-1))
+                                            * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                        + std::pow(std::abs(lambda(2)), j)
+                                            * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                            * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                            * (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2)))
+                                        + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                            * (1.0 - std::pow(std::abs(lambda(3)), N(3)-2)) / (1.0 - std::abs(lambda(3)))
+                                            * (1.0 - std::pow(std::abs(lambda(2)), m(2)))   / (1.0 - std::abs(lambda(2)))
+                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                        + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                            * summ
+                                        + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                            * summ
+                                            * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                    ) + std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (1.0 - std::pow(std::abs(lambda(1)), r)) / (1.0 - std::abs(lambda(1)));
+                        normInf = std::max(rowSumF, normInf);
+                    }
+                }
+                val = sqrt(norm1 * normInf);
                 break;
             }
             case mgritestimate::FCF_relaxation:{
