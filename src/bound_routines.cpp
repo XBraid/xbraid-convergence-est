@@ -986,7 +986,7 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                         colSumF = std::pow(std::abs(lambda(0)), m(0))
                                     * std::pow(std::abs(lambda(1)), j)
                                     * std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (
-                                    * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
+                                    (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
                                     * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
                                     * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
                                     + std::pow(std::abs(lambda(2)), N(2)-2)
@@ -1287,16 +1287,16 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                 break;
             }
             case mgritestimate::FCF_relaxation:{
-                cout << ">>>ERROR: Implementation of error_l2_sqrt_expression_upper_bound with FCF-relaxation for four grids not finished." << endl;
+                cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound with FCF-relaxation for four grids not implemented." << endl;
                 break;
             }
             default:{
-                cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound only implemented for F- and FCF-relaxation" << endl;
+                cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound only implemented for F- and FCF-relaxation." << endl;
                 throw;
             }
         }
     }else{
-            cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound not implemented for " << numberOfLevels << " levels" << endl;
+            cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound not implemented for " << numberOfLevels << " levels." << endl;
             throw;
     }
     return val;
@@ -1338,84 +1338,176 @@ double get_error_l2_sqrt_expression_approximate_rate(int r,                     
     double val      = 0.0;
     double colSum   = 0.0;
     double rowSum   = 0.0;
-    // set up \f$ \tilde{m} \f$
-    Col<int> mt;
-    mt.set_size(numberOfLevels);
-    for(int l = 0; l < numberOfLevels-1; l++){
-        mt(l) = m(l);
-    }
-    mt(numberOfLevels-1) = N(numberOfLevels-1);
-    if(theoryLevel == 0){
-        // compute approximation for column sum
-        for(int l = 1; l <= numberOfLevels-1; l++){
-            cx_double prod1 = std::pow(lambda(0), mt(0));
-            double prod2 = 1.0;
-            for(int k = 1; k <= l-1; k++){
-                prod1 *= std::pow(lambda(k), mt(k)-1);
+    switch(r){
+        case mgritestimate::F_relaxation:{
+            // set up \f$ \tilde{m} \f$
+            Col<int> mt;
+            mt.set_size(numberOfLevels);
+            for(int l = 0; l < numberOfLevels-1; l++){
+                mt(l) = m(l);
             }
-            for(int k = 1; k <= l; k++){
-                prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k)-1)) / (1.0 - std::abs(lambda(k)));
+            mt(numberOfLevels-1) = N(numberOfLevels-1);
+            if(theoryLevel == 0){
+                // compute approximation for column sum
+                for(int l = 1; l <= numberOfLevels-1; l++){
+                    cx_double prod1 = std::pow(lambda(0), mt(0));
+                    double prod2 = 1.0;
+                    for(int k = 1; k <= l-1; k++){
+                        prod1 *= std::pow(lambda(k), mt(k)-1);
+                    }
+                    for(int k = 1; k <= l; k++){
+                        prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k)-1)) / (1.0 - std::abs(lambda(k)));
+                    }
+                    colSum += std::abs(lambda(l) - prod1) * prod2;
+                }
+                colSum *= (1.0 - std::pow(std::abs(lambda(0)), mt(0))) / (1.0 - std::abs(lambda(0)));
+                if(numberOfLevels > 2){
+                    cx_double prod1 = std::pow(lambda(0), mt(0));
+                    for(int k = 1; k <= numberOfLevels-2; k++){
+                        prod1 *= std::pow(lambda(k), mt(k)-1);
+                    }
+                    colSum += std::pow(std::abs(lambda(numberOfLevels-1)), mt(numberOfLevels-1)-1) * std::abs(lambda(numberOfLevels-1) - prod1);
+                }
+                // compute approximation of row sum
+                for(int l = 1; l <= numberOfLevels-1; l++){
+                    cx_double prod1 = std::pow(lambda(0), mt(0));
+                    double prod2 = 1.0;
+                    for(int k = 1; k <= l-1; k++){
+                        prod1 *= std::pow(lambda(k), mt(k)-1);
+                    }
+                    for(int k = l; k <= numberOfLevels-1; k++){
+                        prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k))) / (1.0 - std::abs(lambda(k)));
+                    }
+                    rowSum += std::abs(lambda(l) - prod1) * prod2;
+                }
+            }else if(theoryLevel == 1){
+                // compute approximation for column sum
+                for(int l = 1; l <= numberOfLevels-1; l++){
+                    cx_double prod1 = std::pow(lambda(0), mt(0));
+                    double prod2 = 1.0;
+                    for(int k = 1; k <= l-1; k++){
+                        prod1 *= std::pow(lambda(k), mt(k)-1);
+                    }
+                    for(int k = 1; k <= l; k++){
+                        prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k)-1)) / (1.0 - std::abs(lambda(k)));
+                    }
+                    colSum += std::abs(lambda(l) - prod1) * prod2;
+                }
+                if(numberOfLevels > 2){
+                    cx_double prod1 = std::pow(lambda(0), mt(0));
+                    for(int k = 1; k <= numberOfLevels-2; k++){
+                        prod1 *= std::pow(lambda(k), mt(k)-1);
+                    }
+                    colSum += std::pow(std::abs(lambda(numberOfLevels-1)), mt(numberOfLevels-1)-1) * std::abs(lambda(numberOfLevels-1) - prod1);
+                }
+                // compute approximation of row sum
+                for(int l = 1; l <= numberOfLevels-1; l++){
+                    cx_double prod1 = std::pow(lambda(0), mt(0));
+                    double prod2 = 1.0;
+                    for(int k = 1; k <= l-1; k++){
+                        prod1 *= std::pow(lambda(k), mt(k)-1);
+                    }
+                    for(int k = l; k <= numberOfLevels-1; k++){
+                        prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k))) / (1.0 - std::abs(lambda(k)));
+                    }
+                    rowSum += std::abs(lambda(l) - prod1) * prod2;
+                }
+            }else{
+                cout << ">>>ERROR: error_l2_sqrt_expression_approximate_rate not implemented on level " << theoryLevel << "." << endl << endl;
+                throw;
             }
-            colSum += std::abs(lambda(l) - prod1) * prod2;
+            break;
         }
-        colSum *= (1.0 - std::pow(std::abs(lambda(0)), mt(0))) / (1.0 - std::abs(lambda(0)));
-        if(numberOfLevels > 2){
-            cx_double prod1 = std::pow(lambda(0), mt(0));
+        case mgritestimate::FCF_relaxation:{
+            double summ     = 0.0;
+            double prod1    = 0.0;
+            cx_double prod2 = 0.0;
+            double prod3    = 0.0;
+            // approximate column sum
+            colSum = std::pow(std::abs(lambda(0)), m(0))
+                        * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                        * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)));
+            summ    = 0.0;
+            for(int k = 2; k <= numberOfLevels-2; k++){
+                prod1   = 1.0;
+                prod2   = std::pow(lambda(0), m(0));
+                prod3   = 1.0;
+                for(int j = 1; j <= k-1; j++){
+                    prod1 *= std::abs(lambda(j));
+                    prod2 *= std::pow(lambda(j), m(j)-1);
+                }
+                for(int j = 1; j <= k; j++){
+                    prod3 *= (1.0 - std::pow(std::abs(lambda(j)), m(j))) / (1.0 - std::abs(lambda(j)));
+                }
+                summ += prod1 * std::abs(lambda(k) - prod2) * prod3;
+            }
+            colSum += 1.0 / (numberOfLevels - 1.0) * std::pow(std::abs(lambda(0)), m(0)) * summ;
+            summ    = 0.0;
+            prod1   = std::pow(std::abs(lambda(0)), m(0));
+            prod3   = 1.0;
             for(int k = 1; k <= numberOfLevels-2; k++){
-                prod1 *= std::pow(lambda(k), mt(k)-1);
+                prod1 *= std::abs(lambda(k));
+                prod3 *= (1.0 - std::pow(std::abs(lambda(k)), m(k))) / (1.0 - std::abs(lambda(k)));
             }
-            colSum += std::pow(std::abs(lambda(numberOfLevels-1)), mt(numberOfLevels-1)-1) * std::abs(lambda(numberOfLevels-1) - prod1);
-        }
-        // compute approximation of row sum
-        for(int l = 1; l <= numberOfLevels-1; l++){
-            cx_double prod1 = std::pow(lambda(0), mt(0));
-            double prod2 = 1.0;
-            for(int k = 1; k <= l-1; k++){
-                prod1 *= std::pow(lambda(k), mt(k)-1);
+            for(int k = 2; k <= numberOfLevels-1; k++){
+                prod2   = std::pow(lambda(0), m(0));
+                for(int j = 1; j <= k-1; j++){
+                    prod2 *= std::pow(lambda(j), m(j)-1);
+                }
+                summ += std::abs(lambda(k) - prod2);
             }
-            for(int k = l; k <= numberOfLevels-1; k++){
-                prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k))) / (1.0 - std::abs(lambda(k)));
+            colSum += 1.0 / (numberOfLevels - 1.0)
+                        * (1.0 - std::pow(std::abs(lambda(numberOfLevels-1)), N(numberOfLevels-1)-1)) / (1.0 - std::abs(lambda(numberOfLevels-1)))
+                        * prod1 * summ * prod3;
+            prod1   = std::abs(lambda(0));
+            prod3   = 1.0;
+            for(int k = 0; k <= numberOfLevels-2; k++){
+                prod1 *= std::pow(std::abs(lambda(k)), m(k)-1);
             }
-            rowSum += std::abs(lambda(l) - prod1) * prod2;
-        }
-    }else if(theoryLevel == 1){
-        // compute approximation for column sum
-        for(int l = 1; l <= numberOfLevels-1; l++){
-            cx_double prod1 = std::pow(lambda(0), mt(0));
-            double prod2 = 1.0;
-            for(int k = 1; k <= l-1; k++){
-                prod1 *= std::pow(lambda(k), mt(k)-1);
-            }
-            for(int k = 1; k <= l; k++){
-                prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k)-1)) / (1.0 - std::abs(lambda(k)));
-            }
-            colSum += std::abs(lambda(l) - prod1) * prod2;
-        }
-        if(numberOfLevels > 2){
-            cx_double prod1 = std::pow(lambda(0), mt(0));
             for(int k = 1; k <= numberOfLevels-2; k++){
-                prod1 *= std::pow(lambda(k), mt(k)-1);
+                prod3 *= (1.0 - std::pow(std::abs(lambda(k)), m(k))) / (1.0 - std::abs(lambda(k)));
             }
-            colSum += std::pow(std::abs(lambda(numberOfLevels-1)), mt(numberOfLevels-1)-1) * std::abs(lambda(numberOfLevels-1) - prod1);
+            colSum += 1.0 / (numberOfLevels - 1.0)
+                        * (1.0 - std::pow(std::abs(lambda(numberOfLevels-1)), N(numberOfLevels-1)-1)) / (1.0 - std::abs(lambda(numberOfLevels-1)))
+                        * prod1 * prod3 * std::abs(lambda(1) - std::pow(lambda(0), m(0)));
+            // approximate row sum
+            rowSum = 0.0;
+            for(int k = 1; k <= numberOfLevels-1; k++){
+                prod1   = 1.0;
+                prod2   = std::pow(lambda(0), m(0));
+                prod3   = 1.0;
+                for(int j = 1; j <= k-1; j++){
+                    prod1 *= std::abs(lambda(j));
+                    prod2 *= std::pow(lambda(j), m(j)-1);
+
+                }
+                for(int j = k; j <= numberOfLevels-2; j++){
+                    prod3 *= (1.0 - std::pow(std::abs(lambda(j)), m(j))) / (1.0 - std::abs(lambda(j)));
+                }
+                rowSum += prod1 * std::abs(lambda(k) - prod2) * prod3;
+            }
+            rowSum *= std::pow(std::abs(lambda(0)), m(0))
+                        * (1.0 - std::pow(std::abs(lambda(numberOfLevels-1)), N(numberOfLevels-1))) / (1.0 - std::abs(lambda(numberOfLevels-1)));
+            if(theoryLevel == 0){
+                colSum *= (1.0 - std::pow(std::abs(lambda(0)), m(0))) / (1.0 - std::abs(lambda(0)));
+            }else if(theoryLevel == 1){
+                // do nothing
+            }else{
+                cout << ">>>ERROR: error_l2_sqrt_expression_approximate_rate not implemented on level " << theoryLevel << "." << endl << endl;
+                throw;
+            }
+            break;
         }
-        // compute approximation of row sum
-        for(int l = 1; l <= numberOfLevels-1; l++){
-            cx_double prod1 = std::pow(lambda(0), mt(0));
-            double prod2 = 1.0;
-            for(int k = 1; k <= l-1; k++){
-                prod1 *= std::pow(lambda(k), mt(k)-1);
-            }
-            for(int k = l; k <= numberOfLevels-1; k++){
-                prod2 *= (1.0 - std::pow(std::abs(lambda(k)), mt(k))) / (1.0 - std::abs(lambda(k)));
-            }
-            rowSum += std::abs(lambda(l) - prod1) * prod2;
+        default:{
+            cout << ">>>ERROR: error_l2_sqrt_expression_approximate_rate only implemented for F- and FCF-relaxation." << endl;
+            throw;
         }
-    }else{
-        cout << ">>>ERROR: error_l2_sqrt_expression_approximate_rate not implemented on level " << theoryLevel << "." << endl << endl;
-        throw;
     }
     // compute approximation of convergence rate
     val = std::sqrt(colSum * rowSum);
+    if(isnan(val)){
+        val = 0.0;
+    }
     return val;
 }
 

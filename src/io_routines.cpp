@@ -123,6 +123,8 @@ void get_default_filename(const int bound, const int relax, string *filename){
                 *filename = "error_l2_tight_twogrid_upper_bound_E_FCF";
             }else if(bound == mgritestimate::error_l2_lower_bound){
                 *filename = "error_l2_lower_bound_E_FCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_expression_approximate_rate){
+                *filename = "error_l2_sqrt_expression_approximate_rate_E_FCF";
             }else if(bound == mgritestimate::residual_l2_upper_bound){
                 *filename = "residual_l2_upper_bound_R_FCF";
             }else if(bound == mgritestimate::residual_l2_sqrt_upper_bound){
