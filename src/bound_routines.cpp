@@ -1424,9 +1424,11 @@ double get_error_l2_sqrt_expression_approximate_rate(int r,                     
             cx_double prod2 = 0.0;
             double prod3    = 0.0;
             // approximate column sum
-            colSum = std::pow(std::abs(lambda(0)), m(0))
-                        * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                        * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)));
+            if(numberOfLevels > 2){
+                colSum = std::pow(std::abs(lambda(0)), m(0))
+                            * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                            * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)));
+            }
             summ    = 0.0;
             for(int k = 2; k <= numberOfLevels-2; k++){
                 prod1   = 1.0;

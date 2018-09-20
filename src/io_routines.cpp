@@ -41,6 +41,10 @@ void export_vector_minmax(int bound, arma::Col<double> *v, const string filename
     string prefix;
     string suffix;
     arma::mat tmp(1, 1);
+    if(arma::any(arma::abs((*v)+1.0)<1.0e-12)){
+        cout << ">>>WARNING: Important assumption violated. Encountered eig(Phi) > 1." << endl << endl;
+        return;
+    }
     get_filename_suffix(type, suffix);
     if((bound == mgritestimate::error_l2_upper_bound)
         || (bound == mgritestimate::error_l2_sqrt_upper_bound)
@@ -51,8 +55,8 @@ void export_vector_minmax(int bound, arma::Col<double> *v, const string filename
         || (bound == mgritestimate::residual_l2_sqrt_upper_bound)){
         prefix = "max_";
         tmp.fill(arma::max(*v));
-        tmp.save(prefix+filename+suffix, type);
         cout << "Convergence <= " << std::setprecision(17) << tmp[0, 0] << endl << endl;
+        tmp.save(prefix+filename+suffix, type);
     }else if((bound == mgritestimate::error_l2_lower_bound)
         || (bound == mgritestimate::error_l2_sqrt_lower_bound)
         || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)

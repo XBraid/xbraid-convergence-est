@@ -131,11 +131,11 @@ void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see con
             A.set_size(2,2);
             b.set_size(2);
             c.set_size(2);
-            double  gamma = 1.0 - 1.0 / sqrt(2.0);
-            A       = {{gamma,      0.0},
-                       {1.0-gamma,  gamma}};
-            b       = {1.0-gamma,   gamma};
-            c       = {gamma,       1.0};
+            double  gamma = 1.0 / sqrt(2.0);
+            A       = {{1.0-gamma,      0.0},
+                       {2.0*gamma-1.0,  1.0-gamma}};
+            b       = {0.5,             0.5};
+            c       = {1.0-gamma,       gamma};
             break;
         }
         case rkconst::L_stable_SDIRK3:
@@ -150,7 +150,7 @@ void get_butcher_tableau(const int method,      ///< Runge-Kutta method, see con
                        {s-q,    q,          0.0},
                        {r,      1.0-q-r,    q}};
             b       = {r,       1.0-q-r,    q};
-            c       = {q,       s,          r};
+            c       = {q,       s,          1.0};
             break;
         }
         case rkconst::L_stable_SDIRK4:

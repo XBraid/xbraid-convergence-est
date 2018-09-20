@@ -83,7 +83,7 @@ namespace mgritestimate{
  */
 namespace rkconst{
     //-------------------------------------- A-stable methods --------------------------------------------------------//
-    /** 2nd-order A-stable Lobatto IIIA method, Butcher tableau:
+    /** 2nd-order A-L-stable Lobatto IIIA (ESDIRK) method, Butcher tableau:
      *  <table>
      *      <tr>    <td>    \f$0\f$ <td>    \f$0\f$             <td>    \f$0\f$
      *      <tr>    <td>    \f$1\f$ <td>    \f$\frac{1}{2}\f$   <td>    \f$\frac{1}{2}\f$
@@ -164,7 +164,7 @@ namespace rkconst{
      *  </table>
      *  See [Hairer, Wanner (1996)], Table 5.1.
      *
-     *  Note: Also known as implicit midpoint rule.
+     *  Note: Also known as implicit midpoint rule. It is a symplectic solver.
      */
     const int A_stable_Gauss_order2 = 802;
     /** 4th-order A-stable Gauss method, Butcher tableau:
@@ -217,7 +217,7 @@ namespace rkconst{
      */
     const int A_stable_SDIRK4 = 104;
     //-------------------------------------- L-stable methods --------------------------------------------------------//
-    /** 1st-order L-stable SDIRK method, Butcher tableau:
+    /** 1st-order A-B-L-stable SDIRK method, Butcher tableau:
      *  <table>
      *      <tr>    <td>    \f$1\f$ <td>    \f$1\f$
      *      <tr>    <td>            <td>    \f$1\f$
@@ -229,11 +229,11 @@ namespace rkconst{
     const int L_stable_SDIRK1 = 201;
     /** 2nd-order L-stable SDIRK method, Butcher tableau:
      *  <table>
-     *      <tr>    <td>    \f$\gamma\f$    <td>    \f$\gamma\f$   <td>    \f$0\f$
-     *      <tr>    <td>    \f$1\f$         <td>    \f$1-\gamma\f$ <td>    \f$\gamma\f$
-     *      <tr>    <td>                    <td>    \f$1-\gamma\f$ <td>    \f$\gamma\f$
+     *      <tr>    <td>    \f$1-\gamma\f$  <td>    \f$1-\gamma\f$  <td>    \f$0\f$
+     *      <tr>    <td>    \f$\gamma\f$    <td>    \f$2\gamma-1\f$ <td>    \f$1-\gamma\f$
+     *      <tr>    <td>                    <td>    \f$0.5\f$       <td>    \f$0.5\f$
      *  </table>
-     *  with \f$\gamma = 1.0 - 1.0 / \sqrt{2.0}\f$.
+     *  with \f$\gamma = 1.0 / \sqrt{2.0}\f$.
      *  See [Dobrev et al. (2017)], Table 3.1.
      */
     const int L_stable_SDIRK2 = 202;
@@ -241,7 +241,7 @@ namespace rkconst{
      *  <table>
      *      <tr>    <td>    \f$q\f$     <td>    \f$q\f$     <td>    \f$0\f$     <td>    \f$0\f$
      *      <tr>    <td>    \f$s\f$     <td>    \f$s-q\f$   <td>    \f$q\f$     <td>    \f$0\f$
-     *      <tr>    <td>    \f$r\f$     <td>    \f$r\f$     <td>    \f$1-q-r\f$ <td>    \f$q\f$
+     *      <tr>    <td>    \f$1\f$     <td>    \f$r\f$     <td>    \f$1-q-r\f$ <td>    \f$q\f$
      *      <tr>    <td>                <td>    \f$r\f$     <td>    \f$1-q-r\f$ <td>    \f$q\f$
      *  </table>
      *  with \f$q = 0.435866521508458999416019\f$, \f$r = 1.20849664917601007033648\f$ and \f$s = 0.717933260754229499708010\f$.
