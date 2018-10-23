@@ -26,7 +26,7 @@ void export_vector_minmax(int bound, arma::Col<double> *v, const string filename
 
 void get_filename_suffix(arma::file_type type, string &suffix);
 
-void get_default_filename(const int bound, const int relax, string *filename);
+void get_default_filename(const int cycle, const int bound, const int relax, string *filename);
 
 int parse_commandline_options(appStruct &app, int argc, char** argv);
 

@@ -5,28 +5,43 @@
  */
 void get_propagator_bound(const int bound,                  ///< requested bound, see constants.hpp
                           int theoryLevel,                  ///< time grid level, where bound is computed
+                          const int cycle,                  ///< cycling strategy, see constants.hpp
                           const int relax,                  ///< relaxation scheme, see constants.hpp
                           Col<int> numberOfTimeSteps,       ///< number of time steps on all time grids
                           Col<int> coarseningFactors,       ///< temporal coarsening factors for levels 0-->1, 1-->2, etc.
                           Col<double> **lambda,             ///< eigenvalues on each time grid
                           Col<double> *&estimate            ///< on return, the estimate for all eigenvalues
                           ){
-    if((bound == mgritestimate::error_l2_upper_bound)
-        || (bound == mgritestimate::error_l2_sqrt_upper_bound)
-        || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
-        || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
-        || (bound == mgritestimate::error_l2_lower_bound)
-        || (bound == mgritestimate::error_l2_sqrt_lower_bound)
-        || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
-        || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
-        get_error_l2_propagator_bound(bound, theoryLevel, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
-    }else if((bound == mgritestimate::residual_l2_upper_bound)
-        || (bound == mgritestimate::residual_l2_sqrt_upper_bound)
-        || (bound == mgritestimate::residual_l2_lower_bound)){
-        get_residual_l2_propagator_bound(bound, theoryLevel, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+    if(cycle == mgritestimate::V_cycle){
+        if((bound == mgritestimate::error_l2_upper_bound)
+            || (bound == mgritestimate::error_l2_sqrt_upper_bound)
+            || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
+            || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
+            || (bound == mgritestimate::error_l2_lower_bound)
+            || (bound == mgritestimate::error_l2_sqrt_lower_bound)
+            || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
+            || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
+            get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+        }else if((bound == mgritestimate::residual_l2_upper_bound)
+            || (bound == mgritestimate::residual_l2_sqrt_upper_bound)
+            || (bound == mgritestimate::residual_l2_lower_bound)){
+            get_residual_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+        }else{
+            cout << ">>>ERROR: Unknown bound type " << bound << endl << endl;
+            throw;
+        }
+    }else if(cycle == mgritestimate::F_cycle){
+        if((bound == mgritestimate::error_l2_upper_bound)
+            || (bound == mgritestimate::error_l2_sqrt_upper_bound)){
+                get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+        }else if((bound == mgritestimate::residual_l2_upper_bound)
+            || (bound == mgritestimate::residual_l2_sqrt_upper_bound)){
+                get_residual_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+        }else{
+            cout << ">>>ERROR Unknown bound type " << bound << " for F-cycle." << endl << endl;
+        }
     }else{
-        cout << ">>>ERROR: Unknown bound type " << bound << endl << endl;
-        throw;
+        cout << ">>>ERROR: Unknown cycling strategy " << cycle << " for bound type " << bound << endl << endl;
     }
 }
 
@@ -35,28 +50,43 @@ void get_propagator_bound(const int bound,                  ///< requested bound
  */
 void get_propagator_bound(const int bound,                  ///< requested bound, see constants.hpp
                           int theoryLevel,                  ///< time grid level, where bound is computed
+                          const int cycle,                  ///< cycling strategy, see constants.hpp
                           const int relax,                  ///< relaxation scheme, see constants.hpp
                           Col<int> numberOfTimeSteps,       ///< number of time steps on all time grids
                           Col<int> coarseningFactors,       ///< temporal coarsening factors for levels 0-->1, 1-->2, etc.
                           Col<cx_double> **lambda,             ///< eigenvalues on each time grid
                           Col<double> *&estimate            ///< on return, the estimate for all eigenvalues
                           ){
-    if((bound == mgritestimate::error_l2_upper_bound)
-        || (bound == mgritestimate::error_l2_sqrt_upper_bound)
-        || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
-        || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
-        || (bound == mgritestimate::error_l2_lower_bound)
-        || (bound == mgritestimate::error_l2_sqrt_lower_bound)
-        || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
-        || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
-        get_error_l2_propagator_bound(bound, theoryLevel, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
-    }else if((bound == mgritestimate::residual_l2_upper_bound)
-        || (bound == mgritestimate::residual_l2_sqrt_upper_bound)
-        || (bound == mgritestimate::residual_l2_lower_bound)){
-        get_residual_l2_propagator_bound(bound, theoryLevel, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+    if(cycle == mgritestimate::V_cycle){
+        if((bound == mgritestimate::error_l2_upper_bound)
+            || (bound == mgritestimate::error_l2_sqrt_upper_bound)
+            || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
+            || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
+            || (bound == mgritestimate::error_l2_lower_bound)
+            || (bound == mgritestimate::error_l2_sqrt_lower_bound)
+            || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
+            || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
+            get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+        }else if((bound == mgritestimate::residual_l2_upper_bound)
+            || (bound == mgritestimate::residual_l2_sqrt_upper_bound)
+            || (bound == mgritestimate::residual_l2_lower_bound)){
+            get_residual_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+        }else{
+            cout << ">>>ERROR: Unknown bound type " << bound << " for V-cycle." << endl << endl;
+            throw;
+        }
+    }else if(cycle == mgritestimate::F_cycle){
+        if((bound == mgritestimate::error_l2_upper_bound)
+            || (bound == mgritestimate::error_l2_sqrt_upper_bound)){
+                get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+        }else if((bound == mgritestimate::residual_l2_upper_bound)
+            || (bound == mgritestimate::residual_l2_sqrt_upper_bound)){
+                get_residual_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
+        }else{
+            cout << ">>>ERROR Unknown bound type " << bound << " for F-cycle." << endl << endl;
+        }
     }else{
-        cout << ">>>ERROR: Unknown bound type " << bound << endl << endl;
-        throw;
+        cout << ">>>ERROR: Unknown cycling strategy " << cycle << " for bound type " << bound << endl << endl;
     }
 }
                         
@@ -65,6 +95,7 @@ void get_propagator_bound(const int bound,                  ///< requested bound
  */
 void get_error_l2_propagator_bound(const int bound,                 ///< requested bound, see constants.hpp
                                    int theoryLevel,                 ///< time grid level, where bound is computed
+                                   const int cycle,                 ///< cycling strategy, see constants.hpp
                                    const int relax,                 ///< relaxation scheme, see constants.hpp
                                    Col<int> numberOfTimeSteps,      ///< number of time steps on all time grids
                                    Col<int> coarseningFactors,      ///< temporal coarsening factors for levels 0-->1, 1-->2, etc.
@@ -88,11 +119,19 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
     int (*get_E)(arma::sp_mat *, arma::Col<double>, arma::Col<int>, arma::Col<int>, int);
     switch(relax){
         case mgritestimate::F_relaxation:{
-            get_E = get_E_F;
+            if(cycle == mgritestimate::V_cycle){
+                get_E = get_E_F;
+            }else if(cycle == mgritestimate::F_cycle){
+                get_E = get_F_F;
+            }
             break;
         }
         case mgritestimate::FCF_relaxation:{
-            get_E = get_E_FCF;
+            if(cycle == mgritestimate::V_cycle){
+                get_E = get_E_FCF;
+            }else if(cycle == mgritestimate::F_cycle){
+                get_E = get_F_FCF;
+            }
             break;
         }
         default:{
@@ -252,6 +291,7 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
  */
 void get_error_l2_propagator_bound(const int bound,                 ///< requested bound, see constants.hpp
                                    int theoryLevel,                 ///< time grid level, where bound is computed
+                                   const int cycle,                 ///< cycling strategy, see constants.hpp
                                    const int relax,                 ///< relaxation scheme, see constants.hpp
                                    Col<int> numberOfTimeSteps,      ///< number of time steps on all time grids
                                    Col<int> coarseningFactors,      ///< temporal coarsening factors for levels 0-->1, 1-->2, etc.
@@ -275,11 +315,19 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
     int (*get_E)(arma::sp_cx_mat *, arma::Col<arma::cx_double>, arma::Col<int>, arma::Col<int>, int);
     switch(relax){
         case mgritestimate::F_relaxation:{
-            get_E = get_E_F;
+            if(cycle == mgritestimate::V_cycle){
+                get_E = get_E_F;
+            }else if(cycle == mgritestimate::F_cycle){
+                get_E = get_F_F;
+            }
             break;
         }
         case mgritestimate::FCF_relaxation:{
-            get_E = get_E_FCF;
+            if(cycle == mgritestimate::V_cycle){
+                get_E = get_E_FCF;
+            }else if(cycle == mgritestimate::F_cycle){
+                get_E = get_F_FCF;
+            }
             break;
         }
         default:{
@@ -439,6 +487,7 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
  */
 void get_residual_l2_propagator_bound(const int bound,                  ///< requested bound, see constants.hpp
                                       int theoryLevel,                  ///< time grid level, where bound is computed
+                                      const int cycle,                  ///< cycling strategy, see constants.hpp
                                       const int relax,                  ///< relaxation scheme, see constants.hpp
                                       Col<int> numberOfTimeSteps,       ///< number of time steps on all time grids
                                       Col<int> coarseningFactors,       ///< temporal coarsening factors for levels 0-->1, 1-->2, etc.
@@ -459,7 +508,7 @@ void get_residual_l2_propagator_bound(const int bound,                  ///< req
     (*estimate).set_size(numberOfSamples);
     (*estimate).fill(-2.0);
     // setup function pointer for error propagator
-    int (*get_R)(arma::sp_mat *, arma::Col<double>, arma::Col<int>, arma::Col<int>, int);
+    int (*get_R)(arma::sp_mat *, arma::Col<double>, arma::Col<int>, arma::Col<int>, int, int);
     switch(relax){
         case mgritestimate::F_relaxation:{
             get_R = get_R_F;
@@ -495,7 +544,7 @@ void get_residual_l2_propagator_bound(const int bound,                  ///< req
                 }
                 sp_mat *R = new sp_mat();
                 // get residual propagator
-                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel, cycle);
                 // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
                 if(errCode == -1){
                     (*estimate)(evalIdx) = -1.0;
@@ -517,7 +566,7 @@ void get_residual_l2_propagator_bound(const int bound,                  ///< req
                 mat pinvR;
                 pinvSuccess = true;
                 // get residual propagator
-                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel, cycle);
                 // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
                 if(errCode == -1){
                     (*estimate)(evalIdx) = -1.0;
@@ -547,7 +596,7 @@ void get_residual_l2_propagator_bound(const int bound,                  ///< req
                 }
                 sp_mat *R = new sp_mat();
                 // get residual propagator
-                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel, cycle);
                 // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
                 if(errCode == -1){
                     (*estimate)(evalIdx) = -1.0;
@@ -574,6 +623,7 @@ void get_residual_l2_propagator_bound(const int bound,                  ///< req
  */
 void get_residual_l2_propagator_bound(const int bound,                  ///< requested bound, see constants.hpp
                                       int theoryLevel,                  ///< time grid level, where bound is computed
+                                      const int cycle,                  ///< cycling strategy, see constants.hpp
                                       const int relax,                  ///< relaxation scheme, see constants.hpp
                                       Col<int> numberOfTimeSteps,       ///< number of time steps on all time grids
                                       Col<int> coarseningFactors,       ///< temporal coarsening factors for levels 0-->1, 1-->2, etc.
@@ -594,7 +644,7 @@ void get_residual_l2_propagator_bound(const int bound,                  ///< req
     (*estimate).set_size(numberOfSamples);
     (*estimate).fill(-2.0);
     // setup function pointer for residual propagator
-    int (*get_R)(arma::sp_cx_mat *, arma::Col<arma::cx_double>, arma::Col<int>, arma::Col<int>, int);
+    int (*get_R)(arma::sp_cx_mat *, arma::Col<arma::cx_double>, arma::Col<int>, arma::Col<int>, int, int);
     switch(relax){
         case mgritestimate::F_relaxation:{
             get_R = get_R_F;
@@ -630,7 +680,7 @@ void get_residual_l2_propagator_bound(const int bound,                  ///< req
                 }
                 sp_cx_mat *R = new sp_cx_mat();
                 // get residual propagator
-                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel, cycle);
                 // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
                 if(errCode == -1){
                     (*estimate)(evalIdx) = -1.0;
@@ -652,7 +702,7 @@ void get_residual_l2_propagator_bound(const int bound,                  ///< req
                 cx_mat pinvR;
                 pinvSuccess = true;
                 // get residual propagator
-                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel, cycle);
                 // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
                 if(errCode == -1){
                     (*estimate)(evalIdx) = -1.0;
@@ -682,7 +732,7 @@ void get_residual_l2_propagator_bound(const int bound,                  ///< req
                 }
                 sp_cx_mat *R = new sp_cx_mat();
                 // get residual propagator
-                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                errCode = get_R(R, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel, cycle);
                 // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
                 if(errCode == -1){
                     (*estimate)(evalIdx) = -1.0;

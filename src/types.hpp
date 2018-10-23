@@ -22,6 +22,7 @@ struct appStruct{
     int numberOfImagSamples;                                                ///< number of samples along complex axis if sampling spatial eigenvalues
     int bound;                                                              ///< bound to evaluate, see constants.hpp
     int theoryLevel;                                                        ///< bound is evaluated on this level
+    int cycle;                                                              ///< cycling strategy, see constants.hpp
     int relax;                                                              ///< relaxation scheme, see constants.hpp
     bool fileSpatialEigenvalues;                                            ///< indicates whether we are reading spatial eigenvalues from file
     bool filePhiEigenvalues;                                                ///< indicates whether we are reading eigenvalues of \f$Phi_l\f$ from file

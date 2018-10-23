@@ -15,6 +15,17 @@ namespace constants{
 namespace mgritestimate{
     //----------------------------------------------------------------------------------------------------------------//
     /**
+     *  Estimate V-cycle convergence
+     */
+    const int V_cycle = 0;
+    /**
+     *  Estimate F-cycle convergence
+     *
+     *  Note: F-cycle with one V-cycle per level.
+     */
+    const int F_cycle = 1;
+    //----------------------------------------------------------------------------------------------------------------//
+    /**
      *  F-relaxation on all levels
      */
     const int F_relaxation = 0;

@@ -31,10 +31,10 @@ int main(int argc, char** argv){
     begin = clock();
     // evaluate bound for residual or error propagator for complex eigenvalue case
     if(app.sampleComplexPlane || app.fileComplexEigenvalues){
-        get_propagator_bound(app.bound, app.theoryLevel, app.relax, app.numberOfTimeSteps, app.coarseningFactors, app.lambdac, app.estimate);
+        get_propagator_bound(app.bound, app.theoryLevel, app.cycle, app.relax, app.numberOfTimeSteps, app.coarseningFactors, app.lambdac, app.estimate);
     // evaluate bound for residual or error propagator for real eigenvalue case
     }else{
-        get_propagator_bound(app.bound, app.theoryLevel, app.relax, app.numberOfTimeSteps, app.coarseningFactors, app.lambdar, app.estimate);
+        get_propagator_bound(app.bound, app.theoryLevel, app.cycle, app.relax, app.numberOfTimeSteps, app.coarseningFactors, app.lambdar, app.estimate);
     }
     end = clock();
     cout << "Rank " << app.world_rank << " / " << app.world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl << endl;

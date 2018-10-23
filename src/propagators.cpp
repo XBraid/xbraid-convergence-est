@@ -1,7 +1,7 @@
 #include "propagators.hpp"
 
 /**
- *  get error propagator for V-cycle with FCF-F and >= 2 grid levels (real eigenvalues)
+ *  get error propagator for V-cycle with F-relaxation and >= 2 grid levels (real eigenvalues)
  */
 int get_E_F(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
     // check for valid arguments
@@ -281,9 +281,250 @@ int get_E_FCF(arma::sp_cx_mat *E_FCF, arma::Col<arma::cx_double> lambda, arma::C
 }
 
 /**
+ *  get error propagator for F-cycle with F-relaxation and >= 2 grid levels (real eigenvalues)
+ */
+int get_F_F(arma::sp_mat *F_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+    // check for valid arguments
+    if((theoryLevel != 0) && (theoryLevel != 1)){
+        std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
+        throw;
+    }
+    if((lambda.n_elem != Nl.n_elem) || (lambda.n_elem != ml.n_elem+1)){
+        std::cout << ">>>ERROR: Error propagator encountered invalid definition of number of levels." << std::endl;
+    }
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1;
+    }
+    // get number of levels
+    int numLevels = lambda.n_elem;
+    // if two-level algorithm, all cycling strategies coincide
+    arma::sp_mat *E_F = new arma::sp_mat();
+    get_E_F(E_F, lambda, Nl, ml, theoryLevel);
+    // get parameters for coarsest two grids
+    arma::Col<double>   rec_lambda  = arma::Col<double>(lambda.rows(numLevels-2,numLevels-1));
+    arma::Col<int>      rec_Nl      = arma::Col<int>(Nl.rows(numLevels-2,numLevels-1));
+    arma::Col<int>      rec_ml      = arma::Col<int>(ml.row(numLevels-2));
+    // pointers to all operators
+    arma::sp_mat *ptrA[2];
+    arma::sp_mat *ptrR[1];
+    arma::sp_mat *ptrRI[1];
+    arma::sp_mat *ptrS[1];
+    arma::sp_mat *ptrP[1];
+    // compute operators
+    get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, rec_lambda, rec_Nl, rec_ml);
+    // get coarsest-grid correction on level n_l-2
+    arma::sp_mat identity = arma::speye(rec_Nl(1),rec_Nl(1));
+    arma::sp_mat R0A0P0 = (*ptrRI[0]) * (*ptrA[0]) * (*ptrP[0]);
+    arma::sp_mat MF1 = (*ptrP[0]) * (identity - arma::sp_mat(arma::mat(*ptrA[1]).i()) * R0A0P0) * (*ptrRI[0]);
+    arma::sp_mat MV1 = MF1;
+    arma::sp_mat MF0 = MF1;
+    arma::sp_mat MV0 = MV1;
+    for(int level = numLevels-3; level >= 0; level--){
+        MV1         = MV0;
+        MF1         = MF0;
+        rec_lambda  = arma::Col<double>(lambda.rows(level,level+1));
+        rec_Nl      = arma::Col<int>(Nl.rows(level,level+1));
+        rec_ml      = arma::Col<int>(ml.row(level));
+        get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, rec_lambda, rec_Nl, rec_ml);
+        identity = arma::speye(rec_Nl(1),rec_Nl(1));
+        R0A0P0 = (*ptrRI[0]) * (*ptrA[0]) * (*ptrP[0]);
+        MF0 = (*ptrP[0]) * (identity - (identity - MV1 * MF1) * arma::sp_mat(arma::mat(*ptrA[1]).i()) * R0A0P0) * (*ptrRI[0]);
+        MV0 = (*ptrP[0]) * (identity - (identity - MV1) * arma::sp_mat(arma::mat(*ptrA[1]).i()) * R0A0P0) * (*ptrRI[0]);
+    }
+    if(theoryLevel == 1){
+        // on level 1, remove the pre-/post-multiplied P_0 and R_{I_0}
+        (*F_F) = (*ptrRI[0]) * MF0 * (*ptrP[0]);
+    }else if(theoryLevel == 0){
+        (*F_F) = MF0;
+    }
+    return 0;
+}
+
+/**
+ *  get error propagator for F-cycle with F-relaxation and >= 2 grid levels (complex eigenvalues)
+ */
+int get_F_F(arma::sp_cx_mat *F_F, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+    // check for valid arguments
+    if((theoryLevel != 0) && (theoryLevel != 1)){
+        std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
+        throw;
+    }
+    if((lambda.n_elem != Nl.n_elem) || (lambda.n_elem != ml.n_elem+1)){
+        std::cout << ">>>ERROR: Error propagator encountered invalid definition of number of levels." << std::endl;
+    }
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1;
+    }
+    // get number of levels
+    int numLevels = lambda.n_elem;
+    // if two-level algorithm, all cycling strategies coincide
+    arma::sp_cx_mat *E_F = new arma::sp_cx_mat();
+    get_E_F(E_F, lambda, Nl, ml, theoryLevel);
+    // get parameters for coarsest two grids
+    arma::Col<arma::cx_double>  rec_lambda  = arma::Col<arma::cx_double>(lambda.rows(numLevels-2,numLevels-1));
+    arma::Col<int>              rec_Nl      = arma::Col<int>(Nl.rows(numLevels-2,numLevels-1));
+    arma::Col<int>              rec_ml      = arma::Col<int>(ml.row(numLevels-2));
+    // pointers to all operators
+    arma::sp_cx_mat *ptrA[2];
+    arma::sp_cx_mat *ptrR[1];
+    arma::sp_cx_mat *ptrRI[1];
+    arma::sp_cx_mat *ptrS[1];
+    arma::sp_cx_mat *ptrP[1];
+    // compute operators
+    get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, rec_lambda, rec_Nl, rec_ml);
+    // get coarsest-grid correction on level n_l-2
+    arma::sp_cx_mat identity = arma::sp_cx_mat(arma::speye(rec_Nl(1),rec_Nl(1)),arma::speye(rec_Nl(1),rec_Nl(1)).zeros());
+    arma::sp_cx_mat R0A0P0 = (*ptrRI[0]) * (*ptrA[0]) * (*ptrP[0]);
+    arma::sp_cx_mat MF1 = (*ptrP[0]) * (identity - arma::sp_cx_mat(arma::cx_mat(*ptrA[1]).i()) * R0A0P0) * (*ptrRI[0]);
+    arma::sp_cx_mat MV1 = MF1;
+    arma::sp_cx_mat MF0 = MF1;
+    arma::sp_cx_mat MV0 = MV1;
+    for(int level = numLevels-3; level >= 0; level--){
+        MV1         = MV0;
+        MF1         = MF0;
+        rec_lambda  = arma::Col<arma::cx_double>(lambda.rows(level,level+1));
+        rec_Nl      = arma::Col<int>(Nl.rows(level,level+1));
+        rec_ml      = arma::Col<int>(ml.row(level));
+        get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, rec_lambda, rec_Nl, rec_ml);
+        identity = arma::sp_cx_mat(arma::speye(rec_Nl(1),rec_Nl(1)),arma::speye(rec_Nl(1),rec_Nl(1)).zeros());
+        R0A0P0 = (*ptrRI[0]) * (*ptrA[0]) * (*ptrP[0]);
+        MF0 = (*ptrP[0]) * (identity - (identity - MV1 * MF1) * arma::sp_cx_mat(arma::cx_mat(*ptrA[1]).i()) * R0A0P0) * (*ptrRI[0]);
+        MV0 = (*ptrP[0]) * (identity - (identity - MV1) * arma::sp_cx_mat(arma::cx_mat(*ptrA[1]).i()) * R0A0P0) * (*ptrRI[0]);
+    }
+    if(theoryLevel == 1){
+        // on level 1, remove the pre-/post-multiplied P_0 and R_{I_0}
+        (*F_F) = (*ptrRI[0]) * MF0 * (*ptrP[0]);
+    }else if(theoryLevel == 0){
+        (*F_F) = MF0;
+    }
+    return 0;
+}
+
+/**
+ *  get error propagator for F-cycle with FCF-relaxation and >= 2 grid levels (real eigenvalues)
+ */
+int get_F_FCF(arma::sp_mat *F_FCF, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+    // check for valid arguments
+    if((theoryLevel != 0) && (theoryLevel != 1)){
+        std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
+        throw;
+    }
+    if((lambda.n_elem != Nl.n_elem) || (lambda.n_elem != ml.n_elem+1)){
+        std::cout << ">>>ERROR: Error propagator encountered invalid definition of number of levels." << std::endl;
+    }
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1;
+    }
+    // get number of levels
+    int numLevels = lambda.n_elem;
+    // get parameters for coarsest two grids
+    arma::Col<double>   rec_lambda  = arma::Col<double>(lambda.rows(numLevels-2,numLevels-1));
+    arma::Col<int>      rec_Nl      = arma::Col<int>(Nl.rows(numLevels-2,numLevels-1));
+    arma::Col<int>      rec_ml      = arma::Col<int>(ml.row(numLevels-2));
+    // pointers to all operators
+    arma::sp_mat *ptrA[2];
+    arma::sp_mat *ptrR[1];
+    arma::sp_mat *ptrRI[1];
+    arma::sp_mat *ptrS[1];
+    arma::sp_mat *ptrP[1];
+    // compute operators
+    get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, rec_lambda, rec_Nl, rec_ml);
+    // get coarsest-grid correction on level n_l-2
+    arma::sp_mat identity = arma::speye(rec_Nl(1),rec_Nl(1));
+    arma::sp_mat R0A0P0 = (*ptrRI[0]) * (*ptrA[0]) * (*ptrP[0]);
+    arma::sp_mat MF1 = (*ptrP[0]) * (identity - arma::sp_mat(arma::mat(*ptrA[1]).i()) * R0A0P0) * (identity - R0A0P0) * (*ptrRI[0]);
+    arma::sp_mat MV1 = MF1;
+    arma::sp_mat MF0 = MF1;
+    arma::sp_mat MV0 = MV1;
+    for(int level = numLevels-3; level >= 0; level--){
+        MV1         = MV0;
+        MF1         = MF0;
+        rec_lambda  = arma::Col<double>(lambda.rows(level,level+1));
+        rec_Nl      = arma::Col<int>(Nl.rows(level,level+1));
+        rec_ml      = arma::Col<int>(ml.row(level));
+        get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, rec_lambda, rec_Nl, rec_ml);
+        identity = arma::speye(rec_Nl(1),rec_Nl(1));
+        R0A0P0 = (*ptrRI[0]) * (*ptrA[0]) * (*ptrP[0]);
+        MF0 = (*ptrP[0]) * (identity - (identity - MV1 * MF1) * arma::sp_mat(arma::mat(*ptrA[1]).i()) * R0A0P0) * (identity - R0A0P0) * (*ptrRI[0]);
+        MV0 = (*ptrP[0]) * (identity - (identity - MV1) * arma::sp_mat(arma::mat(*ptrA[1]).i()) * R0A0P0) * (identity - R0A0P0) * (*ptrRI[0]);
+    }
+    if(theoryLevel == 1){
+        // on level 1, remove the pre-/post-multiplied P_0 and R_{I_0}
+        (*F_FCF) = (*ptrRI[0]) * MF0 * (*ptrP[0]);
+    }else if(theoryLevel == 0){
+        (*F_FCF) = MF0;
+    }
+    return 0;
+}
+
+/**
+ *  get error propagator for F-cycle with FCF-relaxation and >= 2 grid levels (complex eigenvalues)
+ */
+int get_F_FCF(arma::sp_cx_mat *F_FCF, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+    // check for valid arguments
+    if((theoryLevel != 0) && (theoryLevel != 1)){
+        std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
+        throw;
+    }
+    if((lambda.n_elem != Nl.n_elem) || (lambda.n_elem != ml.n_elem+1)){
+        std::cout << ">>>ERROR: Error propagator encountered invalid definition of number of levels." << std::endl;
+    }
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1;
+    }
+    // get number of levels
+    int numLevels = lambda.n_elem;
+    // if two-level algorithm, all cycling strategies coincide
+    arma::sp_cx_mat *E_F = new arma::sp_cx_mat();
+    get_E_F(E_F, lambda, Nl, ml, theoryLevel);
+    // get parameters for coarsest two grids
+    arma::Col<arma::cx_double>  rec_lambda  = arma::Col<arma::cx_double>(lambda.rows(numLevels-2,numLevels-1));
+    arma::Col<int>              rec_Nl      = arma::Col<int>(Nl.rows(numLevels-2,numLevels-1));
+    arma::Col<int>              rec_ml      = arma::Col<int>(ml.row(numLevels-2));
+    // pointers to all operators
+    arma::sp_cx_mat *ptrA[2];
+    arma::sp_cx_mat *ptrR[1];
+    arma::sp_cx_mat *ptrRI[1];
+    arma::sp_cx_mat *ptrS[1];
+    arma::sp_cx_mat *ptrP[1];
+    // compute operators
+    get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, rec_lambda, rec_Nl, rec_ml);
+    // get coarsest-grid correction on level n_l-2
+    arma::sp_cx_mat identity = arma::sp_cx_mat(arma::speye(rec_Nl(1),rec_Nl(1)),arma::speye(rec_Nl(1),rec_Nl(1)).zeros());
+    arma::sp_cx_mat R0A0P0 = (*ptrRI[0]) * (*ptrA[0]) * (*ptrP[0]);
+    arma::sp_cx_mat MF1 = (*ptrP[0]) * (identity - arma::sp_cx_mat(arma::cx_mat(*ptrA[1]).i()) * R0A0P0) * (identity - R0A0P0) * (*ptrRI[0]);
+    arma::sp_cx_mat MV1 = MF1;
+    arma::sp_cx_mat MF0 = MF1;
+    arma::sp_cx_mat MV0 = MV1;
+    for(int level = numLevels-3; level >= 0; level--){
+        MV1         = MV0;
+        MF1         = MF0;
+        rec_lambda  = arma::Col<arma::cx_double>(lambda.rows(level,level+1));
+        rec_Nl      = arma::Col<int>(Nl.rows(level,level+1));
+        rec_ml      = arma::Col<int>(ml.row(level));
+        get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, rec_lambda, rec_Nl, rec_ml);
+        identity = arma::sp_cx_mat(arma::speye(rec_Nl(1),rec_Nl(1)),arma::speye(rec_Nl(1),rec_Nl(1)).zeros());
+        R0A0P0 = (*ptrRI[0]) * (*ptrA[0]) * (*ptrP[0]);
+        MF0 = (*ptrP[0]) * (identity - (identity - MV1 * MF1) * arma::sp_cx_mat(arma::cx_mat(*ptrA[1]).i()) * R0A0P0) * (identity - R0A0P0) * (*ptrRI[0]);
+        MV0 = (*ptrP[0]) * (identity - (identity - MV1) * arma::sp_cx_mat(arma::cx_mat(*ptrA[1]).i()) * R0A0P0) * (identity - R0A0P0) * (*ptrRI[0]);
+    }
+    if(theoryLevel == 1){
+        // on level 1, remove the pre-/post-multiplied P_0 and R_{I_0}
+        (*F_FCF) = (*ptrRI[0]) * MF0 * (*ptrP[0]);
+    }else if(theoryLevel == 0){
+        (*F_FCF) = MF0;
+    }
+    return 0;
+}
+
+/**
  *  get residual propagator for V-cycle with F-relaxation and >= 2 grid levels (real eigenvalues)
  */
-int get_R_F(arma::sp_mat *R_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+int get_R_F(arma::sp_mat *R_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel, int cycle){
     if((theoryLevel != 0) && (theoryLevel != 1)){
         std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
         throw;
@@ -291,7 +532,11 @@ int get_R_F(arma::sp_mat *R_F, arma::Col<double> lambda, arma::Col<int> Nl, arma
     arma::sp_mat A0 = get_Al(lambda(0), Nl(0));
     int errCode = 0;
     arma::sp_mat *E_F0 = new arma::sp_mat();
-    errCode = get_E_F(E_F0, lambda, Nl, ml, 0);
+    if(cycle == mgritestimate::V_cycle){
+        errCode = get_E_F(E_F0, lambda, Nl, ml, 0);
+    }else if(cycle == mgritestimate::F_cycle){
+        errCode = get_F_F(E_F0, lambda, Nl, ml, 0);
+    }
     if(errCode == -1){
         return errCode;
     }
@@ -309,7 +554,7 @@ int get_R_F(arma::sp_mat *R_F, arma::Col<double> lambda, arma::Col<int> Nl, arma
 /**
  *  get residual propagator for V-cycle with F-relaxation and >= 2 grid levels (complex eigenvalues)
  */
-int get_R_F(arma::sp_cx_mat *R_F, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+int get_R_F(arma::sp_cx_mat *R_F, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel, int cycle){
     if((theoryLevel != 0) && (theoryLevel != 1)){
         std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
         throw;
@@ -317,7 +562,11 @@ int get_R_F(arma::sp_cx_mat *R_F, arma::Col<arma::cx_double> lambda, arma::Col<i
     arma::sp_cx_mat A0 = get_Al(lambda(0), Nl(0));
     int errCode = 0;
     arma::sp_cx_mat *E_F0 = new arma::sp_cx_mat();
-    errCode = get_E_F(E_F0, lambda, Nl, ml, 0);
+    if(cycle == mgritestimate::V_cycle){
+        errCode = get_E_F(E_F0, lambda, Nl, ml, 0);
+    }else if(cycle == mgritestimate::F_cycle){
+        errCode = get_F_F(E_F0, lambda, Nl, ml, 0);
+    }
     if(errCode == -1){
         return errCode;
     }
@@ -335,7 +584,7 @@ int get_R_F(arma::sp_cx_mat *R_F, arma::Col<arma::cx_double> lambda, arma::Col<i
 /**
  *  get residual propagator for V-cycle with FCF-relaxation and >= 2 grid levels (real eigenvalues)
  */
-int get_R_FCF(arma::sp_mat *R_FCF, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+int get_R_FCF(arma::sp_mat *R_FCF, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel, int cycle){
     if((theoryLevel != 0) && (theoryLevel != 1)){
         std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
         throw;
@@ -343,7 +592,11 @@ int get_R_FCF(arma::sp_mat *R_FCF, arma::Col<double> lambda, arma::Col<int> Nl, 
     arma::sp_mat A0 = get_Al(lambda(0), Nl(0));
     int errCode = 0;
     arma::sp_mat *E_FCF0 = new arma::sp_mat();
-    errCode = get_E_FCF(E_FCF0, lambda, Nl, ml, 0);
+    if(cycle == mgritestimate::V_cycle){
+        errCode = get_E_FCF(E_FCF0, lambda, Nl, ml, 0);
+    }else if(cycle == mgritestimate::F_cycle){
+        errCode = get_F_FCF(E_FCF0, lambda, Nl, ml, 0);
+    }
     if(errCode == -1){
         return errCode;
     }
@@ -361,7 +614,7 @@ int get_R_FCF(arma::sp_mat *R_FCF, arma::Col<double> lambda, arma::Col<int> Nl, 
 /**
  *  get residual propagator for V-cycle with FCF-relaxation and >= 2 grid levels (complex eigenvalues)
  */
-int get_R_FCF(arma::sp_cx_mat *R_FCF, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+int get_R_FCF(arma::sp_cx_mat *R_FCF, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel, int cycle){
     if((theoryLevel != 0) && (theoryLevel != 1)){
         std::cout << ">>>ERROR: Error propagator only implemented for level 0 and level 1." << std::endl;
         throw;
@@ -369,7 +622,11 @@ int get_R_FCF(arma::sp_cx_mat *R_FCF, arma::Col<arma::cx_double> lambda, arma::C
     arma::sp_cx_mat A0 = get_Al(lambda(0), Nl(0));
     int errCode = 0;
     arma::sp_cx_mat *E_FCF0 = new arma::sp_cx_mat();
-    errCode = get_E_FCF(E_FCF0, lambda, Nl, ml, 0);
+    if(cycle == mgritestimate::V_cycle){
+        errCode = get_E_FCF(E_FCF0, lambda, Nl, ml, 0);
+    }else if(cycle == mgritestimate::F_cycle){
+        errCode = get_F_FCF(E_FCF0, lambda, Nl, ml, 0);
+    }
     if(errCode == -1){
         return errCode;
     }

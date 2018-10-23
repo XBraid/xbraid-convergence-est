@@ -3,7 +3,7 @@
 void export_estimates(appStruct &app, arma::file_type type){
     if(app.world_rank == 0){
         if(!app.userOutputFile){
-            get_default_filename(app.bound, app.relax, &app.userOutputFileName);
+            get_default_filename(app.cycle, app.bound, app.relax, &app.userOutputFileName);
         }
         export_vector(app.estimate, app.userOutputFileName, type);
         export_vector_minmax(app.bound, app.estimate, app.userOutputFileName, type);
@@ -41,10 +41,6 @@ void export_vector_minmax(int bound, arma::Col<double> *v, const string filename
     string prefix;
     string suffix;
     arma::mat tmp(1, 1);
-    if(arma::any(arma::abs((*v)+1.0)<1.0e-12)){
-        cout << ">>>WARNING: Important assumption violated. Encountered eig(Phi) > 1." << endl << endl;
-        return;
-    }
     get_filename_suffix(type, suffix);
     if((bound == mgritestimate::error_l2_upper_bound)
         || (bound == mgritestimate::error_l2_sqrt_upper_bound)
@@ -90,53 +86,62 @@ void get_filename_suffix(arma::file_type type, string &suffix){
 /**
  *  set default filename depending on bound/relaxation type
  */
-void get_default_filename(const int bound, const int relax, string *filename){
+void get_default_filename(const int cycle, const int bound, const int relax, string *filename){
+    string cyc;
+    if(cycle == mgritestimate::V_cycle){
+        cyc = "Vcycle_";
+    }else if(cycle == mgritestimate::F_cycle){
+        cyc = "Fcycle_";
+    }else{
+        cout << ">>>ERROR: Unknown cycling strategy." << endl << endl;
+        throw;
+    }
     switch(relax){
         case mgritestimate::F_relaxation:{
             if(bound == mgritestimate::error_l2_upper_bound){
-                *filename = "error_l2_upper_bound_E_F";
+                *filename = cyc + "error_l2_upper_bound_E_F";
             }else if(bound == mgritestimate::error_l2_sqrt_upper_bound){
-                *filename = "error_l2_sqrt_upper_bound_E_F";
+                *filename = cyc + "error_l2_sqrt_upper_bound_E_F";
             }else if(bound == mgritestimate::error_l2_sqrt_expression_upper_bound){
-                *filename = "error_l2_sqrt_expression_upper_bound_E_F";
+                *filename = cyc + "error_l2_sqrt_expression_upper_bound_E_F";
             }else if(bound == mgritestimate::error_l2_tight_twogrid_upper_bound){
-                *filename = "error_l2_tight_twogrid_upper_bound_E_F";
+                *filename = cyc + "error_l2_tight_twogrid_upper_bound_E_F";
             }else if(bound == mgritestimate::error_l2_lower_bound){
-                *filename = "error_l2_lower_bound_E_F";
+                *filename = cyc + "error_l2_lower_bound_E_F";
             }else if(bound == mgritestimate::error_l2_sqrt_expression_approximate_rate){
-                *filename = "error_l2_sqrt_expression_approximate_rate_E_F";
+                *filename = cyc + "error_l2_sqrt_expression_approximate_rate_E_F";
             }else if(bound == mgritestimate::residual_l2_upper_bound){
-                *filename = "residual_l2_upper_bound_R_F";
+                *filename = cyc + "residual_l2_upper_bound_R_F";
             }else if(bound == mgritestimate::residual_l2_sqrt_upper_bound){
-                *filename = "residual_l2_sqrt_upper_bound_R_F";
+                *filename = cyc + "residual_l2_sqrt_upper_bound_R_F";
             }else if(bound == mgritestimate::residual_l2_lower_bound){
-                *filename = "residual_l2_lower_bound_R_F";
+                *filename = cyc + "residual_l2_lower_bound_R_F";
             }else{
-                *filename = "bound_E_F";
+                *filename = cyc + "bound_E_F";
             }
             break;
         }
         case mgritestimate::FCF_relaxation:{
             if(bound == mgritestimate::error_l2_upper_bound){
-                *filename = "error_l2_upper_bound_E_FCF";
+                *filename = cyc + "error_l2_upper_bound_E_FCF";
             }else if(bound == mgritestimate::error_l2_sqrt_upper_bound){
-                *filename = "error_l2_sqrt_upper_bound_E_FCF";
+                *filename = cyc + "error_l2_sqrt_upper_bound_E_FCF";
             }else if(bound == mgritestimate::error_l2_sqrt_expression_upper_bound){
-                *filename = "error_l2_sqrt_expression_upper_bound_E_FCF";
+                *filename = cyc + "error_l2_sqrt_expression_upper_bound_E_FCF";
             }else if(bound == mgritestimate::error_l2_tight_twogrid_upper_bound){
-                *filename = "error_l2_tight_twogrid_upper_bound_E_FCF";
+                *filename = cyc + "error_l2_tight_twogrid_upper_bound_E_FCF";
             }else if(bound == mgritestimate::error_l2_lower_bound){
-                *filename = "error_l2_lower_bound_E_FCF";
+                *filename = cyc + "error_l2_lower_bound_E_FCF";
             }else if(bound == mgritestimate::error_l2_sqrt_expression_approximate_rate){
-                *filename = "error_l2_sqrt_expression_approximate_rate_E_FCF";
+                *filename = cyc + "error_l2_sqrt_expression_approximate_rate_E_FCF";
             }else if(bound == mgritestimate::residual_l2_upper_bound){
-                *filename = "residual_l2_upper_bound_R_FCF";
+                *filename = cyc + "residual_l2_upper_bound_R_FCF";
             }else if(bound == mgritestimate::residual_l2_sqrt_upper_bound){
-                *filename = "residual_l2_sqrt_upper_bound_R_FCF";
+                *filename = cyc + "residual_l2_sqrt_upper_bound_R_FCF";
             }else if(bound == mgritestimate::residual_l2_lower_bound){
-                *filename = "residual_l2_lower_bound_R_FCF";
+                *filename = cyc + "residual_l2_lower_bound_R_FCF";
             }else{
-                *filename = "bound_E_FCF";
+                *filename = cyc + "bound_E_FCF";
             }
             break;
         }
@@ -164,8 +169,10 @@ void get_default_filename(const int bound, const int relax, string *filename){
  *      --file-phi-complex-eigenvalues lambda_real.txt lambda_imag.txt       name of file that contains complex part of eigenvalues of Phi
  *      --bound tight_twogrid_upper_bound                                    bound to evaluate, see constants.hpp
  *      --bound-on-level 1                                                   bound is evaluated on this level (options: 0, 1)
+ *      --V-cycle                                                            cycling strategy, see constants.hpp
+ *      --F-cycle                                                            cycling strategy, see constants.hpp
  *      --relaxation-scheme F_relaxation                                     relaxation scheme, see constants.hpp
- *      --output-file                                                        user-defined output file name (without suffix)
+ *      --output-file Vcycle_error_l2                                        user-defined output file name (without suffix)
  */
 int parse_commandline_options(appStruct &app, int argc, char** argv){
     // need to set number of levels before reading temporal coarsening factors
@@ -189,8 +196,10 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
                 cout << "    --file-phi-complex-eigenvalues lambda_real.txt lambda_imag.txt      name of file that contains complex part of eigenvalues of Phi" << endl;
                 cout << "    --bound tight_twogrid_upper_bound                                   bound to evaluate, see constants.hpp" << endl;
                 cout << "    --bound-on-level 1                                                  bound is evaluated on this level (options: 0, 1)" << endl;
+                cout << "    --V-cycle                                                           cycling strategy, see constants.hpp" << endl;
+                cout << "    --F-cycle                                                           cycling strategy, see constants.hpp" << endl;
                 cout << "    --relaxation-scheme F_relaxation                                    relaxation scheme, see constants.hpp" << endl;
-                cout << "    --output-file                                                       user-defined output file name (without suffix)" << endl;
+                cout << "    --output-file Vcycle_error_l2                                       user-defined output file name (without suffix)" << endl;
                 cout << endl;
             }
             return 1;
@@ -334,6 +343,10 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
             }
         }else if(string(argv[argIdx]) == "--bound-on-level"){
             app.theoryLevel = stoi(argv[++argIdx]);
+        }else if(string(argv[argIdx]) == "--V-cycle"){
+            app.cycle = mgritestimate::V_cycle;
+        }else if(string(argv[argIdx]) == "--F-cycle"){
+            app.cycle = mgritestimate::F_cycle;
         }else if(string(argv[argIdx]) == "--relaxation-scheme"){
             argIdx++;
             if(string(argv[argIdx]) == "F_relaxation"){

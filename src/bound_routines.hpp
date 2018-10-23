@@ -12,17 +12,17 @@ using namespace std;
 using namespace arma;
 using namespace mgritestimate;
 
-void get_propagator_bound(const int bound, int theoryLevel, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<double> **lambda, Col<double> *&estimate);
+void get_propagator_bound(const int bound, int theoryLevel, const int cycle, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<double> **lambda, Col<double> *&estimate);
 
-void get_propagator_bound(const int bound, int theoryLevel, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<cx_double> **lambda, Col<double> *&estimate);
+void get_propagator_bound(const int bound, int theoryLevel, const int cycle, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<cx_double> **lambda, Col<double> *&estimate);
 
-void get_error_l2_propagator_bound(const int bound, int theoryLevel, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<double> **lambda, Col<double> *&estimate);
+void get_error_l2_propagator_bound(const int bound, int theoryLevel, const int cycle, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<double> **lambda, Col<double> *&estimate);
 
-void get_error_l2_propagator_bound(const int bound, int theoryLevel, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<cx_double> **lambda, Col<double> *&estimate);
+void get_error_l2_propagator_bound(const int bound, int theoryLevel, const int cycle, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<cx_double> **lambda, Col<double> *&estimate);
 
-void get_residual_l2_propagator_bound(const int bound, int theoryLevel, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<double> **lambda, Col<double> *&estimate);
+void get_residual_l2_propagator_bound(const int bound, int theoryLevel, const int cycle, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<double> **lambda, Col<double> *&estimate);
 
-void get_residual_l2_propagator_bound(const int bound, int theoryLevel, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<cx_double> **lambda, Col<double> *&estimate);
+void get_residual_l2_propagator_bound(const int bound, int theoryLevel, const int cycle, const int relax, Col<int> numberOfTimeSteps, Col<int> coarseningFactors, Col<cx_double> **lambda, Col<double> *&estimate);
 
 double get_error_l2_tight_twogrid_upper_bound(int r, Col<double> lambda, Col<int> N, Col<int> m, int theoryLevel);
 

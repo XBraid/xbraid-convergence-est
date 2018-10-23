@@ -21,6 +21,7 @@ void initalize_app_struct(appStruct &app){
     app.numberOfImagSamples = 9;
     app.bound = mgritestimate::residual_l2_upper_bound;
     app.theoryLevel = 1;
+    app.cycle = mgritestimate::V_cycle;
     app.relax = mgritestimate::F_relaxation;
     app.fileSpatialEigenvalues = false;
     app.filePhiEigenvalues = false;
