@@ -53,11 +53,13 @@ namespace mgritestimate{
      */
     const int error_l2_tight_twogrid_upper_bound = 4;
     /**
-     *  \f$\ell^2\f$-norm of pseudo-inverse of numerically constructed error propagator
+     *  1 / \f$\ell^2\f$-norm of pseudo-inverse of numerically constructed error propagator
      */
-    const int error_l2_lower_bound = -1;
+    const int error_l2_approximate_lower_bound = -1;
     /**
      *  \f$\ell^2\f$-norm of numerically constructed error propagator is bounded using triangle inequality and \f$\sqrt{ \| \cdot \|_1 \| \cdot \|_\infty }\f$
+     *
+     *  Note: Currently not implemented.
      */
     const int error_l2_sqrt_lower_bound = -2;
     /**

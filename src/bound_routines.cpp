@@ -17,7 +17,7 @@ void get_propagator_bound(const int bound,                  ///< requested bound
             || (bound == mgritestimate::error_l2_sqrt_upper_bound)
             || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
-            || (bound == mgritestimate::error_l2_lower_bound)
+            || (bound == mgritestimate::error_l2_approximate_lower_bound)
             || (bound == mgritestimate::error_l2_sqrt_lower_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
             || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
@@ -62,7 +62,7 @@ void get_propagator_bound(const int bound,                  ///< requested bound
             || (bound == mgritestimate::error_l2_sqrt_upper_bound)
             || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
-            || (bound == mgritestimate::error_l2_lower_bound)
+            || (bound == mgritestimate::error_l2_approximate_lower_bound)
             || (bound == mgritestimate::error_l2_sqrt_lower_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
             || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
@@ -170,7 +170,7 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
             }
             break;
         }
-        case mgritestimate::error_l2_lower_bound:{
+        case mgritestimate::error_l2_approximate_lower_bound:{
             errCode = 0;
             for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
                 // for a given spatial mode, get eigenvalues for all levels
@@ -366,7 +366,7 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
             }
             break;
         }
-        case mgritestimate::error_l2_lower_bound:{
+        case mgritestimate::error_l2_approximate_lower_bound:{
             errCode = 0;
             for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
                 // for a given spatial mode, get eigenvalues for all levels
