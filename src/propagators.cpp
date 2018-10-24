@@ -1,6 +1,94 @@
 #include "propagators.hpp"
 
 /**
+ *  get contributions to error propagator for V-cycle with F-relaxation and > 2 grid levels from intermediate levels (real eigenvalues)
+ */
+int get_E_F_intermediate(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+    // check for valid arguments
+    if(theoryLevel != 1){
+        std::cout << ">>>ERROR: Intermediate level contributions of error propagator only implemented for level 1." << std::endl;
+        throw;
+    }
+    if((lambda.n_elem != Nl.n_elem) || (lambda.n_elem != ml.n_elem+1)){
+        std::cout << ">>>ERROR: Error propagator encountered invalid definition of number of levels." << std::endl;
+    }
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1;
+    }
+    // get number of levels
+    int                 numLevels   = lambda.n_elem;
+    // pointers to all operators
+    arma::sp_mat *ptrA[numLevels];
+    arma::sp_mat *ptrR[numLevels-1];
+    arma::sp_mat *ptrRI[numLevels-1];
+    arma::sp_mat *ptrS[numLevels-1];
+    arma::sp_mat *ptrP[numLevels-1];
+    // compute operators
+    get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, lambda, Nl, ml);
+    // compute error propagator contributions for F-relaxation, using form: I - term * R0A0P0 - summ * R0A0P0
+    // pre-compute R0*A0*P0 = RI0*A0*P0
+    arma::sp_mat R0A0P0 = (*ptrRI[0]) * (*ptrA[0]) * (*ptrP[0]);
+    // pre-compute contributions from intermediate levels
+    arma::sp_mat  summ(Nl(1),Nl(1));
+    arma::sp_mat term2 = arma::sp_mat();
+    for(int level = 0; level < numLevels-2; level++){
+        term2 = (*ptrS[level+1]) * arma::sp_mat(arma::mat((*ptrS[level+1]).st() * (*ptrA[level+1]) * (*ptrS[level+1])).i()) * (*ptrS[level+1]).st();
+        for(int prepostIdx = level; prepostIdx > 0; prepostIdx--){
+            term2 = (*ptrP[prepostIdx]) * term2 * (*ptrR[prepostIdx]);
+        }
+        summ += term2;
+    }
+    // compute intermediate level contributions to error propagator for F-relaxation on level 1
+    (*E_F) = summ * R0A0P0;
+    return 0;
+}
+
+/**
+ *  get contributions to error propagator for V-cycle with F-relaxation and > 2 grid levels from intermediate levels (complex eigenvalues)
+ */
+int get_E_F_intermediate(arma::sp_cx_mat *E_F, arma::Col<arma::cx_double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
+    // check for valid arguments
+    if(theoryLevel != 1){
+        std::cout << ">>>ERROR: Intermediate level contributions of error propagator only implemented for level 1." << std::endl;
+        throw;
+    }
+    if((lambda.n_elem != Nl.n_elem) || (lambda.n_elem != ml.n_elem+1)){
+        std::cout << ">>>ERROR: Error propagator encountered invalid definition of number of levels." << std::endl;
+    }
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1;
+    }
+    // get number of levels
+    int                 numLevels   = lambda.n_elem;
+    // pointers to all operators
+    arma::sp_cx_mat *ptrA[numLevels];
+    arma::sp_cx_mat *ptrR[numLevels-1];
+    arma::sp_cx_mat *ptrRI[numLevels-1];
+    arma::sp_cx_mat *ptrS[numLevels-1];
+    arma::sp_cx_mat *ptrP[numLevels-1];
+    // compute operators
+    get_operators(ptrA, ptrR, ptrRI, ptrS, ptrP, lambda, Nl, ml);
+    // compute error propagator contributions for F-relaxation, using form: I - term * R0A0P0 - summ * R0A0P0
+    // pre-compute R0*A0*P0 = RI0*A0*P0
+    arma::sp_cx_mat R0A0P0 = (*ptrRI[0]) * (*ptrA[0]) * (*ptrP[0]);
+    // pre-compute contributions from intermediate levels
+    arma::sp_cx_mat  summ(Nl(1),Nl(1));
+    arma::sp_cx_mat term2 = arma::sp_cx_mat();
+    for(int level = 0; level < numLevels-2; level++){
+        term2 = (*ptrS[level+1]) * arma::sp_cx_mat(arma::cx_mat((*ptrS[level+1]).st() * (*ptrA[level+1]) * (*ptrS[level+1])).i()) * (*ptrS[level+1]).st();
+        for(int prepostIdx = level; prepostIdx > 0; prepostIdx--){
+            term2 = (*ptrP[prepostIdx]) * term2 * (*ptrR[prepostIdx]);
+        }
+        summ += term2;
+    }
+    // compute intermediate level contributions to error propagator for F-relaxation on level 1
+    (*E_F) = summ * R0A0P0;
+    return 0;
+}
+
+/**
  *  get error propagator for V-cycle with F-relaxation and >= 2 grid levels (real eigenvalues)
  */
 int get_E_F(arma::sp_mat *E_F, arma::Col<double> lambda, arma::Col<int> Nl, arma::Col<int> ml, int theoryLevel){
@@ -185,10 +273,10 @@ int get_E_FCF(arma::sp_mat *E_FCF, arma::Col<double> lambda, arma::Col<int> Nl, 
         }
         result = result - (term1 + term2) * A0P0;
     }
-    // compute error propagator for F-relaxation on level 0
+    // compute error propagator for FCF-relaxation on level 0
     if(theoryLevel == 1){
         (*E_FCF) = result;
-    // compute error propagator for F-relaxation on level 1
+    // compute error propagator for FCF-relaxation on level 1
     } else if(theoryLevel == 0){
         (*E_FCF) = (*ptrP[0]) * result * (*ptrRI[0]);
     }
@@ -270,10 +358,10 @@ int get_E_FCF(arma::sp_cx_mat *E_FCF, arma::Col<arma::cx_double> lambda, arma::C
         }
         result = result - (term1 + term2) * A0P0;
     }
-    // compute error propagator for F-relaxation on level 0
+    // compute error propagator for FCF-relaxation on level 0
     if(theoryLevel == 1){
         (*E_FCF) = result;
-    // compute error propagator for F-relaxation on level 1
+    // compute error propagator for FCF-relaxation on level 1
     } else if(theoryLevel == 0){
         (*E_FCF) = (*ptrP[0]) * result * (*ptrRI[0]);
     }

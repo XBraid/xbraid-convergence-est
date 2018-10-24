@@ -18,7 +18,7 @@ void get_propagator_bound(const int bound,                  ///< requested bound
             || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
             || (bound == mgritestimate::error_l2_approximate_lower_bound)
-            || (bound == mgritestimate::error_l2_sqrt_lower_bound)
+            || (bound == mgritestimate::error_l2_sqrt_approximate_lower_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
             || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
             get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
@@ -39,9 +39,11 @@ void get_propagator_bound(const int bound,                  ///< requested bound
                 get_residual_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
         }else{
             cout << ">>>ERROR Unknown bound type " << bound << " for F-cycle." << endl << endl;
+            throw;
         }
     }else{
         cout << ">>>ERROR: Unknown cycling strategy " << cycle << " for bound type " << bound << endl << endl;
+        throw;
     }
 }
 
@@ -63,7 +65,7 @@ void get_propagator_bound(const int bound,                  ///< requested bound
             || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
             || (bound == mgritestimate::error_l2_approximate_lower_bound)
-            || (bound == mgritestimate::error_l2_sqrt_lower_bound)
+            || (bound == mgritestimate::error_l2_sqrt_approximate_lower_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
             || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
             get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
@@ -84,9 +86,11 @@ void get_propagator_bound(const int bound,                  ///< requested bound
                 get_residual_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
         }else{
             cout << ">>>ERROR Unknown bound type " << bound << " for F-cycle." << endl << endl;
+            throw;
         }
     }else{
         cout << ">>>ERROR: Unknown cycling strategy " << cycle << " for bound type " << bound << endl << endl;
+        throw;
     }
 }
                         
@@ -235,6 +239,50 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                 }
                 // evaluate expression
                 (*estimate)(evalIdx) = get_error_l2_sqrt_expression_upper_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+            }
+            break;
+        }
+        case mgritestimate::error_l2_sqrt_approximate_lower_bound:{
+            if(cycle == mgritestimate::F_cycle){
+                cout << endl << ">>>ERROR: error_l2_sqrt_approximate_lower_bound not implemented for F-cycle." << endl << endl;
+                throw;
+            }
+            if(numberOfLevels < 3){
+                cout << endl << ">>>ERROR: error_l2_sqrt_approximate_lower_bound only implemenented for three or more levels." << endl << endl;
+                throw;
+            }
+            errCode             = 0;
+            double normEB1      = 0.0;
+            double normEBInf    = 0.0;
+            double normB1       = 0.0;
+            double normBInf     = 0.0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                sp_mat *E   = new sp_mat();
+                sp_mat *B   = new sp_mat();
+                sp_mat *EB  = new sp_mat();
+                // get error propagator
+                errCode = get_E(E, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
+                if(errCode == -1){
+                    (*estimate)(evalIdx) = -1.0;
+                    continue;
+                }
+                // get error propagator, intermediate level contributions
+                errCode = get_E_F_intermediate(B, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                // compute coarse-grid correction part
+                (*EB) = (*E) + (*B);
+                // compute norms for approximate lower bound
+                normEB1     = norm((*EB), 1);
+                normEBInf   = norm((*EB), "inf");
+                normB1      = norm((*B), 1);
+                normBInf    = norm((*B), "inf");
+                // compute approximate lower bound
+                (*estimate)(evalIdx) = abs(sqrt(normEB1 * normEBInf) - sqrt(normB1 * normBInf));
             }
             break;
         }
@@ -431,6 +479,50 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                 }
                 // evaluate expression
                 (*estimate)(evalIdx) = get_error_l2_sqrt_expression_upper_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+            }
+            break;
+        }
+        case mgritestimate::error_l2_sqrt_approximate_lower_bound:{
+            if(cycle == mgritestimate::F_cycle){
+                cout << endl << ">>>ERROR: error_l2_sqrt_approximate_lower_bound not implemented for F-cycle." << endl << endl;
+                throw;
+            }
+            if(numberOfLevels < 3){
+                cout << endl << ">>>ERROR: error_l2_sqrt_approximate_lower_bound only implemenented for three or more levels." << endl << endl;
+                throw;
+            }
+            errCode             = 0;
+            double normEB1      = 0.0;
+            double normEBInf    = 0.0;
+            double normB1       = 0.0;
+            double normBInf     = 0.0;
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<cx_double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                sp_cx_mat *E    = new sp_cx_mat();
+                sp_cx_mat *B    = new sp_cx_mat();
+                sp_cx_mat *EB   = new sp_cx_mat();
+                // get error propagator
+                errCode = get_E(E, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                // compute bound only if time stepper is stable, i.e., \f$\lambda_k < 1\f$
+                if(errCode == -1){
+                    (*estimate)(evalIdx) = -1.0;
+                    continue;
+                }
+                // get error propagator, intermediate level contributions
+                errCode = get_E_F_intermediate(B, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                // compute coarse-grid correction part
+                (*EB) = (*E) + (*B);
+                // compute norms for approximate lower bound
+                normEB1     = norm((*EB), 1);
+                normEBInf   = norm((*EB), "inf");
+                normB1      = norm((*B), 1);
+                normBInf    = norm((*B), "inf");
+                // compute approximate lower bound
+                (*estimate)(evalIdx) = abs(sqrt(normEB1 * normEBInf) - sqrt(normB1 * normBInf));
             }
             break;
         }
