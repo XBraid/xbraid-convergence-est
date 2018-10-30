@@ -1649,7 +1649,7 @@ double get_error_l2_sqrt_expression_approximate_rate(int r,                     
     }
     // compute approximation of convergence rate
     val = std::sqrt(colSum * rowSum);
-    if(isnan(val)){
+    if(std::isnan(val)){
         val = 0.0;
     }
     return val;
