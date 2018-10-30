@@ -1087,7 +1087,6 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                 break;
             }
             case mgritestimate::FCF_relaxation:{
-                throw;
                 double norm1;
                 double normInf;
                 double colSumF;
