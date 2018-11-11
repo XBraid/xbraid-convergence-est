@@ -465,6 +465,7 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                 /// \todo Seems to be required for Armadillo 6.500.5. Can skip cx_mat() conversion for later versions?
                 norm1   = norm(cx_mat(*E), 1);
                 normInf = norm(cx_mat(*E), "inf");
+                cout << " 1 : " << norm1 << " inf : " << normInf << endl;
                 (*estimate)(evalIdx) = sqrt(norm1 * normInf);
             }
             break;
@@ -517,10 +518,10 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                 // compute coarse-grid correction part
                 (*EB) = (*E) + (*B);
                 // compute norms for approximate lower bound
-                normEB1     = norm((*EB), 1);
-                normEBInf   = norm((*EB), "inf");
-                normB1      = norm((*B), 1);
-                normBInf    = norm((*B), "inf");
+                normEB1     = arma::norm(arma::abs(*EB), 1);
+                normEBInf   = arma::norm(arma::abs(*EB), "inf");
+                normB1      = arma::norm(arma::abs(*B), 1);
+                normBInf    = arma::norm(arma::abs(*B), "inf");
                 // compute approximate lower bound
                 (*estimate)(evalIdx) = abs(sqrt(normEB1 * normEBInf) - sqrt(normB1 * normBInf));
             }
@@ -1023,20 +1024,20 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                                 * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
                                 * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
                                 * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
-                                + std::abs(lambda(1) - std::pow(std::abs(lambda(0)), m(0)))
+                                + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                 * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
                                 * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
                                 + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
                                 * std::pow(std::abs(lambda(2)), N(2)-2);
                     // F-point column sum
-                    for(int j = 2; j <= m(1)-1; j++){
-                        colSumF = (std::abs(lambda(1) - std::pow(std::abs(lambda(0)), m(0)))
+                    for(int j = 1; j <= m(1)-1; j++){
+                        colSumF = (std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                     * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
                                     * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
                                     * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
                                     + std::pow(std::abs(lambda(2)), N(2)-2)
-                                    * std::abs(lambda(1) - std::pow(std::abs(lambda(0)), m(0)))) * std::pow(std::abs(lambda(1)), j-1)
-                                    + std::abs(lambda(1) - std::pow(std::abs(lambda(0)), m(0)))
+                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0)))) * std::pow(std::abs(lambda(1)), j-1)
+                                    + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                     * (1.0 - std::pow(std::abs(lambda(1)), m(1)-2)) / (1.0 - std::abs(lambda(1)))
                                     * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)));
                         norm1   = std::max(colSumF, norm1);
@@ -1046,18 +1047,18 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                     norm1   = std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
                                 * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
                                 * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                + std::abs(lambda(1) - std::pow(std::abs(lambda(0)), m(0)))
+                                + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                 * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
                                 + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
                                 * std::pow(std::abs(lambda(2)), N(2)-2);
                     // F-point column sum
-                    for(int j = 2; j <= m(1)-1; j++){
-                        colSumF = (std::abs(lambda(1) - std::pow(std::abs(lambda(0)), m(0)))
+                    for(int j = 1; j <= m(1)-1; j++){
+                        colSumF = (std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                     * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
                                     * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
                                     + std::pow(std::abs(lambda(2)), N(2)-2)
-                                    * std::abs(lambda(1) - std::pow(std::abs(lambda(0)), m(0)))) * std::pow(std::abs(lambda(1)), j-1)
-                                    + std::abs(lambda(1) - std::pow(std::abs(lambda(0)), m(0)))
+                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0)))) * std::pow(std::abs(lambda(1)), j-1)
+                                    + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                     * (1.0 - std::pow(std::abs(lambda(1)), m(1)-2)) / (1.0 - std::abs(lambda(1)));
                         norm1   = std::max(colSumF, norm1);
                     }
@@ -1068,7 +1069,7 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                 // C-point row sum
                 normInf  = std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
                             * (1.0 - std::pow(std::abs(lambda(2)), N(2)-1)) / (1.0 - std::abs(lambda(2)))
-                            + std::abs(lambda(1) - std::pow(std::abs(lambda(0)), m(0)))
+                            + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                             * (1.0 - std::pow(std::abs(lambda(2)), N(2)-1)) / (1.0 - std::abs(lambda(2)))
                             * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1))   / (1.0 - std::abs(lambda(1)));
                 for(int j = 1; j <= m(1)-1; j++){
@@ -1076,10 +1077,10 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                                 * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
                                 * (
                                 std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                + std::abs(lambda(1) - std::pow(std::abs(lambda(0)), m(0)))
+                                + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                 * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
                                 )
-                                + std::abs(lambda(1) - std::pow(std::abs(lambda(0)), m(0)))
+                                + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                 * (1.0 - std::pow(std::abs(lambda(1)), j)) / (1.0 - std::abs(lambda(1)));
                     normInf = std::max(rowSumF, normInf);
                 }
