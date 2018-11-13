@@ -288,27 +288,44 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
         }
         case mgritestimate::error_l2_tight_twogrid_upper_bound:{
             errCode = 0;
+            Col<double> estimateLevels(numberOfLevels-1);
+            Col<int> cf(1);
             for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                estimateLevels.fill(-1.0);
                 // for a given spatial mode, get eigenvalues for all levels
                 Col<double> lambda_k(numberOfLevels);
                 for(int level = 0; level < numberOfLevels; level++){
                     lambda_k(level) = (*lambda[level])(evalIdx);
                 }
-                // evaluate expression
-                (*estimate)(evalIdx) = get_error_l2_tight_twogrid_upper_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                // evaluate expression for all subsequent levels, then get max
+                for(int level = 0; level < numberOfLevels-1; level++){
+                    cf.fill(coarseningFactors(level));
+                    estimateLevels(level) = get_error_l2_tight_twogrid_upper_bound(relax, Col<double>(lambda_k.subvec(level,level+1)),
+                         Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
+                }
+                estimateLevels.print();
+                (*estimate)(evalIdx) = arma::max(estimateLevels);
             }
             break;
         }
         case mgritestimate::error_l2_tight_twogrid_lower_bound:{
             errCode = 0;
+            Col<double> estimateLevels(numberOfLevels-1);
+            Col<int> cf(1);
             for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                estimateLevels.fill(-1.0);
                 // for a given spatial mode, get eigenvalues for all levels
                 Col<double> lambda_k(numberOfLevels);
                 for(int level = 0; level < numberOfLevels; level++){
                     lambda_k(level) = (*lambda[level])(evalIdx);
                 }
-                // evaluate expression
-                (*estimate)(evalIdx) = get_error_l2_tight_twogrid_lower_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                // evaluate expression for all subsequent levels, then get max
+                for(int level = 0; level < numberOfLevels-1; level++){
+                    cf.fill(coarseningFactors(level));
+                    estimateLevels(level) = get_error_l2_tight_twogrid_lower_bound(relax, Col<double>(lambda_k.subvec(level,level+1)),
+                         Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
+                }
+                (*estimate)(evalIdx) = arma::max(estimateLevels);
             }
             break;
         }
@@ -465,7 +482,6 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                 /// \todo Seems to be required for Armadillo 6.500.5. Can skip cx_mat() conversion for later versions?
                 norm1   = norm(cx_mat(*E), 1);
                 normInf = norm(cx_mat(*E), "inf");
-                cout << " 1 : " << norm1 << " inf : " << normInf << endl;
                 (*estimate)(evalIdx) = sqrt(norm1 * normInf);
             }
             break;
@@ -529,27 +545,43 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
         }
         case mgritestimate::error_l2_tight_twogrid_upper_bound:{
             errCode = 0;
+            Col<double> estimateLevels(numberOfLevels-1);
+            Col<int> cf(1);
             for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                estimateLevels.fill(-1.0);
                 // for a given spatial mode, get eigenvalues for all levels
                 Col<cx_double> lambda_k(numberOfLevels);
                 for(int level = 0; level < numberOfLevels; level++){
                     lambda_k(level) = (*lambda[level])(evalIdx);
                 }
-                // evaluate expression
-                (*estimate)(evalIdx) = get_error_l2_tight_twogrid_upper_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                // evaluate expression for all subsequent levels, then get max
+                for(int level = 0; level < numberOfLevels-1; level++){
+                    cf.fill(coarseningFactors(level));
+                    estimateLevels(level) = get_error_l2_tight_twogrid_upper_bound(relax, Col<cx_double>(lambda_k.subvec(level,level+1)),
+                         Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
+                }
+                (*estimate)(evalIdx) = arma::max(estimateLevels);
             }
             break;
         }
         case mgritestimate::error_l2_tight_twogrid_lower_bound:{
             errCode = 0;
+            Col<double> estimateLevels(numberOfLevels-1);
+            Col<int> cf(1);
             for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                estimateLevels.fill(-1.0);
                 // for a given spatial mode, get eigenvalues for all levels
                 Col<cx_double> lambda_k(numberOfLevels);
                 for(int level = 0; level < numberOfLevels; level++){
                     lambda_k(level) = (*lambda[level])(evalIdx);
                 }
-                // evaluate expression
-                (*estimate)(evalIdx) = get_error_l2_tight_twogrid_lower_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                // evaluate expression for all subsequent levels, then get max
+                for(int level = 0; level < numberOfLevels-1; level++){
+                    cf.fill(coarseningFactors(level));
+                    estimateLevels(level) = get_error_l2_tight_twogrid_lower_bound(relax, Col<cx_double>(lambda_k.subvec(level,level+1)),
+                         Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
+                }
+                (*estimate)(evalIdx) = arma::max(estimateLevels);
             }
             break;
         }
@@ -901,6 +933,7 @@ double get_error_l2_tight_twogrid_upper_bound(int r,                   ///< numb
             throw;
         }
     }
+    val *= std::sqrt((1.0 - std::pow(std::abs(lambda(0)), 2.0*m(0))) / (1.0 - std::pow(std::abs(lambda(0)), 2.0)));
     return val;
 }
 
@@ -958,6 +991,7 @@ double get_error_l2_tight_twogrid_lower_bound(int r,                   ///< numb
             throw;
         }
     }
+    val *= std::sqrt((1.0 - std::pow(std::abs(lambda(0)), 2.0*m(0))) / (1.0 - std::pow(std::abs(lambda(0)), 2.0)));
     return val;
 }
 

@@ -171,7 +171,7 @@ void get_default_filename(const int cycle, const int bound, const int relax, str
  *      --file-spatial-complex-eigenvalues dteta_real.txt dteta_imag.txt     name of files that contain real and complex part of spatial eigenvalues, respectively
  *      --file-phi-real-eigenvalues lambda_real.txt                          name of file that contains real part of eigenvalues of Phi
  *      --file-phi-complex-eigenvalues lambda_real.txt lambda_imag.txt       name of file that contains complex part of eigenvalues of Phi
- *      --bound tight_twogrid_upper_bound                                    bound to evaluate, see constants.hpp
+ *      --bound error_l2_tight_twogrid_upper_bound                           bound to evaluate, see constants.hpp
  *      --bound-on-level 1                                                   bound is evaluated on this level (options: 0, 1)
  *      --V-cycle                                                            cycling strategy, see constants.hpp
  *      --F-cycle                                                            cycling strategy, see constants.hpp
@@ -198,7 +198,7 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
                 cout << "    --file-spatial-complex-eigenvalues dteta_real.txt dteta_imag.txt    name of files that contain real and complex part of spatial eigenvalues" << endl;
                 cout << "    --file-phi-real-eigenvalues lambda_real.txt                         name of file that contains real part of eigenvalues of Phi" << endl;
                 cout << "    --file-phi-complex-eigenvalues lambda_real.txt lambda_imag.txt      name of file that contains complex part of eigenvalues of Phi" << endl;
-                cout << "    --bound tight_twogrid_upper_bound                                   bound to evaluate, see constants.hpp" << endl;
+                cout << "    --bound error_l2_tight_twogrid_upper_bound                          bound to evaluate, see constants.hpp" << endl;
                 cout << "    --bound-on-level 1                                                  bound is evaluated on this level (options: 0, 1)" << endl;
                 cout << "    --V-cycle                                                           cycling strategy, see constants.hpp" << endl;
                 cout << "    --F-cycle                                                           cycling strategy, see constants.hpp" << endl;
