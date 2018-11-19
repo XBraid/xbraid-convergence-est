@@ -303,7 +303,6 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                     estimateLevels(level) = get_error_l2_tight_twogrid_upper_bound(relax, Col<double>(lambda_k.subvec(level,level+1)),
                          Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
                 }
-                estimateLevels.print();
                 (*estimate)(evalIdx) = arma::max(estimateLevels);
             }
             break;
