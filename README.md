@@ -28,7 +28,7 @@ To install bootstrap and armadillo, we recommend using SPACK, since SPACK will i
 
 A list of commandline options is displayed when running:
 
-    ./main --help
+    ./bin/mgrit-convergence --help
 
 ## Visualization
 
