@@ -1215,7 +1215,7 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                 }
                 // C-point row sum
                 double summ = 0.0;
-                for(int k = 0; k < numberOfLevels-3; k++){
+                for(int k = 0; k <= m(1)-3; k++){
                     summ += std::pow(std::abs(lambda(1)), k);
                 }
                 normInf = std::pow(std::abs(lambda(0)), m(0))
@@ -1393,7 +1393,7 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                                         ) * std::pow(std::abs(lambda(1)), r) * std::pow(std::abs(lambda(2)), j)
                                         + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                             * (1.0 - std::pow(std::abs(lambda(1)), m(1))) / (1.0 - std::abs(lambda(1)))
-                                            * summ1;
+                                            * summ1
                                         + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                             * summ2;
                             norm1   = std::max(colSumF, norm1);
@@ -1427,7 +1427,8 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
                                         * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
                                     ) + (1.0 - std::pow(std::abs(lambda(2)), j)) / (1.0 - std::abs(lambda(2))) * (
                                         std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                        + (1.0 - std::pow(std::abs(lambda(2)), m(2)-1))   / (1.0 - std::abs(lambda(2))) * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                        + (1.0 - std::pow(std::abs(lambda(1)), m(1)-1))   / (1.0 - std::abs(lambda(1)))
+                                        * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
                                     );
                     normInf     = std::max(rowSumCF, normInf);
                 }
