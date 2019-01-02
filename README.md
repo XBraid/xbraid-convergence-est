@@ -94,7 +94,7 @@ of 5-level MGRIT V-cycles with FCF-relaxation on each level in parallel:
         --number-of-time-grids 5                            \
         --coarsening-factors   2 2 2 2                      \
         --runge-kutta-method L_stable_SDIRK1                \
-        --sample-complex-plane -0.9 0.0001 0.0 0.0          \
+        --sample-complex-plane -0.9 -0.0001 0.0 0.0         \
         --complex-plane-sample-size 12 1                    \
         --bound error_l2_upper_bound                        \
         --bound-on-level 1                                  \
@@ -112,7 +112,7 @@ This will produce the following output:
 The script prints:
 
 ```
-Convergence <= 0.22158731181372346
+Convergence <= 0.2214874843534855
 ```
 
 ## Source code documentation
