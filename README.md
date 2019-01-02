@@ -1,4 +1,4 @@
-# mgrit-convergence
+# XBraid-convergence-est
 
 ## Operating systems
 
@@ -24,18 +24,60 @@ To install bootstrap and armadillo, we recommend using SPACK, since SPACK will i
     load-packages : loads the recommended libraries using SPACK
     unload-packages : unloads the recommended libraries using SPACK
 
-## Commandline options
+## Examples
+
+### Commandline options
 
 A list of commandline options is displayed when running:
 
-    ./bin/mgrit-convergence --help
+```
+    ./bin/xbraid-convergence-est --help
+```
 
-## Visualization
+### Compute approximate convergence factor of MGRIT V-cycle with FCF-relaxation
 
-A Python3 script for visualization of estimated bounds for spatial eigenvalues in the complex plane can be found in the utils/ folder.
-For required commandline arguments, run:
+#### Sample complex plane
 
-    python3 heatmap.py
+This example samples spatial eigenvalues in the comlex plane
+and computes an approximate convergence factor (according to [Hessenthaler et al.](https://arxiv.org/abs/1812.11508), Approximation 2)
+of 5-level MGRIT V-cycles with FCF-relaxation on each level:
+
+```
+    ./bin/xbraid-convergence-est                            \
+        --number-of-timesteps  1025                         \
+        --number-of-time-grids 5                            \
+        --coarsening-factors   2 2 2 2                      \
+        --runge-kutta-method L_stable_SDIRK1                \
+        --sample-complex-plane -10.0 1.0 -4.0 4.0           \
+        --complex-plane-sample-size 110 90                  \
+        --bound error_l2_sqrt_expression_approximate_rate   \
+        --bound-on-level 1                                  \
+        --V-cycle                                           \
+        --relaxation-scheme FCF_relaxation                  \
+        --output-file V-cycle_FCF-relaxation_approx
+```
+
+This will produce the following output:
+
+* dteta_l0.txt : contains the sampled spatial eigenvalues
+* V-cycle_FCF-relaxation_approx.txt : contains the approximate convergence factor for all samples
+* max_V-cycle_FCF-relaxation_approx.txt : contains the maximum approximate convergence factor
+
+Results can be visualized by running:
+
+```
+    python3 utils/heatmap.py dteta_l0.txt V-cycle_FCF-relaxation_approx.txt NAN NAN NAN NAN 0.0 1.0
+```
+
+This will visualize the approximate convergence factors in the complex plane:
+
+![Image: Approximate convergence factor for 5-level V-cycles with FCF-relaxation (SDIRK1)](utils/figures/heatmap.png)
+
+To find out more about the arguments of the Python script, run:
+
+```
+    python3 utils/heatmap.py
+```
 
 ## Source code documentation
 

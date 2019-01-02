@@ -16,7 +16,7 @@ import code
 def main():
     interactiveMode = False
     exportFigure    = True
-    silentMode      = True
+    silentMode      = False
     exportFormat    = "png" # png, svg
     exportDPI       = 300
     # get Matplotlib version
@@ -83,6 +83,8 @@ def main():
     plt.gca().set_aspect("equal")
     plt.xlim([xmin, xmax])
     plt.ylim([ymin, ymax])
+    plt.xlabel(r"$\delta_t \Re (\xi)$")
+    plt.ylabel(r"$\delta_t \Im (\xi)$")
     plt.colorbar(heatmap, fraction=0.046, pad=0.04)
     fig.canvas.set_window_title(os.path.abspath(datafile))
     try:
@@ -101,7 +103,7 @@ def main():
         if ((mplVersionMajor < 2) and (mplVersionMinor < 6) and (mplVersionPatch < 2) and (exportFormat == "svg")):
             print(">>>ERROR: EPS/SVG export requires Matplotlib version >= 1.5.2. You have "+mplVersion+"!")
             sys.exit()
-        plt.savefig("tst."+exportFormat, format=exportFormat, dpi=exportDPI)
+        plt.savefig("heatmap."+exportFormat, format=exportFormat, dpi=exportDPI)
     if not(silentMode):
         plt.show()
     # allow user to interact with data in workspace
