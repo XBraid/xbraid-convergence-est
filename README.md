@@ -79,6 +79,40 @@ To find out more about the arguments of the Python script, run:
     python3 utils/heatmap.py
 ```
 
+#### Sample real axis
+
+This example samples the real axis (by using the same complex plane sampling routines)
+and computes the l2-norm of the error propagation operator (on level 1;
+according to [Hessenthaler et al.](https://arxiv.org/abs/1812.11508), Lemma 3.3 and Equation 4.1)
+of 5-level MGRIT V-cycles with FCF-relaxation on each level in parallel:
+
+```
+    mpirun -np 4 ./bin/xbraid-convergence-est               \
+        --number-of-timesteps  1025                         \
+        --number-of-time-grids 5                            \
+        --coarsening-factors   2 2 2 2                      \
+        --runge-kutta-method L_stable_SDIRK1                \
+        --sample-complex-plane -0.9 0.0001 0.0 0.0          \
+        --complex-plane-sample-size 12 1                    \
+        --bound error_l2_upper_bound                        \
+        --bound-on-level 1                                  \
+        --V-cycle                                           \
+        --relaxation-scheme FCF_relaxation                  \
+        --output-file V-cycle_FCF-relaxation_l2error
+```
+
+This will produce the following output:
+
+* dteta_l0.txt : contains the sampled spatial eigenvalues
+* V-cycle_FCF-relaxation_l2error.txt : contains the value of the upper bound for all samples
+* max_V-cycle_FCF-relaxation_l2error.txt : contains the maximum value of the upper bound for all samples
+
+The script prints:
+
+```
+Convergence <= 0.22158731181372346
+```
+
 ## Source code documentation
 
 Doxygen is used to automatically generate source code documentation.
