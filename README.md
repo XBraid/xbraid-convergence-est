@@ -73,6 +73,8 @@ This will visualize the approximate convergence factors in the complex plane:
 
 ![Image: Approximate convergence factor for 5-level V-cycles with FCF-relaxation (SDIRK1)](utils/figures/heatmap.png)
 
+The visualized data is also exported as ```heatmap.png```.
+
 To find out more about the arguments of the Python script, run:
 
 ```
