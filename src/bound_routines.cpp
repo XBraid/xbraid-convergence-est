@@ -93,7 +93,7 @@ void get_propagator_bound(const int bound,                  ///< requested bound
         throw;
     }
 }
-                        
+
 /**
  *  compute bound for error propagator for multilevel MGRIT algorithm (real version)
  */
@@ -139,8 +139,13 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
             break;
         }
         default:{
-            cout << ">>>ERROR: Only F- and FCF-relaxation are implemented" << endl;
-            throw;
+            if(bound == mgritestimate::error_l2_sqrt_expression_upper_bound){
+                // fine
+            }
+            else{
+                cout << ">>>ERROR: Only F- and FCF-relaxation are implemented for this bound." << endl;
+                throw;
+            }
         }
     }
     // get local eigenvalue index range on rank
@@ -395,8 +400,13 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
             break;
         }
         default:{
-            cout << ">>>ERROR: Only F- and FCF-relaxation are implemented" << endl;
-            throw;
+            if(bound == mgritestimate::error_l2_sqrt_expression_upper_bound){
+                // fine
+            }
+            else{
+                cout << ">>>ERROR: Only F- and FCF-relaxation are implemented for this bound." << endl;
+                throw;
+            }
         }
     }
     // get local eigenvalue index range on rank
@@ -605,7 +615,7 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
     // communicate data
     communicateBounds(estimate, numberOfSamples, samplesRankStartIdx, samplesRankStopIdx);
 }
-                        
+
 /**
  *  compute bound for residual propagator for multilevel MGRIT algorithm (real version)
  */
@@ -643,8 +653,13 @@ void get_residual_l2_propagator_bound(const int bound,                  ///< req
             break;
         }
         default:{
-            cout << ">>>ERROR: Only F- and FCF-relaxation are implemented." << endl;
-            throw;
+            if(bound == mgritestimate::error_l2_sqrt_expression_upper_bound){
+                // fine
+            }
+            else{
+                cout << ">>>ERROR: Only F- and FCF-relaxation are implemented for this bound." << endl;
+                throw;
+            }
         }
     }
     // get local eigenvalue index range on rank
@@ -779,8 +794,13 @@ void get_residual_l2_propagator_bound(const int bound,                  ///< req
             break;
         }
         default:{
-            cout << ">>>ERROR: Only F- and FCF-relaxation are implemented" << endl;
-            throw;
+            if(bound == mgritestimate::error_l2_sqrt_expression_upper_bound){
+                // fine
+            }
+            else{
+                cout << ">>>ERROR: Only F- and FCF-relaxation are implemented for this bound." << endl;
+                throw;
+            }
         }
     }
     // get local eigenvalue index range on rank

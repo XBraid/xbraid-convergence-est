@@ -149,6 +149,84 @@ void get_default_filename(const int cycle, const int bound, const int relax, str
             }
             break;
         }
+        case mgritestimate::FCFCF_relaxation:{
+            if(bound == mgritestimate::error_l2_upper_bound){
+                *filename = cyc + "error_l2_upper_bound_E_FCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_upper_bound){
+                *filename = cyc + "error_l2_sqrt_upper_bound_E_FCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_expression_upper_bound){
+                *filename = cyc + "error_l2_sqrt_expression_upper_bound_E_FCFCF";
+            }else if(bound == mgritestimate::error_l2_tight_twogrid_upper_bound){
+                *filename = cyc + "error_l2_tight_twogrid_upper_bound_E_FCFCF";
+            }else if(bound == mgritestimate::error_l2_approximate_lower_bound){
+                *filename = cyc + "error_l2_approximate_lower_bound_E_FCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_approximate_lower_bound){
+                *filename = cyc + "error_l2_sqrt_approximate_lower_bound_E_FCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_expression_approximate_rate){
+                *filename = cyc + "error_l2_sqrt_expression_approximate_rate_E_FCFCF";
+            }else if(bound == mgritestimate::residual_l2_upper_bound){
+                *filename = cyc + "residual_l2_upper_bound_R_FCFCF";
+            }else if(bound == mgritestimate::residual_l2_sqrt_upper_bound){
+                *filename = cyc + "residual_l2_sqrt_upper_bound_R_FCFCF";
+            }else if(bound == mgritestimate::residual_l2_lower_bound){
+                *filename = cyc + "residual_l2_lower_bound_R_FCFCF";
+            }else{
+                *filename = cyc + "bound_E_FCFCF";
+            }
+            break;
+        }
+        case mgritestimate::FCFCFCF_relaxation:{
+            if(bound == mgritestimate::error_l2_upper_bound){
+                *filename = cyc + "error_l2_upper_bound_E_FCFCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_upper_bound){
+                *filename = cyc + "error_l2_sqrt_upper_bound_E_FCFCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_expression_upper_bound){
+                *filename = cyc + "error_l2_sqrt_expression_upper_bound_E_FCFCFCF";
+            }else if(bound == mgritestimate::error_l2_tight_twogrid_upper_bound){
+                *filename = cyc + "error_l2_tight_twogrid_upper_bound_E_FCFCFCF";
+            }else if(bound == mgritestimate::error_l2_approximate_lower_bound){
+                *filename = cyc + "error_l2_approximate_lower_bound_E_FCFCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_approximate_lower_bound){
+                *filename = cyc + "error_l2_sqrt_approximate_lower_bound_E_FCFCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_expression_approximate_rate){
+                *filename = cyc + "error_l2_sqrt_expression_approximate_rate_E_FCFCFCF";
+            }else if(bound == mgritestimate::residual_l2_upper_bound){
+                *filename = cyc + "residual_l2_upper_bound_R_FCFCFCF";
+            }else if(bound == mgritestimate::residual_l2_sqrt_upper_bound){
+                *filename = cyc + "residual_l2_sqrt_upper_bound_R_FCFCFCF";
+            }else if(bound == mgritestimate::residual_l2_lower_bound){
+                *filename = cyc + "residual_l2_lower_bound_R_FCFCFCF";
+            }else{
+                *filename = cyc + "bound_E_FCFCFCF";
+            }
+            break;
+        }
+        case mgritestimate::FCFCFCFCF_relaxation:{
+            if(bound == mgritestimate::error_l2_upper_bound){
+                *filename = cyc + "error_l2_upper_bound_E_FCFCFCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_upper_bound){
+                *filename = cyc + "error_l2_sqrt_upper_bound_E_FCFCFCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_expression_upper_bound){
+                *filename = cyc + "error_l2_sqrt_expression_upper_bound_E_FCFCFCFCF";
+            }else if(bound == mgritestimate::error_l2_tight_twogrid_upper_bound){
+                *filename = cyc + "error_l2_tight_twogrid_upper_bound_E_FCFCFCFCF";
+            }else if(bound == mgritestimate::error_l2_approximate_lower_bound){
+                *filename = cyc + "error_l2_approximate_lower_bound_E_FCFCFCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_approximate_lower_bound){
+                *filename = cyc + "error_l2_sqrt_approximate_lower_bound_E_FCFCFCFCF";
+            }else if(bound == mgritestimate::error_l2_sqrt_expression_approximate_rate){
+                *filename = cyc + "error_l2_sqrt_expression_approximate_rate_E_FCFCFCFCF";
+            }else if(bound == mgritestimate::residual_l2_upper_bound){
+                *filename = cyc + "residual_l2_upper_bound_R_FCFCFCFCF";
+            }else if(bound == mgritestimate::residual_l2_sqrt_upper_bound){
+                *filename = cyc + "residual_l2_sqrt_upper_bound_R_FCFCFCFCF";
+            }else if(bound == mgritestimate::residual_l2_lower_bound){
+                *filename = cyc + "residual_l2_lower_bound_R_FCFCFCFCF";
+            }else{
+                *filename = cyc + "bound_E_FCFCFCFCF";
+            }
+            break;
+        }
         default:{
             cout << ">>>ERROR: Unknown relaxation type when setting default filename." << endl;
             throw;
@@ -353,10 +431,16 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
             app.cycle = mgritestimate::F_cycle;
         }else if(string(argv[argIdx]) == "--relaxation-scheme"){
             argIdx++;
-            if(string(argv[argIdx]) == "F_relaxation"){
+            if((string(argv[argIdx]) == "F_relaxation") || (stoi(argv[argIdx]) == 0)){
                 app.relax = mgritestimate::F_relaxation;
-            }else if(string(argv[argIdx]) == "FCF_relaxation"){
+            }else if((string(argv[argIdx]) == "FCF_relaxation") || (stoi(argv[argIdx]) == 1)){
                 app.relax = mgritestimate::FCF_relaxation;
+            }else if((string(argv[argIdx]) == "FCFCF_relaxation") || (stoi(argv[argIdx]) == 2)){
+                app.relax = mgritestimate::FCFCF_relaxation;
+            }else if((string(argv[argIdx]) == "FCFCFCF_relaxation") || (stoi(argv[argIdx]) == 3)){
+                app.relax = mgritestimate::FCFCFCF_relaxation;
+            }else if((string(argv[argIdx]) == "FCFCFCFCF_relaxation") || (stoi(argv[argIdx]) == 4)){
+                app.relax = mgritestimate::FCFCFCFCF_relaxation;
             }
         }else if(string(argv[argIdx]) == "--output-file"){
             app.userOutputFile      = true;

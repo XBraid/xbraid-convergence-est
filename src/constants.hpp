@@ -33,6 +33,18 @@ namespace mgritestimate{
      *  FCF-relaxation on all levels
      */
     const int FCF_relaxation = 1;
+    /**
+     *  FCF-relaxation on all levels
+     */
+    const int FCFCF_relaxation = 2;
+    /**
+     *  FCF-relaxation on all levels
+     */
+    const int FCFCFCF_relaxation = 3;
+    /**
+     *  FCF-relaxation on all levels
+     */
+    const int FCFCFCFCF_relaxation = 4;
     //----------------------------------------------------------------------------------------------------------------//
     /**
      *  \f$\ell^2\f$-norm of numerically constructed error propagator
@@ -66,7 +78,7 @@ namespace mgritestimate{
     const int error_l2_tight_twogrid_lower_bound = -4;
     /**
      *  Approximate MGRIT convergence rate by approximating \f$\sqrt{ \| E \|_1 \| E \|_\infty }\f$.
-     * 
+     *
      *  Here, \f$ \| E \|_1 \f$ is approximated by the absolute column sum corresponding to the first C-point
      *  and \f$ \| E \|_\infty \f$ is approximated by the absolute row sum corresponding to the last C-point.
      */
@@ -101,7 +113,7 @@ namespace rkconst{
      *      <tr>    <td>            <td>    \f$\frac{1}{2}\f$   <td>    \f$\frac{1}{2}\f$
      *  </table>
      *  See [Hairer, Wanner (1996)], Table 5.7 and [Jay (2015), pp. 817-826], Table 1.
-     * 
+     *
      *  Note: Also known as trapezoidal or Crank-Nicolson method.
      */
     const int A_stable_LobattoIIIA_order2 = 402;
@@ -234,7 +246,7 @@ namespace rkconst{
      *      <tr>    <td>            <td>    \f$1\f$
      *  </table>
      *  See [Dobrev et al. (2017)], Table 3.1.
-     * 
+     *
      *  Note: Also known as backward Euler method.
      */
     const int L_stable_SDIRK1 = 201;
@@ -257,7 +269,7 @@ namespace rkconst{
      *  </table>
      *  with \f$q = 0.435866521508458999416019\f$, \f$r = 1.20849664917601007033648\f$ and \f$s = 0.717933260754229499708010\f$.
      *  See [Dobrev et al. (2017)], Table 3.1,
-     *  talk by <a href="https://www.math.auckland.ac.nz/~butcher/CONFERENCES/TRONDHEIM/trondheim.pdf" target="_blank">talk by Butcher</a> 
+     *  talk by <a href="https://www.math.auckland.ac.nz/~butcher/CONFERENCES/TRONDHEIM/trondheim.pdf" target="_blank">talk by Butcher</a>
      *  and <a href="http://mfem.github.io/doxygen/html/ode_8cpp_source.html" target="_blank">MFEM</a>.
      */
     const int L_stable_SDIRK3 = 203;
@@ -291,7 +303,7 @@ namespace rkconst{
      *      <tr>    <td>            <td>    \f$1\f$
      *  </table>
      *  See [Hairer, Wanner (1996)], Table 5.5.
-     * 
+     *
      *  Note: Same as rkconst::L_stable_SDIRK1.
      */
     const int L_stable_RadauIIA_order1 = 301;
