@@ -431,15 +431,15 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
             app.cycle = mgritestimate::F_cycle;
         }else if(string(argv[argIdx]) == "--relaxation-scheme"){
             argIdx++;
-            if((string(argv[argIdx]) == "F_relaxation") || (stoi(argv[argIdx]) == 0)){
+            if((string(argv[argIdx]) == "F_relaxation") || (string(argv[argIdx]) == "0")){
                 app.relax = mgritestimate::F_relaxation;
-            }else if((string(argv[argIdx]) == "FCF_relaxation") || (stoi(argv[argIdx]) == 1)){
+            }else if((string(argv[argIdx]) == "FCF_relaxation") || (string(argv[argIdx]) == "1")){
                 app.relax = mgritestimate::FCF_relaxation;
-            }else if((string(argv[argIdx]) == "FCFCF_relaxation") || (stoi(argv[argIdx]) == 2)){
+            }else if((string(argv[argIdx]) == "FCFCF_relaxation") || (string(argv[argIdx]) == "2")){
                 app.relax = mgritestimate::FCFCF_relaxation;
-            }else if((string(argv[argIdx]) == "FCFCFCF_relaxation") || (stoi(argv[argIdx]) == 3)){
+            }else if((string(argv[argIdx]) == "FCFCFCF_relaxation") || (string(argv[argIdx]) == "3")){
                 app.relax = mgritestimate::FCFCFCF_relaxation;
-            }else if((string(argv[argIdx]) == "FCFCFCFCF_relaxation") || (stoi(argv[argIdx]) == 4)){
+            }else if((string(argv[argIdx]) == "FCFCFCFCF_relaxation") || (string(argv[argIdx]) == "4")){
                 app.relax = mgritestimate::FCFCFCFCF_relaxation;
             }
         }else if(string(argv[argIdx]) == "--output-file"){
