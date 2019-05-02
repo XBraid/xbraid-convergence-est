@@ -243,7 +243,7 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                     lambda_k(level) = (*lambda[level])(evalIdx);
                 }
                 // evaluate expression
-                (*estimate)(evalIdx) = get_error_l2_sqrt_expression_upper_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                (*estimate)(evalIdx) = get_error_l2_sqrt_expression_upper_bound(cycle, relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
             }
             break;
         }
@@ -504,7 +504,7 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                     lambda_k(level) = (*lambda[level])(evalIdx);
                 }
                 // evaluate expression
-                (*estimate)(evalIdx) = get_error_l2_sqrt_expression_upper_bound(relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
+                (*estimate)(evalIdx) = get_error_l2_sqrt_expression_upper_bound(cycle, relax, lambda_k, numberOfTimeSteps, coarseningFactors, theoryLevel);
             }
             break;
         }
@@ -1020,14 +1020,15 @@ double get_error_l2_tight_twogrid_lower_bound(int r,                   ///< numb
  *  Note: Evaluation is reasonably cheap, so let's just wrap the complex equivalent.
  */
 // note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
-double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< number of FC relaxation steps
+double get_error_l2_sqrt_expression_upper_bound(int cycle,    ///< cycling strategy
+                                     int r,                   ///< number of FC relaxation steps
                                      Col<double> lambda,      ///< eigenvalues of \f$\Phi_l\f$
                                      Col<int> N,              ///< number of time steps on each grid level
                                      Col<int> m,              ///< coarsening factors between all grid levels
                                      int theoryLevel          ///< expression for error propagator on grid level
                                      ){
     Col<cx_double> lambdac(lambda, 0.0*lambda);
-    double val = get_error_l2_sqrt_expression_upper_bound(r, lambdac, N, m, theoryLevel);
+    double val = get_error_l2_sqrt_expression_upper_bound(cycle, r, lambdac, N, m, theoryLevel);
     return val;
 }
 
@@ -1035,7 +1036,8 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
  *  Compute \f$ \sqrt{\| E \|_1 \| E \|_\infty} \f$ using expression (complex version).
  */
 // note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
-double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< number of FC relaxation steps
+double get_error_l2_sqrt_expression_upper_bound(int cycle,      ///< cycling strategy
+                                       int r,                   ///< number of FC relaxation steps
                                        Col<cx_double> lambda,   ///< eigenvalues of \f$\Phi_l\f$
                                        Col<int> N,              ///< number of time steps on each grid level
                                        Col<int> m,              ///< coarsening factors between all grid levels
@@ -1058,228 +1060,380 @@ double get_error_l2_sqrt_expression_upper_bound(int r,                   ///< nu
             throw;
         }
     }else if(numberOfLevels == 3){
-        switch(r){
-            /*  On level 1, we have the following points:
-             *
-             *  C0      F1      F2      F3     C1
-             *  |-------|-------|-------|-------|
-             *  |-------------------------------|
-             *
-             */
-            case mgritestimate::F_relaxation:{
-                double norm1;
-                double normInf;
-                double colSumF;
-                double rowSumF;
-                if(theoryLevel == 0){
+        if(cycle == mgritestimate::F_cycle){
+            switch(r){
+                case mgritestimate::F_relaxation:{
+                    if(theoryLevel == 0){
+                        cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound not implemented for three level F-cycles with F-relaxation on level " << theoryLevel << endl;
+                        throw;
+                    }
+                    double norm1;
+                    double normInf;
+                    double sumC;
+                    double sumF;
+                    double sum1;
+                    double sum2;
+                    double sum3;
+                    double sum4;
+                    double b;
+                    b               = N(1) - m(1) * N(2) + 3 * m(1) - 3;
                     // C-point column sum
-                    norm1   = std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
-                                + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
-                                * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
-                                + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                * std::pow(std::abs(lambda(2)), N(2)-2);
+                    sumC            = 0.0;
+                    for(int r = 0; r <= b; r++){
+                        sumC       += std::abs(lambda(1) - std::pow(lambda(0), m(0))) * std::pow(std::abs(lambda(1)), r);
+                    }
+                    sum1            = 0.0;
+                    for(int r = 0; r <= m(1)-1; r++){
+                        sum1       += std::pow(std::abs(lambda(1)), r);
+                    }
+                    sum2            = 0.0;
+                    for(int q = 1; q <= N(2)-3; q++){
+                        sum2       += std::pow(std::abs(lambda(2)), q-1)
+                                        * std::abs(q * 1.0 * std::pow(lambda(0), m(0)) * std::pow(lambda(1), b+1)
+                                                   - (q + 1.0) * std::pow(lambda(1), m(1)) * lambda(2)
+                                                   - (q - 1.0) * std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * lambda(2)
+                                                   + q * 1.0 * std::pow(lambda(2), 2.0)
+                                            );
+                    }
+                    sumC           += sum1 * sum2
+                                        + std::pow(std::abs(lambda(2)), N(2)-3)
+                                        * std::abs((N(2) - 2.0) * std::pow(lambda(0), m(0)) * std::pow(lambda(1), b+1)
+                                                   - (N(2) - 1.0) * std::pow(lambda(1), m(1)) * lambda(2)
+                                                   - (N(2) - 3.0) * std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * lambda(2)
+                                                   + (N(2) - 2.0) * std::pow(lambda(2), 2.0)
+                                        );
+                    norm1           = sumC;
                     // F-point column sum
-                    for(int j = 1; j <= m(1)-1; j++){
-                        colSumF = (std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                    for(int j = 1; j <= m(1)-1; j){
+                        sum1        = 0.0;
+                        for(int r = 0; r <= b+m(1)-j; r++){
+                            sum1   += std::pow(std::abs(lambda(1)), r);
+                        }
+                        sum2        = 0.0;
+                        for(int r = 0; r <= m(1)-1; r++){
+                            sum2   += std::pow(std::abs(lambda(1)), r+m(1)-1-j);
+                        }
+                        sum3        = 0.0;
+                        for(int q = 1; q <= N(2)-4; q++){
+                            sum3   += std::pow(std::abs(lambda(2)), q)
+                                        * std::abs(q * 1.0 * lambda(2)
+                                                   - (q + 1.0) * std::pow(lambda(1), m(1))
+                                                  );
+                        }
+                        sumF        = sum1
+                                        + sum2 * sum3
+                                        + std::pow(std::abs(lambda(1)), m(1)-1-j)
+                                        * std::pow(std::abs(lambda(2)), N(2)-3)
+                                        * std::abs((N(2) - 3.0) * lambda(2)
+                                                   - (N(2) - 2.0) * std::pow(lambda(1), m(1))
+                                                  );
+                        sumF       *= std::abs(lambda(1) - std::pow(lambda(0), m(0)));
+                        norm1       = std::max(sumF, norm1);
+                    }
+                    // C-point row sum
+                    sumC            = 0.0;
+                    for(int r = 0; r <= b; r++){
+                        sumC       += std::abs(lambda(1) - std::pow(lambda(0), m(0))) * std::pow(std::abs(lambda(1)), r);
+                    }
+                    sum1            = 0.0;
+                    for(int q = 1; q <= N(2)-2; q++){
+                        sum1       += std::pow(std::abs(lambda(2)), q-1)
+                                        * std::abs(q * 1.0 * std::pow(lambda(0), m(0)) * std::pow(lambda(1), b+1)
+                                                   - (q + 1.0) * std::pow(lambda(1), m(1)) * lambda(2)
+                                                   - (q - 1.0) * std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * lambda(2)
+                                                   + q * 1.0 * std::pow(lambda(2), 2.0)
+                                                  );
+                    }
+                    sum2            = 0.0;
+                    for(int r = 0; r <= m(1)-2; r++){
+                        sum2       += std::pow(std::abs(lambda(1)), r);
+                    }
+                    sum3            = 0.0;
+                    for(int q = 1; q <= N(2)-3; q++){
+                        sum3       += std::pow(std::abs(lambda(2)), q)
+                                        * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                        * std::abs(q * 1.0 * lambda(2)
+                                                   - (q + 1.0) * std::pow(lambda(1), m(1))
+                                                  );
+                    }
+                    sumC           += sum1 + sum2 * sum3;
+                    normInf         = sumC;
+                    // F-point row sum
+                    for(int j = N(1)-m(1)+1; j <= N(1)-1; j++){
+                        sum1        = 0.0;
+                        for(int r = 0; r <= b+m(1)+j-N(1); r++){
+                            sum1   += std::pow(std::abs(lambda(1)), r)
+                                        * std::abs(lambda(1) - std::pow(lambda(0), m(0)));
+                        }
+                        sum2        = 0.0;
+                        for(int q = 1; q <= N(2)-3; q++){
+                            sum2   += std::pow(std::abs(lambda(1)), m(1)-1+j-(N(1)-1))
+                                        * std::pow(std::abs(lambda(2)), q-1)
+                                        * std::abs(q * 1.0 * std::pow(lambda(0), m(0)) * std::pow(lambda(1), b+1)
+                                                   - (q + 1.0) * std::pow(lambda(1), m(1)) * lambda(2)
+                                                   - (q - 1.0) * std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1) * lambda(2)
+                                                   + q * 1.0 * std::pow(lambda(2), 2.0)
+                                                  );
+                        }
+                        sum3        = 0.0;
+                        for(int r = b-1-m(1)+2; r <= b-1; r++){
+                            sum3   += std::pow(std::abs(lambda(1)), r-(N(1)-1)+j);
+                        }
+                        sum4        = 0.0;
+                        for(int q = 1; q <= N(2)-4; q++){
+                            sum4   += std::pow(std::abs(lambda(2)), q)
+                                        * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                        * std::abs(q * 1.0 * lambda(2)
+                                                   - (q + 1.0) * std::pow(lambda(1), m(1))
+                                                  );
+                        }
+                        sumF        = sum1 + sum2 + sum3 * sum4;
+                        normInf     = std::max(sumF, normInf);
+                    }
+                    break;
+                }
+                case mgritestimate::FCF_relaxation:{
+                    cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound for F-cycles only implemented for three-grid with F-relaxation" << endl;
+                    throw;
+                    break;
+                }
+                default:{
+                    cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound for F-cycles only implemented for three-grid with F-relaxation" << endl;
+                    throw;
+                }
+            }
+        }else{
+            switch(r){
+                /*  On level 1, we have the following points:
+                *
+                *  C0      F1      F2      F3     C1
+                *  |-------|-------|-------|-------|
+                *  |-------------------------------|
+                *
+                */
+                case mgritestimate::F_relaxation:{
+                    double norm1;
+                    double normInf;
+                    double colSumF;
+                    double rowSumF;
+                    if(theoryLevel == 0){
+                        // C-point column sum
+                        norm1   = std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
                                     * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
                                     * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
                                     * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
-                                    + std::pow(std::abs(lambda(2)), N(2)-2)
-                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0)))) * std::pow(std::abs(lambda(1)), j-1)
                                     + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)-2)) / (1.0 - std::abs(lambda(1)))
-                                    * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)));
-                        norm1   = std::max(colSumF, norm1);
-                    }
-                }else if(theoryLevel == 1){
-                    // C-point column sum
-                    norm1   = std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
-                                + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                * std::pow(std::abs(lambda(2)), N(2)-2);
-                    // F-point column sum
-                    for(int j = 1; j <= m(1)-1; j++){
-                        colSumF = (std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                    * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
+                                    + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                    * std::pow(std::abs(lambda(2)), N(2)-2);
+                        // F-point column sum
+                        for(int j = 1; j <= m(1)-1; j++){
+                            colSumF = (std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                        * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                        * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
+                                        + std::pow(std::abs(lambda(2)), N(2)-2)
+                                        * std::abs(lambda(1) - std::pow(lambda(0), m(0)))) * std::pow(std::abs(lambda(1)), j-1)
+                                        + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)-2)) / (1.0 - std::abs(lambda(1)))
+                                        * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)));
+                            norm1   = std::max(colSumF, norm1);
+                        }
+                    }else if(theoryLevel == 1){
+                        // C-point column sum
+                        norm1   = std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
                                     * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
                                     * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                    + std::pow(std::abs(lambda(2)), N(2)-2)
-                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0)))) * std::pow(std::abs(lambda(1)), j-1)
                                     + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)-2)) / (1.0 - std::abs(lambda(1)));
-                        norm1   = std::max(colSumF, norm1);
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                    + std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                    * std::pow(std::abs(lambda(2)), N(2)-2);
+                        // F-point column sum
+                        for(int j = 1; j <= m(1)-1; j++){
+                            colSumF = (std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                        * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                        + std::pow(std::abs(lambda(2)), N(2)-2)
+                                        * std::abs(lambda(1) - std::pow(lambda(0), m(0)))) * std::pow(std::abs(lambda(1)), j-1)
+                                        + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)-2)) / (1.0 - std::abs(lambda(1)));
+                            norm1   = std::max(colSumF, norm1);
+                        }
+                    }else{
+                        cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound not implemented for three levels (F-relaxation) on level " << theoryLevel << endl;
+                        throw;
                     }
-                }else{
-                    cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound not implemented for three levels (F-relaxation) on level " << theoryLevel << endl;
-                    throw;
+                    // C-point row sum
+                    normInf  = std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                * (1.0 - std::pow(std::abs(lambda(2)), N(2)-1)) / (1.0 - std::abs(lambda(2)))
+                                + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                * (1.0 - std::pow(std::abs(lambda(2)), N(2)-1)) / (1.0 - std::abs(lambda(2)))
+                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1))   / (1.0 - std::abs(lambda(1)));
+                    for(int j = 1; j <= m(1)-1; j++){
+                        rowSumF = std::pow(std::abs(lambda(1)), j)
+                                    * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
+                                    * (
+                                    std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                    + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                    )
+                                    + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), j)) / (1.0 - std::abs(lambda(1)));
+                        normInf = std::max(rowSumF, normInf);
+                    }
+                    val = sqrt(norm1 * normInf);
+                    break;
                 }
-                // C-point row sum
-                normInf  = std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                            * (1.0 - std::pow(std::abs(lambda(2)), N(2)-1)) / (1.0 - std::abs(lambda(2)))
-                            + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                            * (1.0 - std::pow(std::abs(lambda(2)), N(2)-1)) / (1.0 - std::abs(lambda(2)))
-                            * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1))   / (1.0 - std::abs(lambda(1)));
-                for(int j = 1; j <= m(1)-1; j++){
-                    rowSumF = std::pow(std::abs(lambda(1)), j)
+                case mgritestimate::FCF_relaxation:{
+                    if(cycle == mgritestimate::F_cycle){
+                        cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound and F-cycles only implemented for three-grid with F-relaxation" << endl;
+                        throw;
+                    }
+                    double norm1;
+                    double normInf;
+                    double colSumF;
+                    double rowSumF;
+                    if(theoryLevel == 0){
+                        // C-point column sum
+                        norm1   = std::pow(std::abs(lambda(0)), m(0))
+                                    * std::pow(std::abs(lambda(1)), m(1)-1)
+                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                    * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                    * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
+                                    + std::pow(std::abs(lambda(0)), m(0))
+                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                    * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
+                                    + std::pow(std::abs(lambda(0)), m(0))
+                                    * std::pow(std::abs(lambda(1)), m(1)-1)
+                                    * std::pow(std::abs(lambda(2)), N(2)-3)
+                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0)));
+                        // F-point column sum
+                        colSumF = std::pow(std::abs(lambda(0)), m(0))
+                                    * std::abs(lambda(1))
+                                    * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                    * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
+                                    * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
+                                    + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                    * std::pow(std::abs(lambda(0)), m(0))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                    * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
+                                    + std::pow(std::abs(lambda(0)), m(0))
+                                    * std::abs(lambda(1))
+                                    * std::pow(std::abs(lambda(2)), N(2)-3)
+                                    * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1));
+                        norm1   = std::max(colSumF, norm1);
+                        for(int j = 1; j <= m(1)-2; j++){
+                            colSumF = std::pow(std::abs(lambda(0)), m(0))
+                                        * std::pow(std::abs(lambda(1)), j)
+                                        * std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (
+                                        (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                        * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
+                                        + std::pow(std::abs(lambda(2)), N(2)-2)
+                                        + (1.0 - std::pow(std::abs(lambda(1)), j))      / (1.0 - std::abs(lambda(1)))
+                                        * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
+                                        );
+                            norm1   = std::max(colSumF, norm1);
+                        }
+                    }else if(theoryLevel == 1){
+                        // C-point column sum
+                        norm1   = std::pow(std::abs(lambda(0)), m(0))
+                                    * std::pow(std::abs(lambda(1)), m(1)-1)
+                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                    * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                    + std::pow(std::abs(lambda(0)), m(0))
+                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                    + std::pow(std::abs(lambda(0)), m(0))
+                                    * std::pow(std::abs(lambda(1)), m(1)-1)
+                                    * std::pow(std::abs(lambda(2)), N(2)-3)
+                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0)));
+                        // F-point column sum
+                        colSumF = std::pow(std::abs(lambda(0)), m(0))
+                                    * std::abs(lambda(1))
+                                    * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                    * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
+                                    + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                    * std::pow(std::abs(lambda(0)), m(0))
+                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                    + std::pow(std::abs(lambda(0)), m(0))
+                                    * std::abs(lambda(1))
+                                    * std::pow(std::abs(lambda(2)), N(2)-3)
+                                    * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1));
+                        norm1   = std::max(colSumF, norm1);
+                        for(int j = 1; j <= m(1)-2; j++){
+                            colSumF = std::pow(std::abs(lambda(0)), m(0))
+                                        * std::pow(std::abs(lambda(1)), j)
+                                        * std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (
+                                        (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
+                                        * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
+                                        + std::pow(std::abs(lambda(2)), N(2)-2)
+                                        + (1.0 - std::pow(std::abs(lambda(1)), j))   / (1.0 - std::abs(lambda(1)))
+                                        );
+                            norm1   = std::max(colSumF, norm1);
+                        }
+                    }else{
+                        cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound not implemented for three levels (FCF-relaxation) on level " << theoryLevel << endl;
+                        throw;
+                    }
+                    // C-point row sum
+                    double summ = 0.0;
+                    for(int k = 0; k <= m(1)-3; k++){
+                        summ += std::pow(std::abs(lambda(1)), k);
+                    }
+                    normInf = std::pow(std::abs(lambda(0)), m(0))
+                                * std::abs(lambda(1))
+                                * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
                                 * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
-                                * (
-                                std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                + std::pow(std::abs(lambda(0)), m(0))
+                                * std::abs(lambda(1))
+                                * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
                                 * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
-                                )
-                                + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                * (1.0 - std::pow(std::abs(lambda(1)), j)) / (1.0 - std::abs(lambda(1)));
-                    normInf = std::max(rowSumF, normInf);
+                                + std::pow(std::abs(lambda(0)), m(0))
+                                * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                + std::pow(std::abs(lambda(0)), m(0))
+                                * std::abs(lambda(1))
+                                * std::pow(std::abs(lambda(2)), N(2)-2)
+                                * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                * summ;
+                    // F-point row sum
+                    for(int j = 1; j <= m(1)-1; j++){
+                        rowSumF = std::pow(std::abs(lambda(0)), m(0))
+                                * std::pow(std::abs(lambda(1)), j+1)
+                                * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
+                                * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
+                                + std::pow(std::abs(lambda(0)), m(0))
+                                * std::pow(std::abs(lambda(1)), j+1)
+                                * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
+                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
+                                + std::pow(std::abs(lambda(0)), m(0))
+                                * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
+                                * (1.0 - std::pow(std::abs(lambda(1)), j+1)) / (1.0 - std::abs(lambda(1)));
+                        normInf = std::max(rowSumF, normInf);
+                    }
+                    // final result
+                    val = sqrt(norm1 * normInf);
+                    break;
                 }
-                val = sqrt(norm1 * normInf);
-                break;
-            }
-            case mgritestimate::FCF_relaxation:{
-                double norm1;
-                double normInf;
-                double colSumF;
-                double rowSumF;
-                if(theoryLevel == 0){
-                    // C-point column sum
-                    norm1   = std::pow(std::abs(lambda(0)), m(0))
-                                * std::pow(std::abs(lambda(1)), m(1)-1)
-                                * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
-                                + std::pow(std::abs(lambda(0)), m(0))
-                                * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
-                                * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
-                                + std::pow(std::abs(lambda(0)), m(0))
-                                * std::pow(std::abs(lambda(1)), m(1)-1)
-                                * std::pow(std::abs(lambda(2)), N(2)-3)
-                                * std::abs(lambda(1) - std::pow(lambda(0), m(0)));
-                    // F-point column sum
-                    colSumF = std::pow(std::abs(lambda(0)), m(0))
-                                * std::abs(lambda(1))
-                                * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
-                                * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
-                                + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                * std::pow(std::abs(lambda(0)), m(0))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
-                                + std::pow(std::abs(lambda(0)), m(0))
-                                * std::abs(lambda(1))
-                                * std::pow(std::abs(lambda(2)), N(2)-3)
-                                * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1));
-                    norm1   = std::max(colSumF, norm1);
-                    for(int j = 1; j <= m(1)-2; j++){
-                        colSumF = std::pow(std::abs(lambda(0)), m(0))
-                                    * std::pow(std::abs(lambda(1)), j)
-                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (
-                                    (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
-                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                    * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
-                                    + std::pow(std::abs(lambda(2)), N(2)-2)
-                                    + (1.0 - std::pow(std::abs(lambda(1)), j))      / (1.0 - std::abs(lambda(1)))
-                                    * (1.0 - std::pow(std::abs(lambda(0)), m(0)))   / (1.0 - std::abs(lambda(0)))
-                                    );
-                        norm1   = std::max(colSumF, norm1);
-                    }
-                }else if(theoryLevel == 1){
-                    // C-point column sum
-                    norm1   = std::pow(std::abs(lambda(0)), m(0))
-                                * std::pow(std::abs(lambda(1)), m(1)-1)
-                                * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                + std::pow(std::abs(lambda(0)), m(0))
-                                * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
-                                + std::pow(std::abs(lambda(0)), m(0))
-                                * std::pow(std::abs(lambda(1)), m(1)-1)
-                                * std::pow(std::abs(lambda(2)), N(2)-3)
-                                * std::abs(lambda(1) - std::pow(lambda(0), m(0)));
-                    // F-point column sum
-                    colSumF = std::pow(std::abs(lambda(0)), m(0))
-                                * std::abs(lambda(1))
-                                * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
-                                + std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                                * std::pow(std::abs(lambda(0)), m(0))
-                                * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                + std::pow(std::abs(lambda(0)), m(0))
-                                * std::abs(lambda(1))
-                                * std::pow(std::abs(lambda(2)), N(2)-3)
-                                * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1));
-                    norm1   = std::max(colSumF, norm1);
-                    for(int j = 1; j <= m(1)-2; j++){
-                        colSumF = std::pow(std::abs(lambda(0)), m(0))
-                                    * std::pow(std::abs(lambda(1)), j)
-                                    * std::abs(lambda(1) - std::pow(lambda(0), m(0))) * (
-                                    (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
-                                    * (1.0 - std::pow(std::abs(lambda(1)), m(1)))   / (1.0 - std::abs(lambda(1)))
-                                    + std::pow(std::abs(lambda(2)), N(2)-2)
-                                    + (1.0 - std::pow(std::abs(lambda(1)), j))   / (1.0 - std::abs(lambda(1)))
-                                    );
-                        norm1   = std::max(colSumF, norm1);
-                    }
-                }else{
-                    cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound not implemented for three levels (FCF-relaxation) on level " << theoryLevel << endl;
+                default:{
+                    cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound only implemented for F- and FCF-relaxation" << endl;
                     throw;
                 }
-                // C-point row sum
-                double summ = 0.0;
-                for(int k = 0; k <= m(1)-3; k++){
-                    summ += std::pow(std::abs(lambda(1)), k);
-                }
-                normInf = std::pow(std::abs(lambda(0)), m(0))
-                            * std::abs(lambda(1))
-                            * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                            * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
-                            + std::pow(std::abs(lambda(0)), m(0))
-                            * std::abs(lambda(1))
-                            * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                            * (1.0 - std::pow(std::abs(lambda(2)), N(2)-2)) / (1.0 - std::abs(lambda(2)))
-                            * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
-                            + std::pow(std::abs(lambda(0)), m(0))
-                            * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                            + std::pow(std::abs(lambda(0)), m(0))
-                            * std::abs(lambda(1))
-                            * std::pow(std::abs(lambda(2)), N(2)-2)
-                            * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                            * summ;
-                // F-point row sum
-                for(int j = 1; j <= m(1)-1; j++){
-                    rowSumF = std::pow(std::abs(lambda(0)), m(0))
-                            * std::pow(std::abs(lambda(1)), j+1)
-                            * std::abs(lambda(2) - std::pow(lambda(0), m(0)) * std::pow(lambda(1), m(1)-1))
-                            * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
-                            + std::pow(std::abs(lambda(0)), m(0))
-                            * std::pow(std::abs(lambda(1)), j+1)
-                            * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                            * (1.0 - std::pow(std::abs(lambda(2)), N(2)-3)) / (1.0 - std::abs(lambda(2)))
-                            * (1.0 - std::pow(std::abs(lambda(1)), m(1)-1)) / (1.0 - std::abs(lambda(1)))
-                            + std::pow(std::abs(lambda(0)), m(0))
-                            * std::abs(lambda(1) - std::pow(lambda(0), m(0)))
-                            * (1.0 - std::pow(std::abs(lambda(1)), j+1)) / (1.0 - std::abs(lambda(1)));
-                    normInf = std::max(rowSumF, normInf);
-                }
-                // final result
-                val = sqrt(norm1 * normInf);
-                break;
-            }
-            default:{
-                cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound only implemented for F- and FCF-relaxation" << endl;
-                throw;
             }
         }
     }else if(numberOfLevels == 4){
+        if(cycle == mgritestimate::F_cycle){
+            cout << ">>>ERROR: error_l2_sqrt_expression_upper_bound and F-cycles only implemented for three-grid with F-relaxation" << endl;
+            throw;
+        }
         switch(r){
             case mgritestimate::F_relaxation:{
                 /*  On level 1, we have the following points:
