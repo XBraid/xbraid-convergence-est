@@ -238,8 +238,6 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
         }
         case mgritestimate::error_l2_sqrt_expression_upper_bound:{
             if((cycle == mgritestimate::F_cycle) && (numberOfLevels == 3)){
-                int world_rank;
-                MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
                 if(world_rank == 0){
                     cout << ">>>INFO-RANK-0: Running experimental implementation of analytic 3-grid F-cycle bound" << endl << endl;
                 }
