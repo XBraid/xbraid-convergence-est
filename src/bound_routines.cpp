@@ -27,11 +27,12 @@ void get_propagator_bound(const int bound,                  ///< requested bound
             || (bound == mgritestimate::residual_l2_lower_bound)){
             get_residual_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
         }else{
-            cout << ">>>ERROR: Unknown bound type " << bound << endl << endl;
+            cout << ">>>ERROR: Unknown bound type " << bound << " for V-cycle." << endl << endl;
             throw;
         }
     }else if(cycle == mgritestimate::F_cycle){
         if((bound == mgritestimate::error_l2_upper_bound)
+            || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
             || (bound == mgritestimate::error_l2_sqrt_upper_bound)){
                 get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
         }else if((bound == mgritestimate::residual_l2_upper_bound)
@@ -79,6 +80,7 @@ void get_propagator_bound(const int bound,                  ///< requested bound
         }
     }else if(cycle == mgritestimate::F_cycle){
         if((bound == mgritestimate::error_l2_upper_bound)
+            || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
             || (bound == mgritestimate::error_l2_sqrt_upper_bound)){
                 get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
         }else if((bound == mgritestimate::residual_l2_upper_bound)
@@ -235,6 +237,13 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
             break;
         }
         case mgritestimate::error_l2_sqrt_expression_upper_bound:{
+            if((cycle == mgritestimate::F_cycle) && (numberOfLevels == 3)){
+                int world_rank;
+                MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+                if(world_rank == 0){
+                    cout << ">>>INFO-RANK-0: Running experimental implementation of analytic 3-grid F-cycle bound" << endl << endl;
+                }
+            }
             errCode = 0;
             for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
                 // for a given spatial mode, get eigenvalues for all levels
@@ -1104,7 +1113,7 @@ double get_error_l2_sqrt_expression_upper_bound(int cycle,      ///< cycling str
                                         );
                     norm1           = sumC;
                     // F-point column sum
-                    for(int j = 1; j <= m(1)-1; j){
+                    for(int j = 1; j <= m(1)-1; j++){
                         sum1        = 0.0;
                         for(int r = 0; r <= b+m(1)-j; r++){
                             sum1   += std::pow(std::abs(lambda(1)), r);
@@ -1190,6 +1199,7 @@ double get_error_l2_sqrt_expression_upper_bound(int cycle,      ///< cycling str
                         sumF        = sum1 + sum2 + sum3 * sum4;
                         normInf     = std::max(sumF, normInf);
                     }
+                    val             = sqrt(norm1 * normInf);
                     break;
                 }
                 case mgritestimate::FCF_relaxation:{

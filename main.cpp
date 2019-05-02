@@ -38,7 +38,7 @@ int main(int argc, char** argv){
     }
     end = clock();
     cout << "Rank " << app.world_rank << " / " << app.world_size << " - Elapsed time: " << double(end-begin)/CLOCKS_PER_SEC << " seconds" << endl << endl;
-    
+
     // export results
     export_estimates(app);
 
