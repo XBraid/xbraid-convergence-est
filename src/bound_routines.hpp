@@ -32,6 +32,10 @@ double get_error_l2_tight_twogrid_lower_bound(int r, Col<double> lambda, Col<int
 
 double get_error_l2_tight_twogrid_lower_bound(int r, Col<cx_double> lambda, Col<int> N, Col<int> m, int theoryLevel);
 
+double get_error_l2_tight_twogrid_bound(int r, Col<double> lambda, Col<int> N, Col<int> m, int theoryLevel);
+
+double get_error_l2_tight_twogrid_bound(int r, Col<cx_double> lambda, Col<int> N, Col<int> m, int theoryLevel);
+
 double get_error_l2_sqrt_expression_upper_bound(int cycle, int r, Col<double> lambda, Col<int> N, Col<int> m, int theoryLevel);
 
 double get_error_l2_sqrt_expression_upper_bound(int cycle, int r, Col<cx_double> lambda, Col<int> N, Col<int> m, int theoryLevel);

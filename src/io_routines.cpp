@@ -46,6 +46,7 @@ void export_vector_minmax(int bound, arma::Col<double> *v, const string filename
         || (bound == mgritestimate::error_l2_sqrt_upper_bound)
         || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
         || (bound == mgritestimate::error_l2_tight_twogrid_upper_bound)
+        || (bound == mgritestimate::error_l2_tight_twogrid_bound)
         || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)
         || (bound == mgritestimate::residual_l2_upper_bound)
         || (bound == mgritestimate::residual_l2_sqrt_upper_bound)){
@@ -106,6 +107,8 @@ void get_default_filename(const int cycle, const int bound, const int relax, str
                 *filename = cyc + "error_l2_sqrt_expression_upper_bound_E_F";
             }else if(bound == mgritestimate::error_l2_tight_twogrid_upper_bound){
                 *filename = cyc + "error_l2_tight_twogrid_upper_bound_E_F";
+            }else if(bound == mgritestimate::error_l2_tight_twogrid_bound){
+                *filename = cyc + "error_l2_tight_twogrid_bound_E_F";
             }else if(bound == mgritestimate::error_l2_approximate_lower_bound){
                 *filename = cyc + "error_l2_approximate_lower_bound_E_F";
             }else if(bound == mgritestimate::error_l2_sqrt_approximate_lower_bound){
@@ -132,6 +135,8 @@ void get_default_filename(const int cycle, const int bound, const int relax, str
                 *filename = cyc + "error_l2_sqrt_expression_upper_bound_E_FCF";
             }else if(bound == mgritestimate::error_l2_tight_twogrid_upper_bound){
                 *filename = cyc + "error_l2_tight_twogrid_upper_bound_E_FCF";
+            }else if(bound == mgritestimate::error_l2_tight_twogrid_bound){
+                *filename = cyc + "error_l2_tight_twogrid_bound_E_FCF";
             }else if(bound == mgritestimate::error_l2_approximate_lower_bound){
                 *filename = cyc + "error_l2_approximate_lower_bound_E_FCF";
             }else if(bound == mgritestimate::error_l2_sqrt_approximate_lower_bound){
@@ -405,6 +410,8 @@ int parse_commandline_options(appStruct &app, int argc, char** argv){
                 app.bound = mgritestimate::error_l2_sqrt_expression_upper_bound;
             }else if(string(argv[argIdx]) == "error_l2_tight_twogrid_upper_bound"){
                 app.bound = mgritestimate::error_l2_tight_twogrid_upper_bound;
+            }else if(string(argv[argIdx]) == "error_l2_tight_twogrid_bound"){
+                app.bound = mgritestimate::error_l2_tight_twogrid_bound;
             }else if(string(argv[argIdx]) == "error_l2_approximate_lower_bound"){
                 app.bound = mgritestimate::error_l2_approximate_lower_bound;
             }else if(string(argv[argIdx]) == "error_l2_sqrt_approximate_lower_bound"){

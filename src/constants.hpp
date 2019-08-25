@@ -83,6 +83,10 @@ namespace mgritestimate{
      *  and \f$ \| E \|_\infty \f$ is approximated by the absolute row sum corresponding to the last C-point.
      */
     const int error_l2_sqrt_expression_approximate_rate = 5;
+    /**
+     *  Tight expression-like bound, see Corollary 4 in [Southworth, Mitchell, Hessenthaler (in preparation)]
+     */
+    const int error_l2_tight_twogrid_bound = 6;
     //----------------------------------------------------------------------------------------------------------------//
     /**
      *  \f$\ell^2\f$-norm of numerically constructed residual propagator
