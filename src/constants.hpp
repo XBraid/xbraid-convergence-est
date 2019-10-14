@@ -84,9 +84,13 @@ namespace mgritestimate{
      */
     const int error_l2_sqrt_expression_approximate_rate = 5;
     /**
-     *  Tight expression-like bound, see Corollary 4 in [Southworth, Mitchell, Hessenthaler (in preparation)]
+     *  Tight expression-like bound without 1/Nc, see Theorem 13 in [Southworth (2019)]
      */
     const int error_l2_tight_twogrid_bound = 6;
+    /**
+     *  Tight expression-like bound, see Corollary 2.4 in [Southworth, Mitchell, Hessenthaler (in preparation)]
+     */
+    const int error_l2_tight_twogrid_bound_single_iter = 7;
     //----------------------------------------------------------------------------------------------------------------//
     /**
      *  \f$\ell^2\f$-norm of numerically constructed residual propagator

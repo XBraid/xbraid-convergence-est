@@ -21,6 +21,7 @@ void get_propagator_bound(const int bound,                  ///< requested bound
             || (bound == mgritestimate::error_l2_sqrt_approximate_lower_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_bound)
+            || (bound == mgritestimate::error_l2_tight_twogrid_bound_single_iter)
             || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
             get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
         }else if((bound == mgritestimate::residual_l2_upper_bound)
@@ -70,6 +71,7 @@ void get_propagator_bound(const int bound,                  ///< requested bound
             || (bound == mgritestimate::error_l2_sqrt_approximate_lower_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_bound)
+            || (bound == mgritestimate::error_l2_tight_twogrid_bound_single_iter)
             || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
             get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
         }else if((bound == mgritestimate::residual_l2_upper_bound)
@@ -363,6 +365,27 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
             }
             break;
         }
+        case mgritestimate::error_l2_tight_twogrid_bound_single_iter:{
+            errCode = 0;
+            Col<double> estimateLevels(numberOfLevels-1);
+            Col<int> cf(1);
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                estimateLevels.fill(-1.0);
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression for all subsequent levels, then get max
+                for(int level = 0; level < numberOfLevels-1; level++){
+                    cf.fill(coarseningFactors(level));
+                    estimateLevels(level) = get_error_l2_tight_twogrid_bound_single_iter(relax, Col<double>(lambda_k.subvec(level,level+1)),
+                         Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
+                }
+                (*estimate)(evalIdx) = arma::max(estimateLevels);
+            }
+            break;
+        }
         case mgritestimate::error_l2_sqrt_expression_approximate_rate:{
             errCode = 0;
             for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
@@ -639,6 +662,27 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                 for(int level = 0; level < numberOfLevels-1; level++){
                     cf.fill(coarseningFactors(level));
                     estimateLevels(level) = get_error_l2_tight_twogrid_bound(relax, Col<cx_double>(lambda_k.subvec(level,level+1)),
+                         Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
+                }
+                (*estimate)(evalIdx) = arma::max(estimateLevels);
+            }
+            break;
+        }
+        case mgritestimate::error_l2_tight_twogrid_bound_single_iter:{
+            errCode = 0;
+            Col<double> estimateLevels(numberOfLevels-1);
+            Col<int> cf(1);
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                estimateLevels.fill(-1.0);
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<cx_double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression for all subsequent levels, then get max
+                for(int level = 0; level < numberOfLevels-1; level++){
+                    cf.fill(coarseningFactors(level));
+                    estimateLevels(level) = get_error_l2_tight_twogrid_bound_single_iter(relax, Col<cx_double>(lambda_k.subvec(level,level+1)),
                          Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
                 }
                 (*estimate)(evalIdx) = arma::max(estimateLevels);
@@ -1066,7 +1110,7 @@ double get_error_l2_tight_twogrid_lower_bound(int r,                   ///< numb
 }
 
 /**
- *  Compute tight two-grid bound using expression. See Corollary 4 in [Southworth, Mitchell, Hessenthaler (in preparation)].
+ *  Compute tight two-grid bound using expression. See Theorem 13 in [Southworth (2019)].
  *
  *  Note: Evaluation is reasonably cheap, so let's just wrap the complex equivalent.
  */
@@ -1077,12 +1121,12 @@ double get_error_l2_tight_twogrid_bound(int r,                      ///< number 
                                      int theoryLevel          ///< expression for error propagator on grid level
                                      ){
     Col<cx_double> lambdac(lambda, 0.0*lambda);
-    double val = get_error_l2_tight_twogrid_lower_bound(r, lambdac, N, m, theoryLevel);
+    double val = get_error_l2_tight_twogrid_bound(r, lambdac, N, m, theoryLevel);
     return val;
 }
 
 /**
- *  Compute tight two-grid bound using expression (complex version). See Corollary 4 in [Southworth, Mitchell, Hessenthaler (in preparation)].
+ *  Compute tight two-grid bound using expression (complex version). See Theorem 13 in [Southworth (2019)].
  */
 // note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
 double get_error_l2_tight_twogrid_bound(int r,                   ///< number of FC relaxation steps
@@ -1120,6 +1164,63 @@ double get_error_l2_tight_twogrid_bound(int r,                   ///< number of 
         }
     }
     val *= std::sqrt((1.0 - std::pow(std::abs(lambda(0)), 2.0*m(0))) / (1.0 - std::pow(std::abs(lambda(0)), 2.0)));
+    return val;
+}
+
+/**
+ *  Compute tight two-grid bound using expression. See Corollary 2.4 in [Southworth, Mitchell, Hessenthaler (in preparation)].
+ *
+ *  Note: Evaluation is reasonably cheap, so let's just wrap the complex equivalent.
+ */
+double get_error_l2_tight_twogrid_bound_single_iter(int r,                      ///< number of FC relaxation steps
+                                                    Col<double> lambda,      ///< eigenvalues of \f$\Phi_l\f$
+                                                    Col<int> N,              ///< number of time steps on each grid level
+                                                    Col<int> m,              ///< coarsening factors between all grid levels
+                                                    int theoryLevel          ///< expression for error propagator on grid level
+                                                    ){
+    Col<cx_double> lambdac(lambda, 0.0*lambda);
+    double val = get_error_l2_tight_twogrid_bound_single_iter(r, lambdac, N, m, theoryLevel);
+    return val;
+}
+
+/**
+ *  Compute tight two-grid bound using expression (complex version). See Corollary 2.4 in [Southworth, Mitchell, Hessenthaler (in preparation)].
+ */
+// note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
+double get_error_l2_tight_twogrid_bound_single_iter(int r,                   ///< number of FC relaxation steps
+                                                    Col<cx_double> lambda,   ///< eigenvalues of \f$\Phi_l\f$
+                                                    Col<int> N,              ///< number of time steps on each grid level
+                                                    Col<int> m,              ///< coarsening factors between all grid levels
+                                                    int theoryLevel          ///< expression for error propagator on grid level
+                                                    ){
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1.0;
+    }
+    // sanity check
+    int numberOfLevels  = N.n_elem;
+    if(numberOfLevels != 2){
+        cout << ">>>ERROR: get_error_l2_tight_twogrid_bound_single_iter only works for two time grids" << endl;
+    }
+    // evaluate expression depending on relaxation scheme
+    double val = -2.0;
+    switch(r){
+        case mgritestimate::F_relaxation:{
+            val = std::abs(std::pow(lambda(0), m(0)) - lambda(1))
+                    / (1.0 - std::abs(lambda(1)));
+            break;
+        }
+        case mgritestimate::FCF_relaxation:{
+            val = std::abs(std::pow(lambda(0), m(0)))
+                    * std::abs(std::pow(lambda(0), m(0)) - lambda(1))
+                    / (1.0 - std::abs(lambda(1)));
+            break;
+        }
+        default:{
+            cout << ">>>ERROR: get_error_l2_tight_twogrid_bound_single_iter only implemented for F- and FCF-relaxation" << endl;
+            throw;
+        }
+    }
     return val;
 }
 
