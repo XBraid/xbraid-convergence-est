@@ -1163,7 +1163,6 @@ double get_error_l2_tight_twogrid_bound(int r,                   ///< number of 
             throw;
         }
     }
-    val *= std::sqrt((1.0 - std::pow(std::abs(lambda(0)), 2.0*m(0))) / (1.0 - std::pow(std::abs(lambda(0)), 2.0)));
     return val;
 }
 
@@ -1221,6 +1220,7 @@ double get_error_l2_tight_twogrid_bound_single_iter(int r,                   ///
             throw;
         }
     }
+    val *= std::sqrt((1.0 - std::pow(std::abs(lambda(0)), 2.0*m(0))) / (1.0 - std::pow(std::abs(lambda(0)), 2.0)));
     return val;
 }
 
