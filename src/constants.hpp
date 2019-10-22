@@ -77,6 +77,10 @@ namespace mgritestimate{
      */
     const int error_l2_tight_twogrid_lower_bound = -4;
     /**
+     * Lower bound from Equation (63) in [Southworth (2019): Necessary conditions and tight two-level convergence bounds for Parareal and multigrid reduction in time]
+     */
+    const int lower_bound_southworth2019_equation63 = -8;
+    /**
      *  Approximate MGRIT convergence rate by approximating \f$\sqrt{ \| E \|_1 \| E \|_\infty }\f$.
      *
      *  Here, \f$ \| E \|_1 \f$ is approximated by the absolute column sum corresponding to the first C-point
@@ -91,6 +95,10 @@ namespace mgritestimate{
      *  Tight expression-like bound, see Corollary 2.4 in [Southworth, Mitchell, Hessenthaler (in preparation)]
      */
     const int error_l2_tight_twogrid_bound_single_iter = 7;
+    /**
+     * Upper bound from Equation (63) in [Southworth (2019): Necessary conditions and tight two-level convergence bounds for Parareal and multigrid reduction in time]
+     */
+    const int upper_bound_southworth2019_equation63 = 8;
     //----------------------------------------------------------------------------------------------------------------//
     /**
      *  \f$\ell^2\f$-norm of numerically constructed residual propagator

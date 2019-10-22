@@ -22,6 +22,8 @@ void get_propagator_bound(const int bound,                  ///< requested bound
             || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_bound_single_iter)
+            || (bound == mgritestimate::lower_bound_southworth2019_equation63)
+            || (bound == mgritestimate::upper_bound_southworth2019_equation63)
             || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
             get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
         }else if((bound == mgritestimate::residual_l2_upper_bound)
@@ -35,6 +37,8 @@ void get_propagator_bound(const int bound,                  ///< requested bound
     }else if(cycle == mgritestimate::F_cycle){
         if((bound == mgritestimate::error_l2_upper_bound)
             || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
+            || (bound == mgritestimate::lower_bound_southworth2019_equation63)
+            || (bound == mgritestimate::upper_bound_southworth2019_equation63)
             || (bound == mgritestimate::error_l2_sqrt_upper_bound)){
                 get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
         }else if((bound == mgritestimate::residual_l2_upper_bound)
@@ -72,6 +76,8 @@ void get_propagator_bound(const int bound,                  ///< requested bound
             || (bound == mgritestimate::error_l2_tight_twogrid_lower_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_bound)
             || (bound == mgritestimate::error_l2_tight_twogrid_bound_single_iter)
+            || (bound == mgritestimate::lower_bound_southworth2019_equation63)
+            || (bound == mgritestimate::upper_bound_southworth2019_equation63)
             || (bound == mgritestimate::error_l2_sqrt_expression_approximate_rate)){
             get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
         }else if((bound == mgritestimate::residual_l2_upper_bound)
@@ -85,6 +91,8 @@ void get_propagator_bound(const int bound,                  ///< requested bound
     }else if(cycle == mgritestimate::F_cycle){
         if((bound == mgritestimate::error_l2_upper_bound)
             || (bound == mgritestimate::error_l2_sqrt_expression_upper_bound)
+            || (bound == mgritestimate::lower_bound_southworth2019_equation63)
+            || (bound == mgritestimate::upper_bound_southworth2019_equation63)
             || (bound == mgritestimate::error_l2_sqrt_upper_bound)){
                 get_error_l2_propagator_bound(bound, theoryLevel, cycle, relax, numberOfTimeSteps, coarseningFactors, lambda, estimate);
         }else if((bound == mgritestimate::residual_l2_upper_bound)
@@ -380,6 +388,48 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                 for(int level = 0; level < numberOfLevels-1; level++){
                     cf.fill(coarseningFactors(level));
                     estimateLevels(level) = get_error_l2_tight_twogrid_bound_single_iter(relax, Col<double>(lambda_k.subvec(level,level+1)),
+                         Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
+                }
+                (*estimate)(evalIdx) = arma::max(estimateLevels);
+            }
+            break;
+        }
+        case mgritestimate::lower_bound_southworth2019_equation63:{
+            errCode = 0;
+            Col<double> estimateLevels(numberOfLevels-1);
+            Col<int> cf(1);
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                estimateLevels.fill(-1.0);
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression for all subsequent levels, then get max
+                for(int level = 0; level < numberOfLevels-1; level++){
+                    cf.fill(coarseningFactors(level));
+                    estimateLevels(level) = get_lower_bound_southworth2019_equation63(relax, Col<double>(lambda_k.subvec(level,level+1)),
+                         Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
+                }
+                (*estimate)(evalIdx) = arma::max(estimateLevels);
+            }
+            break;
+        }
+        case mgritestimate::upper_bound_southworth2019_equation63:{
+            errCode = 0;
+            Col<double> estimateLevels(numberOfLevels-1);
+            Col<int> cf(1);
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                estimateLevels.fill(-1.0);
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression for all subsequent levels, then get max
+                for(int level = 0; level < numberOfLevels-1; level++){
+                    cf.fill(coarseningFactors(level));
+                    estimateLevels(level) = get_upper_bound_southworth2019_equation63(relax, Col<double>(lambda_k.subvec(level,level+1)),
                          Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
                 }
                 (*estimate)(evalIdx) = arma::max(estimateLevels);
@@ -683,6 +733,48 @@ void get_error_l2_propagator_bound(const int bound,                 ///< request
                 for(int level = 0; level < numberOfLevels-1; level++){
                     cf.fill(coarseningFactors(level));
                     estimateLevels(level) = get_error_l2_tight_twogrid_bound_single_iter(relax, Col<cx_double>(lambda_k.subvec(level,level+1)),
+                         Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
+                }
+                (*estimate)(evalIdx) = arma::max(estimateLevels);
+            }
+            break;
+        }
+        case mgritestimate::lower_bound_southworth2019_equation63:{
+            errCode = 0;
+            Col<double> estimateLevels(numberOfLevels-1);
+            Col<int> cf(1);
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                estimateLevels.fill(-1.0);
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<cx_double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression for all subsequent levels, then get max
+                for(int level = 0; level < numberOfLevels-1; level++){
+                    cf.fill(coarseningFactors(level));
+                    estimateLevels(level) = get_lower_bound_southworth2019_equation63(relax, Col<cx_double>(lambda_k.subvec(level,level+1)),
+                         Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
+                }
+                (*estimate)(evalIdx) = arma::max(estimateLevels);
+            }
+            break;
+        }
+        case mgritestimate::upper_bound_southworth2019_equation63:{
+            errCode = 0;
+            Col<double> estimateLevels(numberOfLevels-1);
+            Col<int> cf(1);
+            for(int evalIdx = samplesRankStartIdx; evalIdx <= samplesRankStopIdx; evalIdx++){
+                estimateLevels.fill(-1.0);
+                // for a given spatial mode, get eigenvalues for all levels
+                Col<cx_double> lambda_k(numberOfLevels);
+                for(int level = 0; level < numberOfLevels; level++){
+                    lambda_k(level) = (*lambda[level])(evalIdx);
+                }
+                // evaluate expression for all subsequent levels, then get max
+                for(int level = 0; level < numberOfLevels-1; level++){
+                    cf.fill(coarseningFactors(level));
+                    estimateLevels(level) = get_upper_bound_southworth2019_equation63(relax, Col<cx_double>(lambda_k.subvec(level,level+1)),
                          Col<int>(numberOfTimeSteps.subvec(level,level+1)), cf, theoryLevel);
                 }
                 (*estimate)(evalIdx) = arma::max(estimateLevels);
@@ -1221,6 +1313,120 @@ double get_error_l2_tight_twogrid_bound_single_iter(int r,                   ///
         }
     }
     val *= std::sqrt((1.0 - std::pow(std::abs(lambda(0)), 2.0*m(0))) / (1.0 - std::pow(std::abs(lambda(0)), 2.0)));
+    return val;
+}
+
+/**
+ *  Compute lower bound from Equation (63) in [Southworth (2019): Necessary conditions and tight two-level convergence bounds for Parareal and multigrid reduction in time].
+ *
+ *  Note: Evaluation is reasonably cheap, so let's just wrap the complex equivalent.
+ */
+double get_lower_bound_southworth2019_equation63(int r,                   ///< number of FC relaxation steps
+                                                 Col<double> lambda,      ///< eigenvalues of \f$\Phi_l\f$
+                                                 Col<int> N,              ///< number of time steps on each grid level
+                                                 Col<int> m,              ///< coarsening factors between all grid levels
+                                                 int theoryLevel          ///< expression for error propagator on grid level
+                                                 ){
+    Col<cx_double> lambdac(lambda, 0.0*lambda);
+    double val = get_lower_bound_southworth2019_equation63(r, lambdac, N, m, theoryLevel);
+    return val;
+}
+
+/**
+ *  Compute lower bound from Equation (63) in [Southworth (2019): Necessary conditions and tight two-level convergence bounds for Parareal and multigrid reduction in time] (complex version).
+ */
+// note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
+double get_lower_bound_southworth2019_equation63(int r,                   ///< number of FC relaxation steps
+                                                 Col<cx_double> lambda,   ///< eigenvalues of \f$\Phi_l\f$
+                                                 Col<int> N,              ///< number of time steps on each grid level
+                                                 Col<int> m,              ///< coarsening factors between all grid levels
+                                                 int theoryLevel          ///< expression for error propagator on grid level
+                                                 ){
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1.0;
+    }
+    // sanity check
+    int numberOfLevels  = N.n_elem;
+    if(numberOfLevels != 2){
+        cout << ">>>ERROR: get_lower_bound_southworth2019_equation63 only works for two time grids" << endl;
+    }
+    // evaluate expression depending on relaxation scheme
+    double val = -2.0;
+    switch(r){
+        case mgritestimate::F_relaxation:{
+            val = std::abs(std::pow(lambda(0), m(0)) - lambda(1))
+                    / std::sqrt(std::pow(1.0 - std::abs(lambda(1)), 2.0) + std::abs(lambda(1)) * constants::pi * constants::pi / (N(1) * N(1)));
+            break;
+        }
+        case mgritestimate::FCF_relaxation:{
+            val = std::abs(std::pow(lambda(0), m(0)))
+                    * std::abs(std::pow(lambda(0), m(0)) - lambda(1))
+                    / std::sqrt(std::pow(1.0 - std::abs(lambda(1)), 2.0) + std::abs(lambda(1)) * constants::pi * constants::pi / (N(1) * N(1)));
+            break;
+        }
+        default:{
+            cout << ">>>ERROR: get_lower_bound_southworth2019_equation63 only implemented for F- and FCF-relaxation" << endl;
+            throw;
+        }
+    }
+    return val;
+}
+
+/**
+ *  Compute upper bound from Equation (63) in [Southworth (2019): Necessary conditions and tight two-level convergence bounds for Parareal and multigrid reduction in time].
+ *
+ *  Note: Evaluation is reasonably cheap, so let's just wrap the complex equivalent.
+ */
+double get_upper_bound_southworth2019_equation63(int r,                      ///< number of FC relaxation steps
+                                                 Col<double> lambda,      ///< eigenvalues of \f$\Phi_l\f$
+                                                 Col<int> N,              ///< number of time steps on each grid level
+                                                 Col<int> m,              ///< coarsening factors between all grid levels
+                                                 int theoryLevel          ///< expression for error propagator on grid level
+                                                 ){
+    Col<cx_double> lambdac(lambda, 0.0*lambda);
+    double val = get_upper_bound_southworth2019_equation63(r, lambdac, N, m, theoryLevel);
+    return val;
+}
+
+/**
+ *  Compute upper bound from Equation (63) in [Southworth (2019): Necessary conditions and tight two-level convergence bounds for Parareal and multigrid reduction in time] (complex version).
+ */
+// note: we use std::abs/std::pow here instead of arma::abs/arma::pow because it allows mixed complex/real operands
+double get_upper_bound_southworth2019_equation63(int r,                   ///< number of FC relaxation steps
+                                                 Col<cx_double> lambda,   ///< eigenvalues of \f$\Phi_l\f$
+                                                 Col<int> N,              ///< number of time steps on each grid level
+                                                 Col<int> m,              ///< coarsening factors between all grid levels
+                                                 int theoryLevel          ///< expression for error propagator on grid level
+                                                 ){
+    // check if time stepper is stable
+    if(arma::any(arma::abs(lambda) > constants::time_stepper_stability_limit)){
+        return -1.0;
+    }
+    // sanity check
+    int numberOfLevels  = N.n_elem;
+    if(numberOfLevels != 2){
+        cout << ">>>ERROR: get_upper_bound_southworth2019_equation63 only works for two time grids" << endl;
+    }
+    // evaluate expression depending on relaxation scheme
+    double val = -2.0;
+    switch(r){
+        case mgritestimate::F_relaxation:{
+            val = std::abs(std::pow(lambda(0), m(0)) - lambda(1))
+                    / std::sqrt(std::pow(1.0 - std::abs(lambda(1)), 2.0) + std::abs(lambda(1)) * constants::pi * constants::pi / (6.0 * N(1) * N(1)));
+            break;
+        }
+        case mgritestimate::FCF_relaxation:{
+            val = std::abs(std::pow(lambda(0), m(0)))
+                    * std::abs(std::pow(lambda(0), m(0)) - lambda(1))
+                    / std::sqrt(std::pow(1.0 - std::abs(lambda(1)), 2.0) + std::abs(lambda(1)) * constants::pi * constants::pi / (6.0 * N(1) * N(1)));
+            break;
+        }
+        default:{
+            cout << ">>>ERROR: get_upper_bound_southworth2019_equation63 only implemented for F- and FCF-relaxation" << endl;
+            throw;
+        }
+    }
     return val;
 }
 

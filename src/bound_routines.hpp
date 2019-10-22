@@ -40,6 +40,14 @@ double get_error_l2_tight_twogrid_bound_single_iter(int r, Col<double> lambda, C
 
 double get_error_l2_tight_twogrid_bound_single_iter(int r, Col<cx_double> lambda, Col<int> N, Col<int> m, int theoryLevel);
 
+double get_lower_bound_southworth2019_equation63(int r, Col<double> lambda, Col<int> N, Col<int> m, int theoryLevel);
+
+double get_lower_bound_southworth2019_equation63(int r, Col<cx_double> lambda, Col<int> N, Col<int> m, int theoryLevel);
+
+double get_upper_bound_southworth2019_equation63(int r, Col<double> lambda, Col<int> N, Col<int> m, int theoryLevel);
+
+double get_upper_bound_southworth2019_equation63(int r, Col<cx_double> lambda, Col<int> N, Col<int> m, int theoryLevel);
+
 double get_error_l2_sqrt_expression_upper_bound(int cycle, int r, Col<double> lambda, Col<int> N, Col<int> m, int theoryLevel);
 
 double get_error_l2_sqrt_expression_upper_bound(int cycle, int r, Col<cx_double> lambda, Col<int> N, Col<int> m, int theoryLevel);
