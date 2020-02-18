@@ -23,6 +23,8 @@ To install bootstrap and armadillo, we recommend using SPACK, since SPACK will i
     doxygen : generates the Doxygen source code documentation
     load-packages : loads the recommended libraries using SPACK
     unload-packages : unloads the recommended libraries using SPACK
+    tests : run tests to check consistency of bounds (runtime: approx. 30 minutes)
+    tests-small : run small subset of tests to check consistency of bounds (runtime: approx. 3 minutes)
 
 ## Source code documentation
 
