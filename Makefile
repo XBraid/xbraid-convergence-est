@@ -35,4 +35,4 @@ tests:
 	bash testing/run_tests.sh 1 F-cycle V-cycle full
 
 tests-small:
-	bash testing/run_tests.sh 1 F-cyce V-cycle
+	bash testing/run_tests.sh 1 F-cycle V-cycle
